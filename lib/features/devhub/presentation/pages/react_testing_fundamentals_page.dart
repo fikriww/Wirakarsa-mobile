@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'submit_react_testing_fundamentals.dart'; // Menghubungkan ke file baru
+import 'package:go_router/go_router.dart';
+import '../../../../core/widgets/app_bottom_nav_bar.dart';
 
-class ReactTestingFundamentalsScreen extends StatefulWidget {
-  const ReactTestingFundamentalsScreen({super.key});
+class ReactTestingFundamentalsPage extends StatefulWidget {
+  const ReactTestingFundamentalsPage({super.key});
 
   @override
-  State<ReactTestingFundamentalsScreen> createState() => _ReactTestingFundamentalsScreenState();
+  State<ReactTestingFundamentalsPage> createState() => _ReactTestingFundamentalsPageState();
 }
 
-class _ReactTestingFundamentalsScreenState extends State<ReactTestingFundamentalsScreen> {
+class _ReactTestingFundamentalsPageState extends State<ReactTestingFundamentalsPage> {
   int _selectedIndex = 2; 
 
   @override
@@ -22,7 +23,7 @@ class _ReactTestingFundamentalsScreenState extends State<ReactTestingFundamental
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
         titleSpacing: 0,
         title: Column(
@@ -144,11 +145,7 @@ class _ReactTestingFundamentalsScreenState extends State<ReactTestingFundamental
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navigasi ke file baru
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const SubmitReactTestingFundamentalsScreen()),
-                    );
+                    context.push('/devhub/react-testing-fundamentals/submit');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0D6EFD), 
@@ -169,25 +166,9 @@ class _ReactTestingFundamentalsScreenState extends State<ReactTestingFundamental
           ),
         ),
       ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.black12, width: 0.5)),
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: (i) => setState(() => _selectedIndex = i),
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.blue[700],
-          unselectedItemColor: Colors.grey,
-          selectedLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: "Home"),
-            BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Readiness"),
-            BottomNavigationBarItem(icon: Icon(Icons.code), label: "Dev Hub"),
-            BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: "Simulation"),
-            BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: "Profile"),
-          ],
-        ),
+      bottomNavigationBar: AppBottomNavBar(
+        currentIndex: _selectedIndex,
+        onTap: (i) => setState(() => _selectedIndex = i),
       ),
     );
   }

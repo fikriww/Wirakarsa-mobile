@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'submit_code.dart'; 
+import 'package:go_router/go_router.dart';
 
-class CodeReviewScreen extends StatelessWidget {
-  const CodeReviewScreen({super.key});
+/// The Code Review tab content, shown when "Code Review" segment is active.
+/// This is used as a section within DevhubPage, not a standalone page.
+class CodeReviewSection extends StatelessWidget {
+  const CodeReviewSection({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,11 +38,7 @@ class CodeReviewScreen extends StatelessWidget {
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
-              // PINDAH KE HALAMAN SUBMIT CODE
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SubmitCodeScreen()),
-              );
+              context.push('/devhub/submit-code');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue[600],
@@ -55,7 +53,7 @@ class CodeReviewScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCheckItem(String text) {
+  static Widget _buildCheckItem(String text) {
     return Padding(
       padding: const EdgeInsets.only(left: 50, bottom: 8),
       child: Row(

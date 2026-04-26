@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'submit_css_responsive_mastery.dart'; // Menghubungkan ke file baru
+import 'package:go_router/go_router.dart';
+import '../../../../core/widgets/app_bottom_nav_bar.dart';
 
-class CssResponsiveMasteryScreen extends StatefulWidget {
-  const CssResponsiveMasteryScreen({super.key});
+class ReactComponentBasicPage extends StatefulWidget {
+  const ReactComponentBasicPage({super.key});
 
   @override
-  State<CssResponsiveMasteryScreen> createState() => _CssResponsiveMasteryScreenState();
+  State<ReactComponentBasicPage> createState() => _ReactComponentBasicPageState();
 }
 
-class _CssResponsiveMasteryScreenState extends State<CssResponsiveMasteryScreen> {
+class _ReactComponentBasicPageState extends State<ReactComponentBasicPage> {
   int _selectedIndex = 2;
 
   @override
@@ -16,20 +17,19 @@ class _CssResponsiveMasteryScreenState extends State<CssResponsiveMasteryScreen>
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false,
-
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
         titleSpacing: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
             Text(
-              'CSS Responsive\nMastery',
+              'React Component\nBasic',
               style: TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
@@ -39,7 +39,7 @@ class _CssResponsiveMasteryScreenState extends State<CssResponsiveMasteryScreen>
             ),
             SizedBox(height: 4),
             Text(
-              'Intermediate • ~4hrs • 3 variants',
+              'Intermediate • ~4hrs • 4 variants',
               style: TextStyle(color: Colors.grey, fontSize: 13),
             ),
           ],
@@ -54,7 +54,7 @@ class _CssResponsiveMasteryScreenState extends State<CssResponsiveMasteryScreen>
             ),
             alignment: Alignment.center,
             child: const Text(
-              '10%',
+              '40%',
               style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 13),
             ),
           )
@@ -80,15 +80,16 @@ class _CssResponsiveMasteryScreenState extends State<CssResponsiveMasteryScreen>
                     border: Border.all(color: Colors.blue.withOpacity(0.1)),
                   ),
                   child: const Text(
-                    "Build a fully accessible UI component library following WCAG 2.1 AA standards. Components must be responsive across mobile, tablet, and desktop breakpoints.\n\n"
+                    "Build a responsive landing page that includes a navbar, hero section, and call-to-action. Focus on clean component architecture and proper props/state management.\n\n"
                     "What you'll build:\n"
-                    "A component library containing: navigation bar, hero banner, card grid, modal dialog, and form with validation states.\n\n"
+                    "A marketing landing page for a fictional SaaS product of your choice — be creative with the theme.\n\n"
                     "Deliverables to submit:\n"
-                    "• A single index.html + styles.css file (no frameworks — vanilla CSS only)\n"
-                    "• Screenshot or screen recording showing all 3 breakpoints (375px, 768px, 1280px)\n"
-                    "• Accessibility audit report exported from Lighthouse or axe DevTools (score ≥ 90)\n"
-                    "• A written note (50-100 words) on how you handled keyboard navigation and color contrast\n\n"
-                    "Acceptance criteria: No horizontal scroll at any breakpoint, all interactive elements keyboard-accessible, passes Lighthouse accessibility audit.",
+                    "• GitHub repo link or .zip with all source files\n"
+                    "• The page must be broken into at least 6 separate components (Navbar, Hero, FeatureCard, CTAButton, Footer, etc.)\n"
+                    "• Props must be used to pass at least 3 dynamic values (e.g. headline text, feature list, CTA label)\n"
+                    "• One component must manage local state (e.g. mobile menu toggle, tab switcher)\n"
+                    "• Live demo link (Vercel, Netlify, or CodeSandbox) — required\n\n"
+                    "Acceptance criteria: No prop drilling beyond 2 levels, no inline styles, mobile-responsive, deploys without errors.",
                     style: TextStyle(fontSize: 13, height: 1.6, color: Colors.black87),
                   ),
                 ),
@@ -116,10 +117,7 @@ class _CssResponsiveMasteryScreenState extends State<CssResponsiveMasteryScreen>
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const SubmitCssResponsiveMasteryScreen()),
-                      );
+                      context.push('/devhub/react-component-basic/submit');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF0D6EFD),
@@ -136,23 +134,9 @@ class _CssResponsiveMasteryScreenState extends State<CssResponsiveMasteryScreen>
           ),
         ),
       ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.black12, width: 0.5))),
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: (i) => setState(() => _selectedIndex = i),
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.blue[700],
-          unselectedItemColor: Colors.grey,
-          selectedLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: "Home"),
-            BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Readiness"),
-            BottomNavigationBarItem(icon: Icon(Icons.code), label: "Dev Hub"),
-            BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: "Simulation"),
-            BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: "Profile"),
-          ],
-        ),
+      bottomNavigationBar: AppBottomNavBar(
+        currentIndex: _selectedIndex,
+        onTap: (i) => setState(() => _selectedIndex = i),
       ),
     );
   }

@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/widgets/app_bottom_nav_bar.dart';
 
-class SubmitCodeScreen extends StatefulWidget {
-  const SubmitCodeScreen({super.key});
+class SubmitCodePage extends StatefulWidget {
+  const SubmitCodePage({super.key});
 
   @override
-  State<SubmitCodeScreen> createState() => _SubmitCodeScreenState();
+  State<SubmitCodePage> createState() => _SubmitCodePageState();
 }
 
-class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
+class _SubmitCodePageState extends State<SubmitCodePage> {
+  int _selectedIndex = 2;
+
   // Controller untuk mengambil isi kode yang diketik
   final TextEditingController _codeController = TextEditingController(
     text: "// Tulis kode kamu di sini...",
@@ -28,7 +32,7 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
         actions: [
           IconButton(icon: const Icon(Icons.menu, color: Colors.black), onPressed: () {}),
@@ -39,7 +43,7 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
         ),
       ),
-      body: SingleChildScrollView( // Tambahkan ini agar layar bisa di-scroll saat keyboard muncul
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
@@ -65,9 +69,9 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
               ),
             ),
             
-            // --- PERBAIKAN: Area Editor yang Bisa Diklik dan Diketik ---
+            // Area Editor yang Bisa Diklik dan Diketik
             Container(
-              height: 400, // Ukuran editor
+              height: 400,
               width: double.infinity,
               decoration: const BoxDecoration(
                 color: Color(0xFF334155),
@@ -75,7 +79,7 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
               ),
               child: TextField(
                 controller: _codeController,
-                maxLines: null, // Membuatnya bisa banyak baris
+                maxLines: null,
                 keyboardType: TextInputType.multiline,
                 style: const TextStyle(
                   color: Colors.white, 
@@ -84,7 +88,7 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
                 ),
                 decoration: const InputDecoration(
                   contentPadding: EdgeInsets.all(15),
-                  border: InputBorder.none, // Menghilangkan garis bawah default
+                  border: InputBorder.none,
                   hintText: "Mulai mengetik kode...",
                   hintStyle: TextStyle(color: Colors.white38),
                 ),
@@ -98,7 +102,7 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // Cara mengambil teks kode: print(_codeController.text);
+                  // TODO: Implement code review submission
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2563EB),
@@ -111,6 +115,10 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: AppBottomNavBar(
+        currentIndex: _selectedIndex,
+        onTap: (i) => setState(() => _selectedIndex = i),
       ),
     );
   }

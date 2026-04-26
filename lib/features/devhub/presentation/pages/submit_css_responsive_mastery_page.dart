@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/widgets/app_bottom_nav_bar.dart';
 
-class SubmitReactComponentBasicScreen extends StatefulWidget {
-  const SubmitReactComponentBasicScreen({super.key});
+class SubmitCssResponsiveMasteryPage extends StatefulWidget {
+  const SubmitCssResponsiveMasteryPage({super.key});
 
   @override
-  State<SubmitReactComponentBasicScreen> createState() => _SubmitReactComponentBasicScreenState();
+  State<SubmitCssResponsiveMasteryPage> createState() => _SubmitCssResponsiveMasteryPageState();
 }
 
-class _SubmitReactComponentBasicScreenState extends State<SubmitReactComponentBasicScreen> {
+class _SubmitCssResponsiveMasteryPageState extends State<SubmitCssResponsiveMasteryPage> {
   int _selectedIndex = 2;
 
-  Widget _buildMetric(String title, Widget valueWidget, String subtitle) {
+  Widget _buildMetric(String title, String value, String subtitle, Color valueColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(title, style: const TextStyle(color: Colors.grey, fontSize: 12)),
         const SizedBox(height: 8),
-        valueWidget,
+        Text(value, style: TextStyle(color: valueColor, fontSize: 24, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
         Text(subtitle, style: const TextStyle(color: Colors.grey, fontSize: 11)),
       ],
@@ -32,15 +34,15 @@ class _SubmitReactComponentBasicScreenState extends State<SubmitReactComponentBa
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
         titleSpacing: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
-            Text('React Component\nBasic', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 22, height: 1.2)),
+            Text('CSS Responsive\nMastery', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 22, height: 1.2)),
             SizedBox(height: 4),
-            Text('Intermediate • ~4hrs • 4 variants', style: TextStyle(color: Colors.grey, fontSize: 13)),
+            Text('Intermediate • ~4hrs • 3 variants', style: TextStyle(color: Colors.grey, fontSize: 13)),
           ],
         ),
         actions: [
@@ -49,7 +51,7 @@ class _SubmitReactComponentBasicScreenState extends State<SubmitReactComponentBa
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(color: Colors.yellow[300], borderRadius: BorderRadius.circular(8)),
             alignment: Alignment.center,
-            child: const Text('40%', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 13)),
+            child: const Text('10%', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 13)),
           )
         ],
         toolbarHeight: 80,
@@ -71,7 +73,7 @@ class _SubmitReactComponentBasicScreenState extends State<SubmitReactComponentBa
                     child: RichText(
                       text: TextSpan(
                         children: [
-                          TextSpan(text: '68', style: TextStyle(color: Colors.blue[900], fontSize: 32, fontWeight: FontWeight.bold)),
+                          TextSpan(text: '93', style: TextStyle(color: Colors.blue[900], fontSize: 32, fontWeight: FontWeight.bold)),
                           TextSpan(text: '/100', style: TextStyle(color: Colors.blue[900], fontSize: 14, fontWeight: FontWeight.bold)),
                         ]
                       )
@@ -83,12 +85,12 @@ class _SubmitReactComponentBasicScreenState extends State<SubmitReactComponentBa
                     children: [
                       const Text('Project Graded', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 4),
-                      const Text('Submitted March 2, 2026', style: TextStyle(color: Colors.grey, fontSize: 13)),
+                      const Text('Submitted March 4, 2026', style: TextStyle(color: Colors.grey, fontSize: 13)),
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(color: Colors.red[50], borderRadius: BorderRadius.circular(20)),
-                        child: Text('Resubmit Required', style: TextStyle(color: Colors.red[400], fontSize: 12, fontWeight: FontWeight.bold)),
+                        decoration: BoxDecoration(color: Colors.green[100], borderRadius: BorderRadius.circular(20)),
+                        child: Text('Excellent Work', style: TextStyle(color: Colors.green[800], fontSize: 12, fontWeight: FontWeight.bold)),
                       )
                     ],
                   )
@@ -108,23 +110,23 @@ class _SubmitReactComponentBasicScreenState extends State<SubmitReactComponentBa
               ),
               const SizedBox(height: 15),
               const Text(
-                'Component structure is mostly good, but 2 critical requirements are missing: live demo link was not provided, and one component has prop drilling beyond 2 levels. Also 4 inline styles found — must be removed.',
+                'Outstanding accessibility implementation. All 5 components pass WCAG 2.1 AA. Lighthouse score 97. Only minor issue: modal close button lacks visible focus ring on Firefox.',
                 style: TextStyle(fontSize: 13, height: 1.5, color: Colors.black87),
               ),
               const SizedBox(height: 25),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(child: _buildMetric('Component', const Text('7', style: TextStyle(color: Colors.green, fontSize: 24, fontWeight: FontWeight.bold)), 'Requirement mets')),
-                  Expanded(child: _buildMetric('Breakpoints', const Icon(Icons.close, color: Colors.red, size: 28), 'All Passing')),
+                  Expanded(child: _buildMetric('Lighthouse Score', '97', 'Of 100 Target >90', Colors.green)),
+                  Expanded(child: _buildMetric('Breakpoints', '3', 'All Passing', Colors.green)),
                 ],
               ),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(child: _buildMetric('State Management', const Icon(Icons.check, color: Colors.green, size: 28), 'Menu Toggle Works')),
-                  Expanded(child: _buildMetric('Props Used', const Text('5', style: TextStyle(color: Colors.green, fontSize: 24, fontWeight: FontWeight.bold)), 'Target >3')),
+                  Expanded(child: _buildMetric('A11y Violations', '1', 'Minor, not Blocking', Colors.green)),
+                  Expanded(child: _buildMetric('Responsiveness', 'A+', 'No Horizontal Scroll', Colors.green)),
                 ],
               ),
               const SizedBox(height: 30),
@@ -140,28 +142,13 @@ class _SubmitReactComponentBasicScreenState extends State<SubmitReactComponentBa
                 ],
               ),
               const SizedBox(height: 15),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.red[50],
-                  border: Border.all(color: Colors.red[200]!),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Live demo link missing', style: TextStyle(color: Colors.red[800], fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    const Text('Deploy to Vercel, Netlify, or CodeSandbox and include the URL. This is a hard requirement — submission cannot pass without it.', style: TextStyle(fontSize: 13, height: 1.5, color: Colors.black87)),
-                  ],
-                ),
-              ),
+              _buildIssueCard('Modal focus ring missing (Firefox)', 'Add :focus-visible outline on the close button. Chrome passes but Firefox strips default outline without explicit CSS.', Colors.orange),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => context.pop(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0D6EFD),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -175,23 +162,28 @@ class _SubmitReactComponentBasicScreenState extends State<SubmitReactComponentBa
           ),
         ),
       ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.black12, width: 0.5))),
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: (i) => setState(() => _selectedIndex = i),
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.blue[700],
-          unselectedItemColor: Colors.grey,
-          selectedLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: "Home"),
-            BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Readiness"),
-            BottomNavigationBarItem(icon: Icon(Icons.code), label: "Dev Hub"),
-            BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: "Simulation"),
-            BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: "Profile"),
-          ],
-        ),
+      bottomNavigationBar: AppBottomNavBar(
+        currentIndex: _selectedIndex,
+        onTap: (i) => setState(() => _selectedIndex = i),
+      ),
+    );
+  }
+
+  Widget _buildIssueCard(String title, String desc, MaterialColor color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color[50],
+        border: Border.all(color: color[200]!),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: TextStyle(color: color[800], fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Text(desc, style: const TextStyle(fontSize: 13, height: 1.5, color: Colors.black87)),
+        ],
       ),
     );
   }
