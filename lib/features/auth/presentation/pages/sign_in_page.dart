@@ -35,7 +35,7 @@ class _SignInPageState extends State<SignInPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 60),
+              const SizedBox(height: 40),
 
               // Title
               Center(
@@ -119,7 +119,8 @@ class _SignInPageState extends State<SignInPage> {
               // Sign In Button
               ElevatedButton(
                 onPressed: () {
-                  // TODO: Implement sign in logic
+                  // Navigate to Home
+                  context.go('/home');
                 },
                 child: const Text('Sign In'),
               ),

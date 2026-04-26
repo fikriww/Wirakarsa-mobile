@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/widgets/wirapath_logo.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -77,7 +75,7 @@ class _SplashPageState extends State<SplashPage>
     await Future.delayed(const Duration(milliseconds: 1100));
 
     if (mounted) {
-      context.go('/sign-in');
+      context.go('/onboarding');
     }
   }
 
@@ -107,11 +105,16 @@ class _SplashPageState extends State<SplashPage>
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const WirapathLogo(size: 120),
+                        Image.asset(
+                          'assets/images/Union.png',
+                          width: 80,
+                          fit: BoxFit.contain,
+                        ),
                         const SizedBox(height: 16),
-                        Text(
-                          'Wirapath',
-                          style: AppTextStyles.brandName,
+                        Image.asset(
+                          'assets/images/Type@40.png',
+                          width: 120,
+                          fit: BoxFit.contain,
                         ),
                       ],
                     ),

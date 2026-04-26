@@ -132,10 +132,10 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
               const SizedBox(height: 24),
 
-              // Create Account Button
               ElevatedButton(
                 onPressed: () {
-                  // TODO: Implement create account logic
+                  // Navigate to Assessment
+                  context.go('/assessment');
                 },
                 child: const Text('Create Account'),
               ),

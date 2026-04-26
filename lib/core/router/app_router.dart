@@ -1,7 +1,14 @@
 import 'package:go_router/go_router.dart';
 import '../../features/splash/presentation/pages/splash_page.dart';
+import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/sign_in_page.dart';
 import '../../features/auth/presentation/pages/create_account_page.dart';
+import '../../features/assessment/presentation/pages/assessment_page.dart';
+import '../../features/assessment/presentation/pages/connect_github_page.dart';
+import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/readiness/presentation/pages/readiness_center_page.dart';
+import '../../features/readiness/presentation/pages/cv_screening_page.dart';
+import '../../features/readiness/presentation/pages/cv_screening_result_page.dart';
 import '../../features/devhub/presentation/pages/devhub_page.dart';
 import '../../features/devhub/presentation/pages/submit_code_page.dart';
 import '../../features/devhub/presentation/pages/react_testing_fundamentals_page.dart';
@@ -19,10 +26,14 @@ class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: '/splash',
     routes: [
-      // --- Splash & Auth ---
+      // --- Splash, Onboarding & Auth ---
       GoRoute(
         path: '/splash',
         builder: (context, state) => const SplashPage(),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingPage(),
       ),
       GoRoute(
         path: '/sign-in',
@@ -31,6 +42,33 @@ class AppRouter {
       GoRoute(
         path: '/create-account',
         builder: (context, state) => const CreateAccountPage(),
+      ),
+      GoRoute(
+        path: '/assessment',
+        builder: (context, state) => const AssessmentPage(),
+      ),
+      GoRoute(
+        path: '/connect-github',
+        builder: (context, state) => const ConnectGithubPage(),
+      ),
+
+      // --- Main Tabs ---
+      GoRoute(
+        path: '/home',
+        builder: (context, state) => const HomePage(),
+      ),
+      GoRoute(
+        path: '/readiness-center',
+        builder: (context, state) => const ReadinessCenterPage(),
+      ),
+
+      GoRoute(
+        path: '/cv-screening',
+        builder: (context, state) => const CvScreeningPage(),
+      ),
+      GoRoute(
+        path: '/cv-screening-result',
+        builder: (context, state) => const CvScreeningResultPage(),
       ),
 
       // --- DevHub ---
