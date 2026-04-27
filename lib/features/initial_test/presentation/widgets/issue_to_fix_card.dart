@@ -1,0 +1,50 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../domain/entities/test_result_data.dart';
+
+/// Colored card displaying an issue to fix
+class IssueToFixCard extends StatelessWidget {
+  final TestIssue issue;
+
+  const IssueToFixCard({super.key, required this.issue});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: issue.cardColor,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: issue.borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (issue.title.isNotEmpty) ...[
+            Text(
+              issue.title,
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: issue.titleColor,
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+          Text(
+            issue.description,
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              height: 1.5,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

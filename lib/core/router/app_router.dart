@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/splash/presentation/pages/splash_page.dart';
 import '../../features/auth/presentation/pages/sign_in_page.dart';
 import '../../features/auth/presentation/pages/create_account_page.dart';
+import '../../features/main/main_shell.dart';
 
 class AppRouter {
   AppRouter._();
@@ -20,6 +21,14 @@ class AppRouter {
       GoRoute(
         path: '/create-account',
         builder: (context, state) => const CreateAccountPage(),
+      ),
+      GoRoute(
+        path: '/home',
+        builder: (context, state) => const MainShell(currentIndex: 0),
+      ),
+      GoRoute(
+        path: '/simulation',
+        builder: (context, state) => const MainShell(currentIndex: 3),
       ),
     ],
   );
