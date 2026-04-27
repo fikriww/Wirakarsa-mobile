@@ -39,8 +39,10 @@ class HelpSupportPage extends StatelessWidget {
           const SizedBox(height: 16),
           Expanded(
             child: ListView(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 8.0,
+              ),
               children: const [
                 _ExpandableSupportTile(
                   title: 'FAQ',
@@ -128,9 +130,10 @@ class _ExpandableSupportTileState extends State<_ExpandableSupportTile>
       parent: _controller,
       curve: Curves.easeInOut,
     );
-    _rotationAnimation = Tween<double>(begin: 0.0, end: 0.25).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _rotationAnimation = Tween<double>(
+      begin: 0.0,
+      end: 0.25,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
