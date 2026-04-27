@@ -19,6 +19,13 @@ import '../../features/devhub/presentation/pages/submit_react_testing_fundamenta
 import '../../features/devhub/presentation/pages/submit_css_responsive_mastery_page.dart';
 import '../../features/devhub/presentation/pages/submit_react_component_basic_page.dart';
 import '../../features/devhub/presentation/pages/submit_async_javascript_mastery_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/profile/presentation/pages/personal_information_page.dart';
+import '../../features/profile/presentation/pages/password_security_page.dart';
+import '../../features/profile/presentation/pages/notifications_page.dart';
+import '../../features/profile/presentation/pages/language_appearance_page.dart';
+import '../../features/profile/presentation/pages/integrations_page.dart';
+import '../../features/profile/presentation/pages/help_support_page.dart';
 
 class AppRouter {
   AppRouter._();
@@ -27,10 +34,7 @@ class AppRouter {
     initialLocation: '/splash',
     routes: [
       // --- Splash, Onboarding & Auth ---
-      GoRoute(
-        path: '/splash',
-        builder: (context, state) => const SplashPage(),
-      ),
+      GoRoute(path: '/splash', builder: (context, state) => const SplashPage()),
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingPage(),
@@ -53,10 +57,7 @@ class AppRouter {
       ),
 
       // --- Main Tabs ---
-      GoRoute(
-        path: '/home',
-        builder: (context, state) => const HomePage(),
-      ),
+      GoRoute(path: '/home', builder: (context, state) => const HomePage()),
       GoRoute(
         path: '/readiness-center',
         builder: (context, state) => const ReadinessCenterPage(),
@@ -72,10 +73,7 @@ class AppRouter {
       ),
 
       // --- DevHub ---
-      GoRoute(
-        path: '/devhub',
-        builder: (context, state) => const DevhubPage(),
-      ),
+      GoRoute(path: '/devhub', builder: (context, state) => const DevhubPage()),
       GoRoute(
         path: '/devhub/submit-code',
         builder: (context, state) => const SubmitCodePage(),
@@ -115,6 +113,35 @@ class AppRouter {
       GoRoute(
         path: '/devhub/async-javascript-mastery/submit',
         builder: (context, state) => const SubmitAsyncJavascriptMasteryPage(),
+      ),
+
+      GoRoute(
+        path: '/profile',
+        builder: (context, state) => const ProfilePage(),
+      ),
+      GoRoute(
+        path: '/personal-information',
+        builder: (context, state) => const PersonalInformationPage(),
+      ),
+      GoRoute(
+        path: '/password-security',
+        builder: (context, state) => const PasswordSecurityPage(),
+      ),
+      GoRoute(
+        path: '/notifications',
+        builder: (context, state) => const NotificationsPage(),
+      ),
+      GoRoute(
+        path: '/language-appearance',
+        builder: (context, state) => const LanguageAppearancePage(),
+      ),
+      GoRoute(
+        path: '/integrations',
+        builder: (context, state) => const IntegrationsPage(),
+      ),
+      GoRoute(
+        path: '/help-support',
+        builder: (context, state) => const HelpSupportPage(),
       ),
     ],
   );
