@@ -19,6 +19,7 @@ import '../../features/devhub/presentation/pages/submit_react_testing_fundamenta
 import '../../features/devhub/presentation/pages/submit_css_responsive_mastery_page.dart';
 import '../../features/devhub/presentation/pages/submit_react_component_basic_page.dart';
 import '../../features/devhub/presentation/pages/submit_async_javascript_mastery_page.dart';
+import '../../features/main/main_shell.dart';
 
 class AppRouter {
   AppRouter._();
@@ -55,7 +56,11 @@ class AppRouter {
       // --- Main Tabs ---
       GoRoute(
         path: '/home',
-        builder: (context, state) => const HomePage(),
+        builder: (context, state) => const MainShell(currentIndex: 0),
+      ),
+      GoRoute(
+        path: '/simulation',
+        builder: (context, state) => const MainShell(currentIndex: 3),
       ),
       GoRoute(
         path: '/readiness-center',
