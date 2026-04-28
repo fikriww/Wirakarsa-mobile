@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
 import '../simulation/presentation/pages/career_simulation_page.dart';
+import '../home/presentation/pages/home_page.dart';
+import '../readiness/presentation/pages/readiness_center_page.dart';
+import '../devhub/presentation/pages/devhub_page.dart';
+import '../profile/presentation/pages/profile_page.dart';
 
 class MainShell extends StatefulWidget {
   final int currentIndex;
@@ -24,24 +28,15 @@ class _MainShellState extends State<MainShell> {
   Widget _buildCurrentPage() {
     switch (_currentIndex) {
       case 0:
-        return const _PlaceholderPage(title: 'Home', icon: Icons.home_outlined);
+        return const HomePage();
       case 1:
-        return const _PlaceholderPage(
-          title: 'Readiness',
-          icon: Icons.assignment_outlined,
-        );
+        return const ReadinessCenterPage();
       case 2:
-        return const _PlaceholderPage(
-          title: 'Dev Hub',
-          icon: Icons.code_outlined,
-        );
+        return const DevhubPage();
       case 3:
         return const CareerSimulationPage();
       case 4:
-        return const _PlaceholderPage(
-          title: 'Profile',
-          icon: Icons.person_outlined,
-        );
+        return const ProfilePage();
       default:
         return const _PlaceholderPage(
           title: 'Home',
