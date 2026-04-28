@@ -149,13 +149,14 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
               // Sign In Link
               Center(
-                child: Row(
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Already on the path?  ',
+                      'Already on the path?',
                       style: AppTextStyles.bodyMedium,
                     ),
+                    const SizedBox(height: 4),
                     GestureDetector(
                       onTap: () => context.go('/sign-in'),
                       child: Text(

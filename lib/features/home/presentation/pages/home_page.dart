@@ -25,7 +25,10 @@ class HomePage extends StatelessWidget {
                 const SizedBox(height: 16),
                 _buildStatsRow(),
                 const SizedBox(height: 32),
-                _buildSectionHeader("Skills That Need Attention"),
+                _buildSectionHeader(
+                  "Skills That Need Attention",
+                  onViewAll: () => context.go('/readiness-center', extra: {'initialTabIndex': 3}),
+                ),
                 const SizedBox(height: 16),
                 _buildSkillAttentionCard("Web Performance", "Weak", "15%", const Color(0xFFF9C8C8), const Color(0xFFD32F2F), Icons.warning_amber_rounded),
                 const SizedBox(height: 12),
@@ -33,7 +36,10 @@ class HomePage extends StatelessWidget {
                 const SizedBox(height: 12),
                 _buildSkillAttentionCard("Accessibility", "Enough", "50%", const Color(0xFFFFE0A0), const Color(0xFFF57F17), Icons.remove_circle_outline),
                 const SizedBox(height: 32),
-                _buildSectionHeader("Your Achievement Progress"),
+                _buildSectionHeader(
+                  "Your Achievement Progress",
+                  onViewAll: () => context.go('/profile'),
+                ),
                 const SizedBox(height: 16),
                 _buildAchievementList(),
                 const SizedBox(height: 32),
@@ -49,7 +55,6 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNavBar(context),
     );
   }
 
@@ -191,17 +196,26 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(String title, {VoidCallback? onViewAll}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(title, style: AppTextStyles.heading1.copyWith(fontSize: 18)),
-        Text("View All", style: AppTextStyles.bodyMedium.copyWith(color: AppColors.primaryBlue, fontWeight: FontWeight.bold)),
+        if (onViewAll != null)
+          GestureDetector(
+            onTap: onViewAll,
+            child: Text("View All", style: AppTextStyles.bodyMedium.copyWith(color: AppColors.primaryBlue, fontWeight: FontWeight.bold)),
+          )
+        else
+          Text("View All", style: AppTextStyles.bodyMedium.copyWith(color: AppColors.primaryBlue, fontWeight: FontWeight.bold)),
       ],
     );
   }
 
   Widget _buildSkillAttentionCard(String title, String subtitle, String percent, Color bgColor, Color iconColor, IconData icon) {
+    double progress = double.tryParse(percent.replaceAll('%', '')) ?? 0.0;
+    progress /= 100.0;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -221,15 +235,31 @@ class HomePage extends StatelessWidget {
               ],
             ),
           ),
-          Container(
+          SizedBox(
             width: 48,
             height: 48,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(percent, style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold, fontSize: 12)),
+            child: Stack(
+              children: [
+                Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: CircularProgressIndicator(
+                    value: progress,
+                    backgroundColor: Colors.transparent,
+                    color: iconColor,
+                    strokeWidth: 4,
+                  ),
+                ),
+                Center(
+                  child: Text(percent, style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold, fontSize: 12)),
+                ),
+              ],
             ),
           ),
         ],
@@ -316,31 +346,6 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildBottomNavBar(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: 0,
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: AppColors.primaryBlue,
-      unselectedItemColor: AppColors.textSecondary,
-      selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
-      unselectedLabelStyle: const TextStyle(fontSize: 10),
-      onTap: (index) {
-        if (index == 1) {
-          context.go('/readiness-center');
-        } else if (index == 2) {
-          context.go('/devhub');
-        }
-      },
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.bar_chart_outlined), activeIcon: Icon(Icons.bar_chart), label: 'Readiness'),
-        BottomNavigationBarItem(icon: Icon(Icons.code), label: 'Dev Hub'),
-        BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'Simulation'),
-        BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
-      ],
     );
   }
 }

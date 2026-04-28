@@ -9,8 +9,15 @@ import '../profile/presentation/pages/profile_page.dart';
 
 class MainShell extends StatefulWidget {
   final int currentIndex;
+  final int? initialReadinessTabIndex;
+  final Widget? child;
 
-  const MainShell({super.key, this.currentIndex = 0});
+  const MainShell({
+    super.key,
+    this.currentIndex = 0,
+    this.initialReadinessTabIndex,
+    this.child,
+  });
 
   @override
   State<MainShell> createState() => _MainShellState();
@@ -26,11 +33,14 @@ class _MainShellState extends State<MainShell> {
   }
 
   Widget _buildCurrentPage() {
+    if (widget.child != null) return widget.child!;
     switch (_currentIndex) {
       case 0:
         return const HomePage();
       case 1:
-        return const ReadinessCenterPage();
+        return ReadinessCenterPage(
+          initialTabIndex: widget.initialReadinessTabIndex ?? 0,
+        );
       case 2:
         return const DevhubPage();
       case 3:
@@ -48,7 +58,13 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _buildCurrentPage(),
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: SizedBox(
+          key: ValueKey<int>(_currentIndex),
+          child: _buildCurrentPage(),
+        ),
+      ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppColors.white,

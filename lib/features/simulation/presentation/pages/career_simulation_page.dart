@@ -9,6 +9,7 @@ import '../widgets/job_listing_card.dart';
 import '../widgets/quick_reply_chips.dart';
 import '../widgets/chat_input_field.dart';
 import '../widgets/salary_scenario_card.dart';
+import 'voice_mode_page.dart';
 
 /// Simulation flow states
 enum SimulationState {
@@ -45,67 +46,57 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60),
-        child: AppBar(
-          backgroundColor: AppColors.white,
-          elevation: 0,
-          surfaceTintColor: Colors.transparent,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new,
-              color: AppColors.textPrimary,
-              size: 20,
-            ),
-            onPressed: () {
-              if (_currentState != SimulationState.initial) {
-                _goToState(SimulationState.initial);
-              } else {
-                Navigator.of(context).maybePop();
-              }
-            },
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.black,
+            size: 20,
           ),
-          title: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Career Simulation',
-                style: GoogleFonts.poppins(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
+          onPressed: () {
+            if (_currentState != SimulationState.initial) {
+              _goToState(SimulationState.initial);
+            } else {
+              Navigator.of(context).maybePop();
+            }
+          },
+        ),
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Career Simulation',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
-              const SizedBox(height: 2),
-              Text(
-                'Career Simulation AI Mentor',
-                style: GoogleFonts.poppins(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.primaryBlue,
-                ),
-              ),
-            ],
-          ),
-          centerTitle: true,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.add, color: AppColors.textPrimary, size: 22),
-              onPressed: () => _goToState(SimulationState.initial),
             ),
-            IconButton(
-              icon: const Icon(
-                Icons.access_time_outlined,
-                color: AppColors.textPrimary,
-                size: 22,
+            Text(
+              'Career Simulation AI Mentor',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
               ),
-              onPressed: () {},
             ),
           ],
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(1),
-            child: Container(height: 0.5, color: AppColors.divider),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add, color: Colors.black),
+            onPressed: () => _goToState(SimulationState.initial),
           ),
+          IconButton(
+            icon: const Icon(Icons.history, color: Colors.black),
+            onPressed: () {},
+          ),
+        ],
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Divider(height: 1, color: Colors.black12),
         ),
       ),
       body: Column(
@@ -133,6 +124,11 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
             timerText: '05:00',
             onSend: () {
               _chatController.clear();
+            },
+            onMicTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const VoiceModePage()),
+              );
             },
           ),
         ],

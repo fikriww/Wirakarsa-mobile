@@ -1,27 +1,73 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
 class ReadinessCenterPage extends StatefulWidget {
-  const ReadinessCenterPage({super.key});
+  final int initialTabIndex;
+  const ReadinessCenterPage({super.key, this.initialTabIndex = 0});
 
   @override
   State<ReadinessCenterPage> createState() => _ReadinessCenterPageState();
 }
 
 class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
-  int _selectedTabIndex = 0;
+  late int _selectedTabIndex;
   final List<String> _tabs = ["Overview", "Initial Test", "Skill Map", "Skill Gap"];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTabIndex = widget.initialTabIndex;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/home');
+            }
+          },
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.menu, color: Colors.black),
+            onPressed: () {},
+          ),
+        ],
+        centerTitle: true,
+        title: Column(
+          children: [
+            const Text(
+              'Readiness Center',
+              style: TextStyle(
+                  color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            Text(
+              'Analyze & measure your work readiness',
+              style: TextStyle(color: Colors.grey, fontSize: 12),
+            ),
+          ],
+        ),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Divider(height: 1, color: Colors.black12),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(context),
             _buildTabBar(),
             Expanded(
               child: SingleChildScrollView(
@@ -32,7 +78,6 @@ class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavBar(context),
     );
   }
 
@@ -109,16 +154,30 @@ class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
           ),
         ),
         const SizedBox(height: 32),
-        _buildTestTimelineItem("PROG", "L3", "Programming / Software Development", "Designs, codes, verifies, tests, documents, amends and refactors programs/scripts...", true, "Restart Test", isFirst: true),
-        _buildTestTimelineItem("DTAN", "L2", "Data Analysis", "Applies data analysis, visualization and data modelling techniques...", true, "Restart Test"),
-        _buildTestTimelineItem("HCEV", "L3", "User Experience Design", "Produces design concepts and prototypes for user interactions and experiences...", false, "Start Test"),
-        _buildTestTimelineItem("TEST", "L3", "Testing", "Plans, designs, manages, executes and reports tests using testing tools and...", false, "Start Test", isLast: true),
+        _buildTestTimelineItem(
+          "PROG", "L3", "Programming / Software Development", "Designs, codes, verifies, tests, documents, amends and refactors programs/scripts...", true, "Restart Test",
+          isFirst: true,
+          onPressed: () => context.push('/readiness-center/initial-test'),
+        ),
+        _buildTestTimelineItem(
+          "DTAN", "L2", "Data Analysis", "Applies data analysis, visualization and data modelling techniques...", true, "Restart Test",
+          onPressed: () => context.push('/readiness-center/data-analysis-test'),
+        ),
+        _buildTestTimelineItem(
+          "HCEV", "L3", "User Experience Design", "Produces design concepts and prototypes for user interactions and experiences...", false, "Start Test",
+          onPressed: () => context.push('/readiness-center/ux-design-test'),
+        ),
+        _buildTestTimelineItem(
+          "TEST", "L3", "Testing", "Plans, designs, manages, executes and reports tests using testing tools and...", false, "Start Test",
+          isLast: true,
+          onPressed: () => context.push('/readiness-center/testing-test'),
+        ),
         const SizedBox(height: 40),
       ],
     );
   }
 
-  Widget _buildTestTimelineItem(String code, String level, String title, String desc, bool isCompleted, String buttonText, {bool isFirst = false, bool isLast = false}) {
+  Widget _buildTestTimelineItem(String code, String level, String title, String desc, bool isCompleted, String buttonText, {bool isFirst = false, bool isLast = false, VoidCallback? onPressed}) {
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -186,7 +245,7 @@ class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: onPressed ?? () {},
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryBlue,
                         foregroundColor: AppColors.white,
@@ -223,15 +282,13 @@ class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
               Text("Your Skill Map", style: AppTextStyles.heading1.copyWith(fontSize: 18)),
               const SizedBox(height: 24),
               Center(
-                child: Container(
-                  height: 200,
-                  width: 200,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFFE1F0FF), width: 2),
-                  ),
-                  child: const Center(
-                    child: Icon(Icons.hub_outlined, size: 100, color: Color(0xFF90CAF9)),
+                child: SizedBox(
+                  height: 250,
+                  width: double.infinity,
+                  child: CustomPaint(
+                    painter: _SkillMapPainter(
+                      values: [0.3, 0.15, 0.5, 0.85, 0.8, 0.83], // Matches the progress values below
+                    ),
                   ),
                 ),
               ),
@@ -397,30 +454,6 @@ class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
   }
 
   // --- SHARED WIDGETS ---
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios, size: 20),
-            onPressed: () => context.go('/home'),
-          ),
-          Column(
-            children: [
-              Text("Readiness Center", style: AppTextStyles.heading1.copyWith(fontSize: 20)),
-              Text("Analyze & measure your work readiness", style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary)),
-            ],
-          ),
-          IconButton(
-            icon: const Icon(Icons.menu, size: 28),
-            onPressed: () {},
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildTabBar() {
     return SingleChildScrollView(
@@ -561,30 +594,144 @@ class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
       ),
     );
   }
+}
 
-  Widget _buildBottomNavBar(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: 1, // Readiness tab is selected
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: AppColors.primaryBlue,
-      unselectedItemColor: AppColors.textSecondary,
-      selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
-      unselectedLabelStyle: const TextStyle(fontSize: 10),
-      onTap: (index) {
-        if (index == 0) {
-          context.go('/home');
-        } else if (index == 2) {
-          context.go('/devhub');
+class _SkillMapPainter extends CustomPainter {
+  final List<double> values;
+
+  _SkillMapPainter({required this.values});
+
+  final List<String> labels = [
+    "Testing (Jest)",
+    "Web Performance",
+    "Accessibility",
+    "State Management",
+    "React.js",
+    "CSS",
+  ];
+
+  final List<Color> dotColors = [
+    const Color(0xFFD32F2F), // Testing
+    const Color(0xFFD32F2F), // Web Performance
+    const Color(0xFFF57F17), // Accessibility
+    const Color(0xFF388E3C), // State Management
+    const Color(0xFF388E3C), // React.js
+    const Color(0xFF388E3C), // CSS
+  ];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.height / 2) - 40; // leave room for labels
+
+    final outlinePaint = Paint()
+      ..color = const Color(0xFFE1F0FF)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
+    final fillPaint = Paint()
+      ..color = const Color(0xFF90CAF9).withOpacity(0.6)
+      ..style = PaintingStyle.fill;
+
+    final strokePaint = Paint()
+      ..color = const Color(0xFF90CAF9)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+
+    // Draw concentric hexagons
+    for (int i = 1; i <= 4; i++) {
+      final path = Path();
+      final r = radius * (i / 4);
+      for (int j = 0; j < 6; j++) {
+        final angle = j * (pi / 3) - (pi / 2);
+        final x = center.dx + r * cos(angle);
+        final y = center.dy + r * sin(angle);
+        if (j == 0) {
+          path.moveTo(x, y);
+        } else {
+          path.lineTo(x, y);
         }
-      },
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.bar_chart_outlined), activeIcon: Icon(Icons.bar_chart), label: 'Readiness'),
-        BottomNavigationBarItem(icon: Icon(Icons.code), label: 'Dev Hub'),
-        BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'Simulation'),
-        BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
-      ],
-    );
+      }
+      path.close();
+      canvas.drawPath(path, outlinePaint);
+    }
+
+    // Draw axes
+    for (int j = 0; j < 6; j++) {
+      final angle = j * (pi / 3) - (pi / 2);
+      final x = center.dx + radius * cos(angle);
+      final y = center.dy + radius * sin(angle);
+      canvas.drawLine(center, Offset(x, y), outlinePaint);
+    }
+
+    // Draw values polygon
+    final valuePath = Path();
+    for (int j = 0; j < 6; j++) {
+      final angle = j * (pi / 3) - (pi / 2);
+      final val = values[j];
+      final r = radius * val;
+      final x = center.dx + r * cos(angle);
+      final y = center.dy + r * sin(angle);
+      if (j == 0) {
+        valuePath.moveTo(x, y);
+      } else {
+        valuePath.lineTo(x, y);
+      }
+    }
+    valuePath.close();
+
+    canvas.drawPath(valuePath, fillPaint);
+    canvas.drawPath(valuePath, strokePaint);
+
+    // Draw labels
+    for (int j = 0; j < 6; j++) {
+      final angle = j * (pi / 3) - (pi / 2);
+      final labelRadius = radius + 15; // padding for label
+      final labelX = center.dx + labelRadius * cos(angle);
+      final labelY = center.dy + labelRadius * sin(angle);
+
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: labels[j],
+          style: const TextStyle(color: Color(0xFF757575), fontSize: 12),
+        ),
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+
+      final dotPaint = Paint()
+        ..color = dotColors[j]
+        ..style = PaintingStyle.fill;
+
+      double totalWidth = 12 + 8 + textPainter.width;
+      double startX = labelX;
+      double startY = labelY - textPainter.height / 2;
+
+      if (cos(angle) > 0.1) {
+        // Right side
+        startX = labelX;
+      } else if (cos(angle) < -0.1) {
+        // Left side
+        startX = labelX - totalWidth;
+      } else {
+        // Top/Bottom
+        startX = labelX - totalWidth / 2;
+        if (sin(angle) < 0) {
+          startY = labelY - textPainter.height - 10;
+        } else {
+          startY = labelY + 10;
+        }
+      }
+
+      canvas.drawCircle(
+          Offset(startX + 6, startY + textPainter.height / 2), 6, dotPaint);
+      textPainter.paint(canvas, Offset(startX + 12 + 8, startY));
+    }
+  }
+  
+  @override
+  bool shouldRepaint(covariant _SkillMapPainter oldDelegate) {
+    return oldDelegate.values != values;
   }
 }
 

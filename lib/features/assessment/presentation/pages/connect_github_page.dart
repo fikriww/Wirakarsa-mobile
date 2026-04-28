@@ -139,7 +139,7 @@ class _ConnectGithubPageState extends State<ConnectGithubPage> {
         const SizedBox(height: 24),
         Center(
           child: GestureDetector(
-            onTap: () => context.go('/devhub'),
+            onTap: () => context.go('/home'),
             child: Text("Skip for now", style: AppTextStyles.bodyMedium.copyWith(color: AppColors.primaryBlue, fontWeight: FontWeight.bold)),
           ),
         ),
@@ -184,7 +184,7 @@ class _ConnectGithubPageState extends State<ConnectGithubPage> {
         ),
         const SizedBox(height: 40),
         ElevatedButton(
-          onPressed: () => context.go('/devhub'),
+          onPressed: () => context.go('/home'),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryBlue,
             foregroundColor: AppColors.white,

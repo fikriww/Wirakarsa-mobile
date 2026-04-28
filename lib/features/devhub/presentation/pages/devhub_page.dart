@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../widgets/segment_button.dart';
 import '../widgets/project_card.dart';
 import '../widgets/radar_chart.dart';
@@ -23,9 +22,16 @@ class _DevhubPageState extends State<DevhubPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        automaticallyImplyLeading: false,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => context.pop(),
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/home');
+            }
+          },
         ),
         actions: [
           IconButton(
@@ -83,10 +89,6 @@ class _DevhubPageState extends State<DevhubPage> {
           ),
         ),
       ),
-      bottomNavigationBar: AppBottomNavBar(
-        currentIndex: _selectedIndex,
-        onTap: (i) => setState(() => _selectedIndex = i),
-      ),
     );
   }
 
@@ -128,32 +130,36 @@ class _DevhubPageState extends State<DevhubPage> {
         const SizedBox(height: 15),
         ProjectCard(
           title: "React Testing Fundamentals",
+          description: "Build a complete checkout form using TDD approach with Jest & React Testing Library.",
           gap: "Skill Gap: 78%",
-          tags: ["Intermediate", "6 hrs", "2 versions"],
+          tags: ["Intermediate", "6 hrs", "4 variants"],
           progress: 0.3,
           onTapStartProject: () => context.push('/devhub/react-testing-fundamentals'),
         ),
         const SizedBox(height: 15),
         ProjectCard(
           title: "CSS Responsive Mastery",
+          description: "Build a fully accessible UI component library following WCAG 2.1 AA.",
           gap: "Skill Gap: 15%",
-          tags: ["Beginner", "4 hrs", "1 version"],
+          tags: ["Intermediate", "4 hrs", "3 variants"],
           progress: 0.9,
           onTapStartProject: () => context.push('/devhub/css-responsive-mastery'),
         ),
         const SizedBox(height: 15),
         ProjectCard(
           title: "React Component Basic",
+          description: "Build responsive landing page including a navbar, hero section, and call-to-action.",
           gap: "Skill Gap: 48%",
-          tags: ["Intermediate", "4 hrs", "4 versions"],
-          progress: 0.5,
+          tags: ["Intermediate", "4 hrs", "4 variants"],
+          progress: 0.85,
           onTapStartProject: () => context.push('/devhub/react-component-basic'),
         ),
         const SizedBox(height: 15),
         ProjectCard(
           title: "Async JavaScript Mastery",
+          description: "Master asynchronous JavaScript to handle tasks like API calls and timers.",
           gap: "Skill Gap: 25%",
-          tags: ["Intermediate", "6 hrs", "3 versions"],
+          tags: ["Intermediate", "6 hrs", "3 variants"],
           progress: 0.74,
           onTapStartProject: () => context.push('/devhub/async-javascript-mastery'),
         ),

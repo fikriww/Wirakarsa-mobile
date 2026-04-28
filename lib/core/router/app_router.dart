@@ -5,9 +5,16 @@ import '../../features/auth/presentation/pages/sign_in_page.dart';
 import '../../features/auth/presentation/pages/create_account_page.dart';
 import '../../features/assessment/presentation/pages/assessment_page.dart';
 import '../../features/assessment/presentation/pages/connect_github_page.dart';
-import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/readiness/presentation/pages/readiness_center_page.dart';
 import '../../features/readiness/presentation/pages/cv_screening_page.dart';
+import '../../features/readiness/presentation/pages/initial_test_page.dart';
+import '../../features/readiness/presentation/pages/data_analysis_test_page.dart';
+import '../../features/readiness/presentation/pages/data_analysis_review_page.dart';
+import '../../features/readiness/presentation/pages/ux_design_test_page.dart';
+import '../../features/readiness/presentation/pages/ux_design_review_page.dart';
+import '../../features/readiness/presentation/pages/testing_test_page.dart';
+import '../../features/readiness/presentation/pages/testing_review_page.dart';
+import '../../features/readiness/presentation/pages/review_test_page.dart';
 import '../../features/readiness/presentation/pages/cv_screening_result_page.dart';
 import '../../features/devhub/presentation/pages/devhub_page.dart';
 import '../../features/devhub/presentation/pages/submit_code_page.dart';
@@ -68,9 +75,72 @@ class AppRouter {
       ),
       GoRoute(
         path: '/readiness-center',
-        builder: (context, state) => const ReadinessCenterPage(),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final initialTabIndex = extra?['initialTabIndex'] as int? ?? 0;
+          return MainShell(
+            currentIndex: 1,
+            initialReadinessTabIndex: initialTabIndex,
+          );
+        },
       ),
 
+      GoRoute(
+        path: '/readiness-center/initial-test',
+        builder: (context, state) => const MainShell(
+          currentIndex: 1,
+          child: InitialTestPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/readiness-center/review-test',
+        builder: (context, state) => const MainShell(
+          currentIndex: 1,
+          child: ReviewTestPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/readiness-center/data-analysis-test',
+        builder: (context, state) => const MainShell(
+          currentIndex: 1,
+          child: DataAnalysisTestPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/readiness-center/data-analysis-review',
+        builder: (context, state) => const MainShell(
+          currentIndex: 1,
+          child: DataAnalysisReviewPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/readiness-center/ux-design-test',
+        builder: (context, state) => const MainShell(
+          currentIndex: 1,
+          child: UXDesignTestPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/readiness-center/ux-design-review',
+        builder: (context, state) => const MainShell(
+          currentIndex: 1,
+          child: UXDesignReviewPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/readiness-center/testing-test',
+        builder: (context, state) => const MainShell(
+          currentIndex: 1,
+          child: TestingTestPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/readiness-center/testing-review',
+        builder: (context, state) => const MainShell(
+          currentIndex: 1,
+          child: TestingReviewPage(),
+        ),
+      ),
       GoRoute(
         path: '/cv-screening',
         builder: (context, state) => const CvScreeningPage(),
@@ -81,7 +151,7 @@ class AppRouter {
       ),
 
       // --- DevHub ---
-      GoRoute(path: '/devhub', builder: (context, state) => const DevhubPage()),
+      GoRoute(path: '/devhub', builder: (context, state) => const MainShell(currentIndex: 2)),
       GoRoute(
         path: '/devhub/submit-code',
         builder: (context, state) => const SubmitCodePage(),
@@ -125,7 +195,7 @@ class AppRouter {
 
       GoRoute(
         path: '/profile',
-        builder: (context, state) => const ProfilePage(),
+        builder: (context, state) => const MainShell(currentIndex: 4),
       ),
       GoRoute(
         path: '/personal-information',

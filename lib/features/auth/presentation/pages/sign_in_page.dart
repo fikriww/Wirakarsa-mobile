@@ -134,13 +134,14 @@ class _SignInPageState extends State<SignInPage> {
 
               // Create Account Link
               Center(
-                child: Row(
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'New here? Your path starts now!  ',
+                      'New here? Your path starts now!',
                       style: AppTextStyles.bodyMedium,
                     ),
+                    const SizedBox(height: 4),
                     GestureDetector(
                       onTap: () => context.go('/create-account'),
                       child: Text(

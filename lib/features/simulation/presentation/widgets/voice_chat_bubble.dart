@@ -88,13 +88,19 @@ class VoiceChatBubble extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    // Voice/audio waveform icon
+                    // Voice signal bars
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
-                      child: Icon(
-                        Icons.equalizer_rounded,
-                        size: 22,
-                        color: AppColors.primaryBlue.withValues(alpha: 0.5),
+                      child: Row(
+                        children: [
+                          _buildBar(12),
+                          const SizedBox(width: 2),
+                          _buildBar(18),
+                          const SizedBox(width: 2),
+                          _buildBar(10),
+                          const SizedBox(width: 2),
+                          _buildBar(14),
+                        ],
                       ),
                     ),
                   ],
@@ -114,6 +120,17 @@ class VoiceChatBubble extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBar(double height) {
+    return Container(
+      width: 2.5,
+      height: height,
+      decoration: BoxDecoration(
+        color: const Color(0xFF066EFF).withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(1),
       ),
     );
   }

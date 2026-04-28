@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 class ChatInputField extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback? onSend;
+  final VoidCallback? onMicTap;
   final bool showTimer;
   final String? timerText;
 
@@ -12,6 +13,7 @@ class ChatInputField extends StatelessWidget {
     super.key,
     required this.controller,
     this.onSend,
+    this.onMicTap,
     this.showTimer = false,
     this.timerText,
   });
@@ -32,17 +34,20 @@ class ChatInputField extends StatelessWidget {
             child: Row(
               children: [
                 // Mic icon
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.inputBackground,
-                  ),
-                  child: const Icon(
-                    Icons.mic_none_rounded,
-                    color: AppColors.textHint,
-                    size: 20,
+                GestureDetector(
+                  onTap: onMicTap,
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.inputBackground,
+                    ),
+                    child: const Icon(
+                      Icons.mic_none_rounded,
+                      color: AppColors.textHint,
+                      size: 20,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),

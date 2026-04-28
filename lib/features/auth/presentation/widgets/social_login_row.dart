@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class SocialLoginRow extends StatelessWidget {
@@ -38,10 +39,9 @@ class SocialLoginRow extends StatelessWidget {
             ),
             const SizedBox(width: 20),
             _SocialButton(
-              icon: Icons.g_mobiledata_rounded,
-              color: AppColors.google,
+              svgAsset: 'assets/icons/google.svg',
               onTap: () {},
-              iconSize: 32,
+              iconSize: 24,
             ),
             const SizedBox(width: 20),
             _SocialButton(
@@ -57,14 +57,16 @@ class SocialLoginRow extends StatelessWidget {
 }
 
 class _SocialButton extends StatelessWidget {
-  final IconData icon;
-  final Color color;
+  final IconData? icon;
+  final String? svgAsset;
+  final Color? color;
   final VoidCallback onTap;
   final double iconSize;
 
   const _SocialButton({
-    required this.icon,
-    required this.color,
+    this.icon,
+    this.svgAsset,
+    this.color,
     required this.onTap,
     this.iconSize = 28,
   });
@@ -81,10 +83,18 @@ class _SocialButton extends StatelessWidget {
           color: AppColors.inputBackground,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Icon(
-          icon,
-          color: color,
-          size: iconSize,
+        child: Center(
+          child: svgAsset != null
+              ? SvgPicture.asset(
+                  svgAsset!,
+                  width: iconSize,
+                  height: iconSize,
+                )
+              : Icon(
+                  icon,
+                  color: color,
+                  size: iconSize,
+                ),
         ),
       ),
     );

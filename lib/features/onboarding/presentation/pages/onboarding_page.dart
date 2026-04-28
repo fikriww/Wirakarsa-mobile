@@ -16,21 +16,21 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   final List<Map<String, dynamic>> _onboardingData = [
     {
-      "title": "Know Exactly Where You\nStand",
+      "title": "Know Exactly Where You Stand",
       "description":
-          "Most IT grads apply blindly and wonder why they get\nrejected. SkillProof shows you the gap in minutes.",
+          "Most IT grads apply blindly\nand wonder why they get rejected. \n\nSkillProof shows you the gap in minutes.",
       "image": "assets/images/onboarding_1.svg",
     },
     {
-      "title": "Your Personal Roadmap to\nGetting Hired",
+      "title": "Your Personal Roadmap to Getting Hired",
       "description":
-          "No more guessing. Just a clear, personalized plan built\naround your gaps",
+          "No more guessing. Just a clear,\n personalized plan built around your gaps",
       "image": "assets/images/onboarding_2.svg",
     },
     {
-      "title": "SkillProof Shows You What\nto do Next",
+      "title": "SkillProof Shows You What to do Next",
       "description":
-          "You're not behind. You just haven't had the right\nmirror yet.",
+          "You're not behind.\n You just haven't had the right mirror yet.",
       "image": "assets/images/onboarding_3.svg",
     },
   ];
@@ -167,7 +167,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           ),
           const SizedBox(height: 32),
           Text(
-            "Start Your\nJourney Here",
+            "Start Your Journey Here",
             style: AppTextStyles.heading1.copyWith(
               height: 1.3,
               fontWeight: FontWeight.w800,
@@ -178,7 +178,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              "Wirapath is where IT fresh graduates turn skill gaps into\nvalidated proof.",
+              "Wirapath is where IT fresh graduates turn skill gaps into a validated proof.",
               style: AppTextStyles.bodyMedium.copyWith(
                 color: const Color(0xFF6B7280),
                 height: 1.5,

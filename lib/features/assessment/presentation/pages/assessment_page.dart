@@ -21,9 +21,9 @@ class _AssessmentPageState extends State<AssessmentPage> {
   final TextEditingController _universityController = TextEditingController();
 
   // Selections for Screen 2
-  String? _selectedFeeling;
-  String? _selectedNeed;
-  String? _selectedInterest;
+  final List<String> _selectedFeelings = [];
+  final List<String> _selectedNeeds = [];
+  final List<String> _selectedInterests = [];
 
   final List<String> _feelings = [
     "😞 Not confident in my skills",
@@ -67,8 +67,8 @@ class _AssessmentPageState extends State<AssessmentPage> {
         curve: Curves.easeInOut,
       );
     } else {
-      // Final step: Navigate to DevHub or Dashboard
-      context.go('/devhub');
+      // Final step: Navigate to Dashboard (Home)
+      context.go('/home');
     }
   }
 
@@ -213,7 +213,15 @@ class _AssessmentPageState extends State<AssessmentPage> {
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: _feelings.map((e) => _buildChip(e, _selectedFeeling, (v) => setState(() => _selectedFeeling = v))).toList(),
+                    children: _feelings.map((e) => _buildChip(e, _selectedFeelings.contains(e), () {
+                      setState(() {
+                        if (_selectedFeelings.contains(e)) {
+                          _selectedFeelings.remove(e);
+                        } else {
+                          _selectedFeelings.add(e);
+                        }
+                      });
+                    })).toList(),
                   ),
                   const SizedBox(height: 32),
                   Text("What do you need right now?", style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
@@ -221,7 +229,15 @@ class _AssessmentPageState extends State<AssessmentPage> {
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: _needs.map((e) => _buildChip(e, _selectedNeed, (v) => setState(() => _selectedNeed = v))).toList(),
+                    children: _needs.map((e) => _buildChip(e, _selectedNeeds.contains(e), () {
+                      setState(() {
+                        if (_selectedNeeds.contains(e)) {
+                          _selectedNeeds.remove(e);
+                        } else {
+                          _selectedNeeds.add(e);
+                        }
+                      });
+                    })).toList(),
                   ),
                   const SizedBox(height: 32),
                   Text("Your Interest", style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
@@ -229,7 +245,15 @@ class _AssessmentPageState extends State<AssessmentPage> {
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: _interests.map((e) => _buildChip(e, _selectedInterest, (v) => setState(() => _selectedInterest = v))).toList(),
+                    children: _interests.map((e) => _buildChip(e, _selectedInterests.contains(e), () {
+                      setState(() {
+                        if (_selectedInterests.contains(e)) {
+                          _selectedInterests.remove(e);
+                        } else {
+                          _selectedInterests.add(e);
+                        }
+                      });
+                    })).toList(),
                   ),
                   const SizedBox(height: 40),
                 ],
@@ -259,10 +283,9 @@ class _AssessmentPageState extends State<AssessmentPage> {
     );
   }
 
-  Widget _buildChip(String label, String? selectedValue, ValueChanged<String> onSelected) {
-    bool isSelected = label == selectedValue;
+  Widget _buildChip(String label, bool isSelected, VoidCallback onTap) {
     return GestureDetector(
-      onTap: () => onSelected(label),
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
@@ -366,7 +389,7 @@ class _AssessmentPageState extends State<AssessmentPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            "Upload your CV and transcript so we can see your\npotential.",
+            "Upload your CV and transcript so we can see your potential.",
             style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
@@ -475,7 +498,7 @@ class _AssessmentPageState extends State<AssessmentPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            "Connecting your GitHub gives Wirapath a real picture of\nyour coding experience. Not just what you say you know,\nbut what you've actually shipped.",
+            "Connecting your GitHub gives Wirapath a real picture of your coding experience.\n\nNot just what you say you know, but what you've actually shipped.",
             style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary, height: 1.5),
             textAlign: TextAlign.center,
           ),
@@ -493,7 +516,7 @@ class _AssessmentPageState extends State<AssessmentPage> {
           const SizedBox(height: 24),
           Center(
             child: GestureDetector(
-              onTap: () => context.go('/devhub'),
+              onTap: () => context.go('/home'),
               child: Text("Skip for now", style: AppTextStyles.bodyMedium.copyWith(color: AppColors.primaryBlue, fontWeight: FontWeight.bold)),
             ),
           ),

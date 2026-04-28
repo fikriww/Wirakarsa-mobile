@@ -12,10 +12,9 @@ class SplashPage extends StatefulWidget {
 class _SplashPageState extends State<SplashPage>
     with TickerProviderStateMixin {
   late AnimationController _fadeController;
-  late AnimationController _slideController;
+  late AnimationController _dissolveController;
   late Animation<double> _fadeAnimation;
-  late Animation<Offset> _logoSlideAnimation;
-  late Animation<double> _logoScaleAnimation;
+  late Animation<double> _logoDissolveAnimation;
   late Animation<double> _screenFadeAnimation;
 
   @override
@@ -32,30 +31,25 @@ class _SplashPageState extends State<SplashPage>
       curve: Curves.easeOut,
     );
 
-    // Phase 2: Slide logo to bottom-left and shrink, then fade screen
-    _slideController = AnimationController(
+    // Phase 2: Dissolve logo and fade screen
+    _dissolveController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
-    _logoSlideAnimation = Tween<Offset>(
-      begin: Offset.zero,
-      end: const Offset(-0.6, 1.2),
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeInOutCubic,
-    ));
-    _logoScaleAnimation = Tween<double>(
+    
+    _logoDissolveAnimation = Tween<double>(
       begin: 1.0,
-      end: 0.6,
+      end: 0.0,
     ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeInOutCubic,
+      parent: _dissolveController,
+      curve: const Interval(0.0, 0.8, curve: Curves.easeInOut),
     ));
+
     _screenFadeAnimation = Tween<double>(
       begin: 1.0,
       end: 0.0,
     ).animate(CurvedAnimation(
-      parent: _slideController,
+      parent: _dissolveController,
       curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
     ));
 
@@ -70,8 +64,8 @@ class _SplashPageState extends State<SplashPage>
     // Hold for a moment
     await Future.delayed(const Duration(milliseconds: 2500));
 
-    // Phase 2: Slide & shrink, then navigate
-    _slideController.forward();
+    // Phase 2: Dissolve & navigate
+    _dissolveController.forward();
     await Future.delayed(const Duration(milliseconds: 1100));
 
     if (mounted) {
@@ -82,7 +76,7 @@ class _SplashPageState extends State<SplashPage>
   @override
   void dispose() {
     _fadeController.dispose();
-    _slideController.dispose();
+    _dissolveController.dispose();
     super.dispose();
   }
 
@@ -91,33 +85,30 @@ class _SplashPageState extends State<SplashPage>
     return Scaffold(
       backgroundColor: AppColors.white,
       body: AnimatedBuilder(
-        animation: Listenable.merge([_fadeController, _slideController]),
+        animation: Listenable.merge([_fadeController, _dissolveController]),
         builder: (context, child) {
           return Opacity(
             opacity: _screenFadeAnimation.value,
             child: Center(
-              child: SlideTransition(
-                position: _logoSlideAnimation,
-                child: ScaleTransition(
-                  scale: _logoScaleAnimation,
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Image.asset(
-                          'assets/images/Union.png',
-                          width: 80,
-                          fit: BoxFit.contain,
-                        ),
-                        const SizedBox(height: 16),
-                        Image.asset(
-                          'assets/images/Type@40.png',
-                          width: 120,
-                          fit: BoxFit.contain,
-                        ),
-                      ],
-                    ),
+              child: FadeTransition(
+                opacity: _logoDissolveAnimation,
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        'assets/images/Union.png',
+                        width: 80,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(height: 16),
+                      Image.asset(
+                        'assets/images/Type@40.png',
+                        width: 120,
+                        fit: BoxFit.contain,
+                      ),
+                    ],
                   ),
                 ),
               ),

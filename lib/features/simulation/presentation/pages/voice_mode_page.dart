@@ -74,14 +74,18 @@ class _VoiceModePageState extends State<VoiceModePage>
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(
-              Icons.access_time_outlined,
-              color: AppColors.textPrimary,
-              size: 22,
-            ),
+            icon: const Icon(Icons.add, color: Colors.black),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.history, color: Colors.black),
             onPressed: () {},
           ),
         ],
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Divider(height: 1, color: Colors.black12),
+        ),
       ),
       body: Column(
         children: [
@@ -91,58 +95,56 @@ class _VoiceModePageState extends State<VoiceModePage>
           ScaleTransition(
             scale: _pulseAnimation,
             child: Container(
-              width: 200,
-              height: 200,
+              width: 250,
+              height: 250,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                gradient: const RadialGradient(
+                  center: Alignment(-0.2, -0.2),
                   colors: [
-                    const Color(0xFF90CAF9),
-                    AppColors.primaryBlue,
-                    const Color(0xFF1565C0),
+                    Color(0xFFA6C8FF),
+                    Color(0xFF066EFF),
                   ],
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primaryBlue.withValues(alpha: 0.3),
-                    blurRadius: 30,
-                    spreadRadius: 5,
+                    color: const Color(0xFF066EFF).withValues(alpha: 0.2),
+                    blurRadius: 40,
+                    spreadRadius: 10,
                   ),
                 ],
               ),
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
 
           // Sound wave bars
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(9, (index) {
-              final heights = [12.0, 20.0, 28.0, 16.0, 32.0, 16.0, 28.0, 20.0, 12.0];
+            children: List.generate(7, (index) {
+              final heights = [24.0, 32.0, 22.0, 36.0, 28.0, 34.0, 26.0];
               return Container(
-                width: 4,
+                width: 8,
                 height: heights[index],
-                margin: const EdgeInsets.symmetric(horizontal: 2),
+                margin: const EdgeInsets.symmetric(horizontal: 3),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryBlue,
-                  borderRadius: BorderRadius.circular(2),
+                  color: const Color(0xFF066EFF),
+                  borderRadius: BorderRadius.circular(4),
                 ),
               );
             }),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
 
           // "Listening." text
           Text(
             'Listening.',
             style: GoogleFonts.poppins(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
           ),
 
@@ -153,8 +155,8 @@ class _VoiceModePageState extends State<VoiceModePage>
             '05:00',
             style: GoogleFonts.poppins(
               fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: AppColors.error,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFFEE443F),
             ),
           ),
 
@@ -168,21 +170,21 @@ class _VoiceModePageState extends State<VoiceModePage>
               children: [
                 // Camera button
                 _CircleButton(
-                  icon: Icons.videocam_off_outlined,
-                  size: 52,
+                  icon: Icons.videocam_outlined,
+                  size: 60,
                   onTap: () {},
                 ),
                 // Mic button (larger, primary)
                 _CircleButton(
-                  icon: Icons.mic_outlined,
-                  size: 64,
+                  icon: Icons.mic_none_rounded,
+                  size: 72,
                   isPrimary: true,
                   onTap: () {},
                 ),
                 // More options button
                 _CircleButton(
                   icon: Icons.more_horiz,
-                  size: 52,
+                  size: 60,
                   onTap: () {},
                 ),
               ],
@@ -235,10 +237,8 @@ class _CircleButton extends StatelessWidget {
         ),
         child: Icon(
           icon,
-          size: isPrimary ? 28 : 24,
-          color: isPrimary
-              ? AppColors.primaryBlue
-              : AppColors.textSecondary,
+          size: isPrimary ? 32 : 24,
+          color: Colors.black,
         ),
       ),
     );
