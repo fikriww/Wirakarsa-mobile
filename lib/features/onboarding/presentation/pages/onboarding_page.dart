@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
@@ -18,18 +17,21 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final List<Map<String, dynamic>> _onboardingData = [
     {
       "title": "Know Exactly Where You\nStand",
-      "description": "Most IT grads apply blindly and wonder why they get\nrejected. SkillProof shows you the gap in minutes.",
-      "image": "assets/images/onboarding_1.svg"
+      "description":
+          "Most IT grads apply blindly and wonder why they get\nrejected. SkillProof shows you the gap in minutes.",
+      "image": "assets/images/onboarding_1.svg",
     },
     {
       "title": "Your Personal Roadmap to\nGetting Hired",
-      "description": "No more guessing. Just a clear, personalized plan built\naround your gaps",
-      "image": "assets/images/onboarding_2.svg"
+      "description":
+          "No more guessing. Just a clear, personalized plan built\naround your gaps",
+      "image": "assets/images/onboarding_2.svg",
     },
     {
       "title": "SkillProof Shows You What\nto do Next",
-      "description": "You're not behind. You just haven't had the right\nmirror yet.",
-      "image": "assets/images/onboarding_3.svg"
+      "description":
+          "You're not behind. You just haven't had the right\nmirror yet.",
+      "image": "assets/images/onboarding_3.svg",
     },
   ];
 
@@ -194,7 +196,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 foregroundColor: AppColors.white,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: Text('Sign In', style: AppTextStyles.buttonText),
             ),
@@ -205,13 +209,20 @@ class _OnboardingPageState extends State<OnboardingPage> {
             child: OutlinedButton(
               onPressed: () => context.go('/create-account'),
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: AppColors.primaryBlue, width: 1.5),
+                side: const BorderSide(
+                  color: AppColors.primaryBlue,
+                  width: 1.5,
+                ),
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: Text(
                 'Create Account',
-                style: AppTextStyles.buttonText.copyWith(color: AppColors.primaryBlue),
+                style: AppTextStyles.buttonText.copyWith(
+                  color: AppColors.primaryBlue,
+                ),
               ),
             ),
           ),
@@ -235,7 +246,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
               foregroundColor: AppColors.white,
               elevation: 0,
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             child: Text('Get Started', style: AppTextStyles.buttonText),
           ),
