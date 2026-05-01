@@ -5,7 +5,6 @@ import '../../features/auth/presentation/pages/sign_in_page.dart';
 import '../../features/auth/presentation/pages/create_account_page.dart';
 import '../../features/assessment/presentation/pages/assessment_page.dart';
 import '../../features/assessment/presentation/pages/connect_github_page.dart';
-import '../../features/readiness/presentation/pages/readiness_center_page.dart';
 import '../../features/readiness/presentation/pages/cv_screening_page.dart';
 import '../../features/readiness/presentation/pages/initial_test_page.dart';
 import '../../features/readiness/presentation/pages/data_analysis_test_page.dart';
@@ -16,7 +15,6 @@ import '../../features/readiness/presentation/pages/testing_test_page.dart';
 import '../../features/readiness/presentation/pages/testing_review_page.dart';
 import '../../features/readiness/presentation/pages/review_test_page.dart';
 import '../../features/readiness/presentation/pages/cv_screening_result_page.dart';
-import '../../features/devhub/presentation/pages/devhub_page.dart';
 import '../../features/devhub/presentation/pages/submit_code_page.dart';
 import '../../features/devhub/presentation/pages/react_testing_fundamentals_page.dart';
 import '../../features/devhub/presentation/pages/css_responsive_mastery_page.dart';
@@ -27,7 +25,6 @@ import '../../features/devhub/presentation/pages/submit_css_responsive_mastery_p
 import '../../features/devhub/presentation/pages/submit_react_component_basic_page.dart';
 import '../../features/devhub/presentation/pages/submit_async_javascript_mastery_page.dart';
 import '../../features/main/main_shell.dart';
-import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/personal_information_page.dart';
 import '../../features/profile/presentation/pages/password_security_page.dart';
 import '../../features/profile/presentation/pages/notifications_page.dart';
@@ -151,7 +148,17 @@ class AppRouter {
       ),
 
       // --- DevHub ---
-      GoRoute(path: '/devhub', builder: (context, state) => const MainShell(currentIndex: 2)),
+      GoRoute(
+        path: '/devhub',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final isCodeReviewActive = extra?['isCodeReviewActive'] as bool? ?? false;
+          return MainShell(
+            currentIndex: 2,
+            initialDevhubCodeReviewActive: isCodeReviewActive,
+          );
+        },
+      ),
       GoRoute(
         path: '/devhub/submit-code',
         builder: (context, state) => const SubmitCodePage(),

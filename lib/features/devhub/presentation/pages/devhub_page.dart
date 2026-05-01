@@ -6,7 +6,12 @@ import '../widgets/radar_chart.dart';
 import 'code_review_page.dart';
 
 class DevhubPage extends StatefulWidget {
-  const DevhubPage({super.key});
+  final bool initialIsCodeReviewActive;
+
+  const DevhubPage({
+    super.key,
+    this.initialIsCodeReviewActive = false,
+  });
 
   @override
   State<DevhubPage> createState() => _DevhubPageState();
@@ -14,7 +19,23 @@ class DevhubPage extends StatefulWidget {
 
 class _DevhubPageState extends State<DevhubPage> {
   int _selectedIndex = 2;
-  bool _isCodeReviewActive = false;
+  late bool _isCodeReviewActive;
+
+  @override
+  void initState() {
+    super.initState();
+    _isCodeReviewActive = widget.initialIsCodeReviewActive;
+  }
+
+  @override
+  void didUpdateWidget(DevhubPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialIsCodeReviewActive != oldWidget.initialIsCodeReviewActive) {
+      setState(() {
+        _isCodeReviewActive = widget.initialIsCodeReviewActive;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +83,7 @@ class _DevhubPageState extends State<DevhubPage> {
         behavior: const ScrollBehavior().copyWith(overscroll: false),
         child: SingleChildScrollView(
           physics: const ClampingScrollPhysics(),
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 100),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

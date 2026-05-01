@@ -71,7 +71,7 @@ class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
             _buildTabBar(),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.only(left: 24, right: 24, top: 16, bottom: 100),
                 child: _buildTabContent(),
               ),
             ),
@@ -602,10 +602,10 @@ class _SkillMapPainter extends CustomPainter {
   _SkillMapPainter({required this.values});
 
   final List<String> labels = [
-    "Testing (Jest)",
-    "Web Performance",
+    "Testing\n(Jest)",
+    "Web\nPerformance",
     "Accessibility",
-    "State Management",
+    "State\nManagement",
     "React.js",
     "CSS",
   ];
@@ -622,7 +622,7 @@ class _SkillMapPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.height / 2) - 40; // leave room for labels
+    final radius = min(size.width / 2, size.height / 2) - 60; // leave room for labels
 
     final outlinePaint = Paint()
       ..color = const Color(0xFFE1F0FF)
@@ -693,9 +693,10 @@ class _SkillMapPainter extends CustomPainter {
       final textPainter = TextPainter(
         text: TextSpan(
           text: labels[j],
-          style: const TextStyle(color: Color(0xFF757575), fontSize: 12),
+          style: const TextStyle(color: Color(0xFF757575), fontSize: 10),
         ),
         textDirection: TextDirection.ltr,
+        textAlign: TextAlign.center,
       );
       textPainter.layout();
 

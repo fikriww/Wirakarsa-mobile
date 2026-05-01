@@ -26,13 +26,14 @@ class _SubmitCodePageState extends State<SubmitCodePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
-          onPressed: () => context.pop(),
+          onPressed: () { if (context.canPop()) { context.pop(); } else { context.go('/devhub'); } },
         ),
         actions: [
           IconButton(icon: const Icon(Icons.menu, color: Colors.black), onPressed: () {}),
@@ -56,7 +57,7 @@ class _SubmitCodePageState extends State<SubmitCodePage> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0, bottom: 100.0),
         child: Column(
           children: [
             Row(
@@ -64,7 +65,7 @@ class _SubmitCodePageState extends State<SubmitCodePage> {
                 SegmentButton(
                   label: "Mini Project",
                   isActive: false,
-                  onTap: () => context.pop(),
+                  onTap: () => context.go('/devhub', extra: {'isCodeReviewActive': false}),
                 ),
                 const SizedBox(width: 12),
                 SegmentButton(
@@ -117,7 +118,7 @@ class _SubmitCodePageState extends State<SubmitCodePage> {
                 decoration: const InputDecoration(
                   contentPadding: EdgeInsets.all(15),
                   border: InputBorder.none,
-                  hintText: "// Tulis kode kamu di sini...",
+                  hintText: "// Write your code here...",
                   hintStyle: TextStyle(color: Colors.white38),
                   filled: true,
                   fillColor: Colors.transparent,

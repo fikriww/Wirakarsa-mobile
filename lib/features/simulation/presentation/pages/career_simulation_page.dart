@@ -11,7 +11,6 @@ import '../widgets/chat_input_field.dart';
 import '../widgets/salary_scenario_card.dart';
 import 'voice_mode_page.dart';
 
-/// Simulation flow states
 enum SimulationState {
   initial, // 3 option cards
   careerScenarios, // company scenario cards
@@ -19,6 +18,7 @@ enum SimulationState {
   salaryScenarios, // NEW: company salary level cards
   salaryChat, // HR salary message + quick replies
   jobdeskAnalyzer, // job listing cards
+  jobdeskAnalyzerChat, // AI analysis message + quick replies
 }
 
 class CareerSimulationPage extends StatefulWidget {
@@ -115,12 +115,18 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
               replies: ['Is the salary negotiable?', 'I am expecting ar...'],
               onTap: (reply) {},
             ),
+          if (_currentState == SimulationState.jobdeskAnalyzerChat)
+            QuickReplyChips(
+              replies: ['How to improve TypeScript?', 'Start mock interview'],
+              onTap: (reply) {},
+            ),
 
           // Chat input
           ChatInputField(
             controller: _chatController,
             showTimer: _currentState == SimulationState.careerChat ||
-                _currentState == SimulationState.salaryChat,
+                _currentState == SimulationState.salaryChat ||
+                _currentState == SimulationState.jobdeskAnalyzerChat,
             timerText: '05:00',
             onSend: () {
               _chatController.clear();
@@ -130,8 +136,97 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
                 MaterialPageRoute(builder: (context) => const VoiceModePage()),
               );
             },
+            onAskTap: () => _showAskOptions(context),
+            onRepositoriesTap: () => _showRepositories(context),
           ),
+          const SizedBox(height: 90),
         ],
+      ),
+    );
+  }
+
+  void _showAskOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'Interesting Questions',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            _buildOptionTile('How should I negotiate for a higher salary?'),
+            _buildOptionTile('What are the red flags to look for in a startup?'),
+            _buildOptionTile('Can you explain state management simply?'),
+            _buildOptionTile('How to transition from Junior to Mid level?'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showRepositories(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'Conversation History',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            _buildOptionTile('Mock Interview: Tokopedia (Frontend) - Yesterday'),
+            _buildOptionTile('Salary Negotiation: Startup Fintech - 3 days ago'),
+            _buildOptionTile('Career Advice: EdTech - Last week'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionTile(String text) {
+    return InkWell(
+      onTap: () => Navigator.pop(context),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        child: Text(
+          text,
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            color: AppColors.textSecondary,
+          ),
+        ),
       ),
     );
   }
@@ -150,6 +245,8 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
         return _buildSalaryChat();
       case SimulationState.jobdeskAnalyzer:
         return _buildJobdeskAnalyzer();
+      case SimulationState.jobdeskAnalyzerChat:
+        return _buildJobdeskAnalyzerChat();
     }
   }
 
@@ -244,10 +341,15 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       children: [
-        const VoiceChatBubble(
+        VoiceChatBubble(
           message:
               'The designer sent a Figma file:\n\n"Budi, here is the responsive mockup for the class page. Breakpoints: mobile (375px), tablet (768px), desktop (1440px). Please implement according to the spec, prioritizing mobile-first."',
           time: '12:49 AM',
+          onVoiceTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const VoiceModePage()),
+            );
+          },
         ),
       ],
     );
@@ -297,10 +399,15 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       children: [
-        const VoiceChatBubble(
+        VoiceChatBubble(
           message:
               'I am the HR Manager from Startup Fintech. We are offering 4-6m/month for this Junior position. What are your salary expectations?',
           time: '12:49 AM',
+          onVoiceTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const VoiceModePage()),
+            );
+          },
         ),
       ],
     );
@@ -335,7 +442,7 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
                 salary: '8-15 million IDR/month',
                 postedTime: '1 day ago',
                 experienceLevel: 'Entry-Mid',
-                onAnalyze: () {},
+                onAnalyze: () => _goToState(SimulationState.jobdeskAnalyzerChat),
               ),
               JobListingCard(
                 jobTitle: 'React Developer',
@@ -353,10 +460,29 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
                 salary: '8-15 million IDR/month',
                 postedTime: '1 day ago',
                 experienceLevel: 'Entry-Mid',
-                onAnalyze: () {},
+                onAnalyze: () => _goToState(SimulationState.jobdeskAnalyzerChat),
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+
+  /// State 6: Jobdesk Analyzer Chat
+  Widget _buildJobdeskAnalyzerChat() {
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      children: [
+        VoiceChatBubble(
+          message:
+              'I am analyzing the Frontend Developer role at Gojek. Based on your profile, you match 80%. Let\'s focus on improving your TypeScript and Web Performance skills. Are you ready for a mock technical interview?',
+          time: '12:49 AM',
+          onVoiceTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const VoiceModePage()),
+            );
+          },
         ),
       ],
     );

@@ -15,6 +15,7 @@ class _ReactComponentBasicPageState extends State<ReactComponentBasicPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
@@ -22,7 +23,7 @@ class _ReactComponentBasicPageState extends State<ReactComponentBasicPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
-          onPressed: () => context.pop(),
+          onPressed: () { if (context.canPop()) { context.pop(); } else { context.go('/devhub'); } },
         ),
         titleSpacing: 0,
         title: Column(
@@ -66,14 +67,14 @@ class _ReactComponentBasicPageState extends State<ReactComponentBasicPage> {
           behavior: const ScrollBehavior().copyWith(overscroll: false),
           child: SingleChildScrollView(
             physics: const ClampingScrollPhysics(),
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 100),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('Brief', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 100),
                   decoration: BoxDecoration(
                     color: const Color(0xFFEDF1FF),
                     borderRadius: BorderRadius.circular(12),

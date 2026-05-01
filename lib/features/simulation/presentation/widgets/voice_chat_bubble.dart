@@ -7,12 +7,14 @@ class VoiceChatBubble extends StatelessWidget {
   final String message;
   final String time;
   final bool isUser;
+  final VoidCallback? onVoiceTap;
 
   const VoiceChatBubble({
     super.key,
     required this.message,
     required this.time,
     this.isUser = false,
+    this.onVoiceTap,
   });
 
   @override
@@ -89,18 +91,25 @@ class VoiceChatBubble extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     // Voice signal bars
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Row(
-                        children: [
-                          _buildBar(12),
-                          const SizedBox(width: 2),
-                          _buildBar(18),
-                          const SizedBox(width: 2),
-                          _buildBar(10),
-                          const SizedBox(width: 2),
-                          _buildBar(14),
-                        ],
+                    GestureDetector(
+                      onTap: onVoiceTap,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Row(
+                          children: [
+                            _buildBar(12),
+                            const SizedBox(width: 2),
+                            _buildBar(18),
+                            const SizedBox(width: 2),
+                            _buildBar(10),
+                            const SizedBox(width: 2),
+                            _buildBar(14),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -129,7 +138,7 @@ class VoiceChatBubble extends StatelessWidget {
       width: 2.5,
       height: height,
       decoration: BoxDecoration(
-        color: const Color(0xFF066EFF).withValues(alpha: 0.5),
+        color: AppColors.primaryBlue,
         borderRadius: BorderRadius.circular(1),
       ),
     );

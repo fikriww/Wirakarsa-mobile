@@ -32,9 +32,6 @@ class TestGradeScore extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progressColor = _getProgressColor();
-    final ratio = numericScore / maxScore;
-
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [

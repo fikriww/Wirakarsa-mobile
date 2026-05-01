@@ -9,25 +9,25 @@ class RadarChartPainter extends CustomPainter {
     final radius = math.min(size.width, size.height) / 2.8;
 
     final List<String> labels = [
-      "Testing/Debug",
-      "Web Performance",
+      "Testing\n(Jest)",
+      "Web\nPerformance",
       "Accessibility",
-      "State Management",
-      "UI/UX",
-      "Unit",
+      "State\nManagement",
+      "React.js",
+      "CSS",
     ];
 
     final List<Color> dotColors = [
-      Colors.red,
-      Colors.red,
-      Colors.orange,
-      const Color(0xFF22C55E),
-      const Color(0xFF22C55E),
-      const Color(0xFF22C55E),
+      const Color(0xFFD32F2F), // Testing
+      const Color(0xFFD32F2F), // Web Performance
+      const Color(0xFFF57F17), // Accessibility
+      const Color(0xFF388E3C), // State Management
+      const Color(0xFF388E3C), // React.js
+      const Color(0xFF388E3C), // CSS
     ];
 
     // Persentase skill berdasarkan gambar (dummy values agar mirip visualnya)
-    final List<double> values = [0.8, 0.7, 0.65, 0.85, 0.75, 0.6];
+    final List<double> values = [0.3, 0.15, 0.5, 0.85, 0.8, 0.83];
 
     final linePaint = Paint()
       ..color = Colors.blue.withOpacity(0.1)
@@ -94,9 +94,39 @@ class RadarChartPainter extends CustomPainter {
           style: const TextStyle(color: Colors.grey, fontSize: 10),
         ),
         textDirection: TextDirection.ltr,
+        textAlign: TextAlign.center,
       )..layout();
       
-      textPainter.paint(canvas, Offset(x - textPainter.width / 2, y - textPainter.height / 2));
+      double textX = dotPos.dx;
+      double textY = dotPos.dy;
+
+      // Horizontal alignment
+      if (math.cos(angle) > 0.1) {
+        textX += 10; // push to the right
+      } else if (math.cos(angle) < -0.1) {
+        textX -= textPainter.width + 10; // push to the left
+      } else {
+        textX -= textPainter.width / 2; // center horizontally
+      }
+
+      // Vertical alignment
+      if (math.sin(angle) > 0.1) {
+        if (math.cos(angle).abs() < 0.1) {
+          textY += 10; // push down for bottom dot
+        } else {
+          textY = dotPos.dy - textPainter.height / 2 + 4; // center vertically with slight offset
+        }
+      } else if (math.sin(angle) < -0.1) {
+        if (math.cos(angle).abs() < 0.1) {
+          textY -= textPainter.height + 10; // push up for top dot
+        } else {
+          textY = dotPos.dy - textPainter.height / 2 - 4; // center vertically with slight offset
+        }
+      } else {
+        textY -= textPainter.height / 2; // center vertically
+      }
+
+      textPainter.paint(canvas, Offset(textX, textY));
     }
   }
 

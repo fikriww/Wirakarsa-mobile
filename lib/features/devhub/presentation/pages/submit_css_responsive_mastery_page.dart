@@ -28,13 +28,14 @@ class _SubmitCssResponsiveMasteryPageState extends State<SubmitCssResponsiveMast
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
-          onPressed: () => context.pop(),
+          onPressed: () { if (context.canPop()) { context.pop(); } else { context.go('/devhub'); } },
         ),
         titleSpacing: 0,
         title: Column(
@@ -60,7 +61,7 @@ class _SubmitCssResponsiveMasteryPageState extends State<SubmitCssResponsiveMast
         behavior: const ScrollBehavior().copyWith(overscroll: false),
         child: SingleChildScrollView(
           physics: const ClampingScrollPhysics(),
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 100),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -148,7 +149,7 @@ class _SubmitCssResponsiveMasteryPageState extends State<SubmitCssResponsiveMast
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () => context.pop(),
+                  onPressed: () { if (context.canPop()) { context.pop(); } else { context.go('/devhub'); } },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0D6EFD),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

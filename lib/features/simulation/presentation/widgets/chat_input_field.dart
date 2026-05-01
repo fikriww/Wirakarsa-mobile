@@ -6,6 +6,8 @@ class ChatInputField extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback? onSend;
   final VoidCallback? onMicTap;
+  final VoidCallback? onAskTap;
+  final VoidCallback? onRepositoriesTap;
   final bool showTimer;
   final String? timerText;
 
@@ -14,6 +16,8 @@ class ChatInputField extends StatelessWidget {
     required this.controller,
     this.onSend,
     this.onMicTap,
+    this.onAskTap,
+    this.onRepositoriesTap,
     this.showTimer = false,
     this.timerText,
   });
@@ -41,11 +45,22 @@ class ChatInputField extends StatelessWidget {
                     height: 36,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.inputBackground,
+                      color: AppColors.white,
+                      border: Border.all(
+                        color: AppColors.primaryBlue.withValues(alpha: 0.5),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: const Icon(
                       Icons.mic_none_rounded,
-                      color: AppColors.textHint,
+                      color: AppColors.primaryBlue,
                       size: 20,
                     ),
                   ),
@@ -109,13 +124,13 @@ class ChatInputField extends StatelessWidget {
                 _FilterChip(
                   icon: Icons.chat_bubble_outline,
                   label: 'Ask',
-                  onTap: () {},
+                  onTap: onAskTap,
                 ),
                 const SizedBox(width: 8),
                 _FilterChip(
                   icon: Icons.folder_outlined,
                   label: 'All Repositories',
-                  onTap: () {},
+                  onTap: onRepositoriesTap,
                 ),
                 if (showTimer && timerText != null) ...[
                   const Spacer(),
@@ -150,8 +165,9 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
