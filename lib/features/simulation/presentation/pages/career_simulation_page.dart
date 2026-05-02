@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../widgets/chat_bubble.dart';
@@ -49,17 +50,36 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        automaticallyImplyLeading: false,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new,
-            color: Colors.black,
+            color: AppColors.textPrimary,
             size: 20,
           ),
           onPressed: () {
-            if (_currentState != SimulationState.initial) {
-              _goToState(SimulationState.initial);
-            } else {
-              Navigator.of(context).maybePop();
+            switch (_currentState) {
+              case SimulationState.careerScenarios:
+              case SimulationState.salaryScenarios:
+              case SimulationState.jobdeskAnalyzer:
+                _goToState(SimulationState.initial);
+                break;
+              case SimulationState.careerChat:
+                _goToState(SimulationState.careerScenarios);
+                break;
+              case SimulationState.salaryChat:
+                _goToState(SimulationState.salaryScenarios);
+                break;
+              case SimulationState.jobdeskAnalyzerChat:
+                _goToState(SimulationState.jobdeskAnalyzer);
+                break;
+              case SimulationState.initial:
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go('/home');
+                }
+                break;
             }
           },
         ),
