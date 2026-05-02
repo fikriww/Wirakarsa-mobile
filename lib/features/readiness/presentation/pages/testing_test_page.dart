@@ -28,7 +28,7 @@ class _TestingTestPageState extends State<TestingTestPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
-          onPressed: () => context.pop(),
+          onPressed: () => context.go('/readiness-center', extra: {'initialTabIndex': 1}),
         ),
         title: Row(
           children: [
@@ -219,7 +219,7 @@ class _TestingTestPageState extends State<TestingTestPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 120),
           ],
         ),
       ),

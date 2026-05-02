@@ -15,7 +15,7 @@ class DataAnalysisReviewPage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
-          onPressed: () => context.pop(),
+          onPressed: () => context.go('/readiness-center', extra: {'initialTabIndex': 1}),
         ),
         title: Row(
           children: [
@@ -157,28 +157,35 @@ class DataAnalysisReviewPage extends StatelessWidget {
             const SizedBox(height: 32),
             
             // Grid Metrics
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 24,
-              crossAxisSpacing: 16,
-              childAspectRatio: 2,
+            Column(
               children: [
-                _buildGridMetric("Data Cleaning", const Icon(Icons.check, color: Colors.green), "Documented Well"),
-                _buildGridMetric("Visualizations", const Icon(Icons.check, color: Colors.green), "Both Clean"),
-                _buildGridMetric("Regeression R²", const Icon(Icons.close, color: Colors.red), "Not Interpreted"),
-                _buildGridMetric(
-                  "Essay Length", 
-                  Text(
-                    "118", 
-                    style: GoogleFonts.poppins(
-                      color: Colors.orange, 
-                      fontWeight: FontWeight.bold, 
-                      fontSize: 24,
-                    ),
-                  ), 
-                  "Target 150 - 250 words",
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: _buildGridMetric("Data Cleaning", const Icon(Icons.check, color: Colors.green), "Documented Well")),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildGridMetric("Visualizations", const Icon(Icons.check, color: Colors.green), "Both Clean")),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: _buildGridMetric("Regeression R²", const Icon(Icons.close, color: Colors.red), "Not Interpreted")),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildGridMetric(
+                      "Essay Length", 
+                      Text(
+                        "118", 
+                        style: GoogleFonts.poppins(
+                          color: Colors.orange, 
+                          fontWeight: FontWeight.bold, 
+                          fontSize: 24,
+                        ),
+                      ), 
+                      "Target 150 - 250 words",
+                    )),
+                  ],
                 ),
               ],
             ),
@@ -223,7 +230,7 @@ class DataAnalysisReviewPage extends StatelessWidget {
               height: 56,
               child: ElevatedButton(
                 onPressed: () {
-                  context.go('/readiness-center');
+                  context.go('/readiness-center', extra: {'initialTabIndex': 1});
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF066EFF),
@@ -241,7 +248,7 @@ class DataAnalysisReviewPage extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 120),
           ],
         ),
       ),

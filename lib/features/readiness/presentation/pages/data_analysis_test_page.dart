@@ -14,7 +14,7 @@ class DataAnalysisTestPage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
-          onPressed: () => context.pop(),
+          onPressed: () => context.go('/readiness-center', extra: {'initialTabIndex': 1}),
         ),
         title: Row(
           children: [
@@ -152,7 +152,7 @@ class DataAnalysisTestPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 120),
                   ],
                 ),
               ),

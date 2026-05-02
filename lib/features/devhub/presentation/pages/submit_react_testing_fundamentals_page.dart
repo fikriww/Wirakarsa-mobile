@@ -35,7 +35,7 @@ class _SubmitReactTestingFundamentalsPageState extends State<SubmitReactTestingF
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
-          onPressed: () { if (context.canPop()) { context.pop(); } else { context.go('/devhub'); } },
+          onPressed: () => context.go('/devhub'),
         ),
         titleSpacing: 0,
         title: Column(
@@ -153,7 +153,7 @@ class _SubmitReactTestingFundamentalsPageState extends State<SubmitReactTestingF
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () { if (context.canPop()) { context.pop(); } else { context.go('/devhub'); } },
+                  onPressed: () => context.go('/devhub'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0D6EFD),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

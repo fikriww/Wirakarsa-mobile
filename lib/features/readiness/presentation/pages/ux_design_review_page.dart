@@ -15,7 +15,7 @@ class UXDesignReviewPage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
-          onPressed: () => context.pop(),
+          onPressed: () => context.go('/readiness-center', extra: {'initialTabIndex': 1}),
         ),
         title: Row(
           children: [
@@ -157,28 +157,35 @@ class UXDesignReviewPage extends StatelessWidget {
             const SizedBox(height: 32),
             
             // Grid Metrics
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 24,
-              crossAxisSpacing: 16,
-              childAspectRatio: 2,
+            Column(
               children: [
-                _buildGridMetric("User Persona", const Icon(Icons.check, color: Color(0xFF10B981)), "Documented Well"),
-                _buildGridMetric("User Flow", const Icon(Icons.check, color: Color(0xFF10B981)), "Clear"),
-                _buildGridMetric("Wireframes", const Icon(Icons.check, color: Color(0xFF10B981)), "Good"),
-                _buildGridMetric(
-                  "Rationale", 
-                  Text(
-                    "72w", 
-                    style: GoogleFonts.poppins(
-                      color: Colors.orange, 
-                      fontWeight: FontWeight.bold, 
-                      fontSize: 24,
-                    ),
-                  ), 
-                  "Target 100 - 150w",
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: _buildGridMetric("User Persona", const Icon(Icons.check, color: Color(0xFF10B981)), "Documented Well")),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildGridMetric("User Flow", const Icon(Icons.check, color: Color(0xFF10B981)), "Clear")),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: _buildGridMetric("Wireframes", const Icon(Icons.check, color: Color(0xFF10B981)), "Good")),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildGridMetric(
+                      "Rationale", 
+                      Text(
+                        "72w", 
+                        style: GoogleFonts.poppins(
+                          color: Colors.orange, 
+                          fontWeight: FontWeight.bold, 
+                          fontSize: 24,
+                        ),
+                      ), 
+                      "Target 100 - 150w",
+                    )),
+                  ],
                 ),
               ],
             ),
@@ -207,7 +214,7 @@ class UXDesignReviewPage extends StatelessWidget {
               height: 56,
               child: ElevatedButton(
                 onPressed: () {
-                  context.go('/readiness-center');
+                  context.go('/readiness-center', extra: {'initialTabIndex': 1});
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF066EFF),
@@ -225,7 +232,7 @@ class UXDesignReviewPage extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 120),
           ],
         ),
       ),

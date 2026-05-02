@@ -15,7 +15,7 @@ class TestingReviewPage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
-          onPressed: () => context.pop(),
+          onPressed: () => context.go('/readiness-center', extra: {'initialTabIndex': 1}),
         ),
         title: Row(
           children: [
@@ -157,18 +157,25 @@ class TestingReviewPage extends StatelessWidget {
             const SizedBox(height: 32),
             
             // Grid Metrics
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 24,
-              crossAxisSpacing: 16,
-              childAspectRatio: 2,
+            Column(
               children: [
-                _buildGridMetric("Positive Cases", const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981)), "5 Identified"),
-                _buildGridMetric("Negative Cases", const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981)), "3 Identified"),
-                _buildGridMetric("Security Focus", const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981)), "Strong"),
-                _buildGridMetric("Depth", const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981)), "High"),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: _buildGridMetric("Positive Cases", const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981)), "5 Identified")),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildGridMetric("Negative Cases", const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981)), "3 Identified")),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: _buildGridMetric("Security Focus", const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981)), "Strong")),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildGridMetric("Depth", const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981)), "High")),
+                  ],
+                ),
               ],
             ),
             
@@ -196,7 +203,7 @@ class TestingReviewPage extends StatelessWidget {
               height: 56,
               child: ElevatedButton(
                 onPressed: () {
-                  context.go('/readiness-center');
+                  context.go('/readiness-center', extra: {'initialTabIndex': 1});
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF066EFF),
@@ -214,7 +221,7 @@ class TestingReviewPage extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 120),
           ],
         ),
       ),

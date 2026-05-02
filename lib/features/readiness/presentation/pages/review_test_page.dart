@@ -15,7 +15,7 @@ class ReviewTestPage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
-          onPressed: () => context.pop(),
+          onPressed: () => context.go('/readiness-center', extra: {'initialTabIndex': 1}),
         ),
         title: Row(
           children: [
@@ -203,7 +203,7 @@ class ReviewTestPage extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   // Close and go back to readiness center
-                  context.go('/readiness-center');
+                  context.go('/readiness-center', extra: {'initialTabIndex': 1});
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF066EFF),
@@ -221,7 +221,7 @@ class ReviewTestPage extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 120),
           ],
         ),
       ),
