@@ -38,8 +38,9 @@ class _TestingTestPageState extends State<TestingTestPage> {
                 style: GoogleFonts.poppins(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
-                  fontSize: 18,
+                  fontSize: 16,
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(width: 8),
