@@ -117,7 +117,7 @@ class _SubmitAsyncJavascriptMasteryPageState extends State<SubmitAsyncJavascript
       ),
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _selectedIndex,
-        onTap: (i) => setState(() => _selectedIndex = i),
+
       ),
     );
   }

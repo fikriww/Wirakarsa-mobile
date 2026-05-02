@@ -169,7 +169,7 @@ class _SubmitReactTestingFundamentalsPageState extends State<SubmitReactTestingF
       ),
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _selectedIndex,
-        onTap: (i) => setState(() => _selectedIndex = i),
+
       ),
     );
   }

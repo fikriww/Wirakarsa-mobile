@@ -137,7 +137,7 @@ class _ReactComponentBasicPageState extends State<ReactComponentBasicPage> {
       ),
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _selectedIndex,
-        onTap: (i) => setState(() => _selectedIndex = i),
+
       ),
     );
   }

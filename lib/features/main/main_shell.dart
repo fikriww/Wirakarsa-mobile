@@ -83,7 +83,6 @@ class _MainShellState extends State<MainShell> {
       ),
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _currentIndex,
-        onTap: (i) => setState(() => _currentIndex = i),
       ),
     );
   }

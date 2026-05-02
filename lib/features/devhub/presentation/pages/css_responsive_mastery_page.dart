@@ -136,7 +136,7 @@ class _CssResponsiveMasteryPageState extends State<CssResponsiveMasteryPage> {
       ),
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _selectedIndex,
-        onTap: (i) => setState(() => _selectedIndex = i),
+
       ),
     );
   }

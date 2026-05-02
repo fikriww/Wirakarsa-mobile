@@ -1,15 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 /// Shared bottom navigation bar used across multiple pages.
 class AppBottomNavBar extends StatelessWidget {
   final int currentIndex;
-  final ValueChanged<int> onTap;
 
   const AppBottomNavBar({
     super.key,
     required this.currentIndex,
-    required this.onTap,
   });
+
+  void _onItemTapped(BuildContext context, int index) {
+    if (currentIndex == index) return;
+    
+    switch (index) {
+      case 0:
+        context.go('/home');
+        break;
+      case 1:
+        context.go('/readiness-center');
+        break;
+      case 2:
+        context.go('/devhub');
+        break;
+      case 3:
+        context.go('/simulation');
+        break;
+      case 4:
+        context.go('/profile');
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +71,7 @@ class AppBottomNavBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildNavItem(
+                context: context,
                 index: 0,
                 icon: Icons.home_outlined,
                 activeIcon: Icons.home,
@@ -58,6 +80,7 @@ class AppBottomNavBar extends StatelessWidget {
                 inactiveColor: inactiveColor,
               ),
               _buildNavItem(
+                context: context,
                 index: 1,
                 icon: Icons.analytics_outlined,
                 activeIcon: Icons.analytics,
@@ -66,6 +89,7 @@ class AppBottomNavBar extends StatelessWidget {
                 inactiveColor: inactiveColor,
               ),
               _buildNavItem(
+                context: context,
                 index: 2,
                 icon: Icons.terminal_outlined,
                 activeIcon: Icons.terminal,
@@ -74,6 +98,7 @@ class AppBottomNavBar extends StatelessWidget {
                 inactiveColor: inactiveColor,
               ),
               _buildNavItem(
+                context: context,
                 index: 3,
                 icon: Icons.sms_outlined,
                 activeIcon: Icons.sms,
@@ -82,6 +107,7 @@ class AppBottomNavBar extends StatelessWidget {
                 inactiveColor: inactiveColor,
               ),
               _buildNavItem(
+                context: context,
                 index: 4,
                 icon: Icons.account_circle_outlined,
                 activeIcon: Icons.account_circle,
@@ -97,6 +123,7 @@ class AppBottomNavBar extends StatelessWidget {
   }
 
   Widget _buildNavItem({
+    required BuildContext context,
     required int index,
     required IconData icon,
     required IconData activeIcon,
@@ -108,7 +135,7 @@ class AppBottomNavBar extends StatelessWidget {
     final Color color = isSelected ? activeColor : inactiveColor;
 
     return GestureDetector(
-      onTap: () => onTap(index),
+      onTap: () => _onItemTapped(context, index),
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
         width: 50,

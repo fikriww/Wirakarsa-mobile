@@ -165,7 +165,7 @@ class _SubmitCssResponsiveMasteryPageState extends State<SubmitCssResponsiveMast
       ),
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _selectedIndex,
-        onTap: (i) => setState(() => _selectedIndex = i),
+
       ),
     );
   }

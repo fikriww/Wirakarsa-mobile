@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 /// The Code Review tab content, shown when "Code Review" segment is active.
 /// This is used as a section within DevhubPage, not a standalone page.
 class CodeReviewSection extends StatelessWidget {
-  const CodeReviewSection({super.key});
+  final VoidCallback? onSwitchToMiniProject;
+
+  const CodeReviewSection({super.key, this.onSwitchToMiniProject});
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +39,11 @@ class CodeReviewSection extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: () {
-              context.push('/devhub/submit-code');
+            onPressed: () async {
+              final result = await context.push<bool>('/devhub/submit-code');
+              if (result == true) {
+                onSwitchToMiniProject?.call();
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue[600],

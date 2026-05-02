@@ -42,7 +42,11 @@ class RadarChartPainter extends CustomPainter {
         final angle = (j * 60) * math.pi / 180 - (math.pi / 2);
         final x = center.dx + currentRadius * math.cos(angle);
         final y = center.dy + currentRadius * math.sin(angle);
-        if (j == 0) path.moveTo(x, y); else path.lineTo(x, y);
+        if (j == 0) {
+          path.moveTo(x, y);
+        } else {
+          path.lineTo(x, y);
+        }
       }
       path.close();
       canvas.drawPath(path, linePaint);
@@ -67,7 +71,11 @@ class RadarChartPainter extends CustomPainter {
       final valRadius = radius * values[j];
       final x = center.dx + valRadius * math.cos(angle);
       final y = center.dy + valRadius * math.sin(angle);
-      if (j == 0) skillPath.moveTo(x, y); else skillPath.lineTo(x, y);
+      if (j == 0) {
+        skillPath.moveTo(x, y);
+      } else {
+        skillPath.lineTo(x, y);
+      }
     }
     skillPath.close();
     canvas.drawPath(skillPath, skillPaint);

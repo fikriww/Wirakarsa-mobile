@@ -102,7 +102,7 @@ class _SubmitReactComponentBasicPageState extends State<SubmitReactComponentBasi
       ),
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _selectedIndex,
-        onTap: (i) => setState(() => _selectedIndex = i),
+
       ),
     );
   }

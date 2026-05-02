@@ -18,7 +18,7 @@ class DevhubPage extends StatefulWidget {
 }
 
 class _DevhubPageState extends State<DevhubPage> {
-  int _selectedIndex = 2;
+  final int _selectedIndex = 2;
   late bool _isCodeReviewActive;
 
   @override
@@ -89,22 +89,28 @@ class _DevhubPageState extends State<DevhubPage> {
             children: [
               Row(
                 children: [
-                  SegmentButton(
-                    label: "Mini Project",
-                    isActive: !_isCodeReviewActive,
-                    onTap: () => setState(() => _isCodeReviewActive = false),
+                  Expanded(
+                    child: SegmentButton(
+                      label: "Mini Project",
+                      isActive: !_isCodeReviewActive,
+                      onTap: () => setState(() => _isCodeReviewActive = false),
+                    ),
                   ),
                   const SizedBox(width: 12),
-                  SegmentButton(
-                    label: "Code Review",
-                    isActive: _isCodeReviewActive,
-                    onTap: () => setState(() => _isCodeReviewActive = true),
+                  Expanded(
+                    child: SegmentButton(
+                      label: "Code Review",
+                      isActive: _isCodeReviewActive,
+                      onTap: () => setState(() => _isCodeReviewActive = true),
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 25),
+              const SizedBox(height: 16),
               _isCodeReviewActive 
-                  ? const CodeReviewSection() 
+                  ? CodeReviewSection(
+                      onSwitchToMiniProject: () => setState(() => _isCodeReviewActive = false),
+                    )
                   : _buildMainContent(),
             ],
           ),

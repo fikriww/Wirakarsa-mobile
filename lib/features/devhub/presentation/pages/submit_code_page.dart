@@ -65,7 +65,13 @@ class _SubmitCodePageState extends State<SubmitCodePage> {
                 SegmentButton(
                   label: "Mini Project",
                   isActive: false,
-                  onTap: () => context.go('/devhub', extra: {'isCodeReviewActive': false}),
+                  onTap: () {
+                    if (context.canPop()) {
+                      context.pop(true);
+                    } else {
+                      context.go('/devhub', extra: {'isCodeReviewActive': false});
+                    }
+                  },
                 ),
                 const SizedBox(width: 12),
                 SegmentButton(
@@ -193,7 +199,6 @@ class _SubmitCodePageState extends State<SubmitCodePage> {
       ),
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _selectedIndex,
-        onTap: (i) => setState(() => _selectedIndex = i),
       ),
     );
   }
