@@ -140,11 +140,17 @@ class AppRouter {
       ),
       GoRoute(
         path: '/cv-screening',
-        builder: (context, state) => const CvScreeningPage(),
+        builder: (context, state) => const MainShell(
+          currentIndex: 1,
+          child: CvScreeningPage(),
+        ),
       ),
       GoRoute(
         path: '/cv-screening-result',
-        builder: (context, state) => const CvScreeningResultPage(),
+        builder: (context, state) => const MainShell(
+          currentIndex: 1,
+          child: CvScreeningResultPage(),
+        ),
       ),
 
       // --- DevHub ---

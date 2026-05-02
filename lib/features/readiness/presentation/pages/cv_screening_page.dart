@@ -52,7 +52,6 @@ class CvScreeningPage extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavBar(context),
     );
   }
 
@@ -140,31 +139,6 @@ class CvScreeningPage extends StatelessWidget {
       ),
     );
   }
-
-  Widget _buildBottomNavBar(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: 1, // Readiness tab is selected
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: AppColors.primaryBlue,
-      unselectedItemColor: AppColors.textSecondary,
-      selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
-      unselectedLabelStyle: const TextStyle(fontSize: 10),
-      onTap: (index) {
-        if (index == 0) {
-          context.go('/home');
-        } else if (index == 2) {
-          context.go('/devhub');
-        } else if (index == 1) {
-          context.go('/readiness-center');
-        }
-      },
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.bar_chart_outlined), activeIcon: Icon(Icons.bar_chart), label: 'Readiness'),
-        BottomNavigationBarItem(icon: Icon(Icons.code), label: 'Dev Hub'),
-        BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'Simulation'),
-        BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
-      ],
-    );
-  }
 }
+
+

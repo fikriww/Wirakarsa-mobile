@@ -105,7 +105,7 @@ class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildStatsGrid(),
-        const SizedBox(height: 32),
+        const SizedBox(height: 24),
         Text("CV Analysis", style: AppTextStyles.heading1.copyWith(fontSize: 18)),
         const SizedBox(height: 16),
         _buildDocumentAnalysisCard(
@@ -493,18 +493,23 @@ class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
   }
 
   Widget _buildStatsGrid() {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 24,
-      crossAxisSpacing: 16,
-      childAspectRatio: 2.5,
+    return Column(
       children: [
-        _buildStatItem(Icons.cloud_upload_outlined, const Color(0xFFE8EAF6), "63%", "Overall Readiness"),
-        _buildStatItem(Icons.bar_chart, const Color(0xFFE8F5E9), "12", "Skills Mapped"),
-        _buildStatItem(Icons.warning_amber_rounded, const Color(0xFFFFEBEE), "3", "Critical Gaps", iconColor: const Color(0xFFD32F2F)),
-        _buildStatItem(Icons.check_circle_outline, const Color(0xFFE8F5E9), "3", "Strengths", iconColor: const Color(0xFF388E3C)),
+        Row(
+          children: [
+            Expanded(child: _buildStatItem(Icons.cloud_upload_outlined, const Color(0xFFE8EAF6), "63%", "Overall Readiness")),
+            const SizedBox(width: 16),
+            Expanded(child: _buildStatItem(Icons.bar_chart, const Color(0xFFE8F5E9), "12", "Skills Mapped")),
+          ],
+        ),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Expanded(child: _buildStatItem(Icons.warning_amber_rounded, const Color(0xFFFFEBEE), "3", "Critical Gaps", iconColor: const Color(0xFFD32F2F))),
+            const SizedBox(width: 16),
+            Expanded(child: _buildStatItem(Icons.check_circle_outline, const Color(0xFFE8F5E9), "3", "Strengths", iconColor: const Color(0xFF388E3C))),
+          ],
+        ),
       ],
     );
   }
