@@ -11,6 +11,7 @@ class ReactComponentBasicPage extends StatefulWidget {
 
 class _ReactComponentBasicPageState extends State<ReactComponentBasicPage> {
   int _selectedIndex = 2;
+  String? _attachedFileName;
 
   @override
   Widget build(BuildContext context) {
@@ -97,17 +98,41 @@ class _ReactComponentBasicPageState extends State<ReactComponentBasicPage> {
                 const SizedBox(height: 25),
                 const Text('My Work', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
-                TextField(
-                  maxLines: 2,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.black12)),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.black12)),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.blue[600]!)),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF9FAFB),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.black12),
                   ),
+                  child: _attachedFileName == null
+                      ? const Text('No file attached', style: TextStyle(color: Colors.grey))
+                      : Row(
+                          children: [
+                            const Icon(Icons.insert_drive_file, color: Colors.blue, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _attachedFileName!,
+                                style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w500),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () => setState(() => _attachedFileName = null),
+                              child: const Icon(Icons.close, color: Colors.grey, size: 18),
+                            )
+                          ],
+                        ),
                 ),
                 const SizedBox(height: 10),
                 TextButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    setState(() {
+                      _attachedFileName = 'project_submission.zip';
+                    });
+                  },
                   icon: const Icon(Icons.attach_file, color: Colors.blue, size: 20),
                   label: const Text('Attach', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w600)),
                   style: TextButton.styleFrom(padding: EdgeInsets.zero, alignment: Alignment.centerLeft),
