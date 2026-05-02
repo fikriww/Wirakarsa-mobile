@@ -96,10 +96,7 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
             ),
             Text(
               'Career Simulation AI Mentor',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
             ),
           ],
         ),
@@ -127,12 +124,18 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
           // Quick reply chips (shown in certain states)
           if (_currentState == SimulationState.careerChat)
             QuickReplyChips(
-              replies: ["What's the right approach?", "I'm not sure wh..."],
+              replies: [
+                "What's the right approach?",
+                "I'm not sure where to start",
+              ],
               onTap: (reply) {},
             ),
           if (_currentState == SimulationState.salaryChat)
             QuickReplyChips(
-              replies: ['Is the salary negotiable?', 'I am expecting ar...'],
+              replies: [
+                'Is the salary negotiable?',
+                'I am expecting around 12 million IDR/month',
+              ],
               onTap: (reply) {},
             ),
           if (_currentState == SimulationState.jobdeskAnalyzerChat)
@@ -144,7 +147,8 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
           // Chat input
           ChatInputField(
             controller: _chatController,
-            showTimer: _currentState == SimulationState.careerChat ||
+            showTimer:
+                _currentState == SimulationState.careerChat ||
                 _currentState == SimulationState.salaryChat ||
                 _currentState == SimulationState.jobdeskAnalyzerChat,
             timerText: '05:00',
@@ -191,7 +195,9 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
             ),
             const SizedBox(height: 10),
             _buildOptionTile('How should I negotiate for a higher salary?'),
-            _buildOptionTile('What are the red flags to look for in a startup?'),
+            _buildOptionTile(
+              'What are the red flags to look for in a startup?',
+            ),
             _buildOptionTile('Can you explain state management simply?'),
             _buildOptionTile('How to transition from Junior to Mid level?'),
           ],
@@ -225,8 +231,12 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
               ),
             ),
             const SizedBox(height: 10),
-            _buildOptionTile('Mock Interview: Tokopedia (Frontend) - Yesterday'),
-            _buildOptionTile('Salary Negotiation: Startup Fintech - 3 days ago'),
+            _buildOptionTile(
+              'Mock Interview: Tokopedia (Frontend) - Yesterday',
+            ),
+            _buildOptionTile(
+              'Salary Negotiation: Startup Fintech - 3 days ago',
+            ),
             _buildOptionTile('Career Advice: EdTech - Last week'),
           ],
         ),
@@ -366,9 +376,9 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
               'The designer sent a Figma file:\n\n"Budi, here is the responsive mockup for the class page. Breakpoints: mobile (375px), tablet (768px), desktop (1440px). Please implement according to the spec, prioritizing mobile-first."',
           time: '12:49 AM',
           onVoiceTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const VoiceModePage()),
-            );
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const VoiceModePage()));
           },
         ),
       ],
@@ -424,9 +434,9 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
               'I am the HR Manager from Startup Fintech. We are offering 4-6m/month for this Junior position. What are your salary expectations?',
           time: '12:49 AM',
           onVoiceTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const VoiceModePage()),
-            );
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const VoiceModePage()));
           },
         ),
       ],
@@ -462,7 +472,8 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
                 salary: '8-15 million IDR/month',
                 postedTime: '1 day ago',
                 experienceLevel: 'Entry-Mid',
-                onAnalyze: () => _goToState(SimulationState.jobdeskAnalyzerChat),
+                onAnalyze: () =>
+                    _goToState(SimulationState.jobdeskAnalyzerChat),
               ),
               JobListingCard(
                 jobTitle: 'React Developer',
@@ -480,7 +491,8 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
                 salary: '8-15 million IDR/month',
                 postedTime: '1 day ago',
                 experienceLevel: 'Entry-Mid',
-                onAnalyze: () => _goToState(SimulationState.jobdeskAnalyzerChat),
+                onAnalyze: () =>
+                    _goToState(SimulationState.jobdeskAnalyzerChat),
               ),
             ],
           ),
@@ -499,9 +511,9 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
               'I am analyzing the Frontend Developer role at Gojek. Based on your profile, you match 80%. Let\'s focus on improving your TypeScript and Web Performance skills. Are you ready for a mock technical interview?',
           time: '12:49 AM',
           onVoiceTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const VoiceModePage()),
-            );
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const VoiceModePage()));
           },
         ),
       ],
