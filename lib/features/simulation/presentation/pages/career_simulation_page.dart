@@ -10,7 +10,10 @@ import '../widgets/job_listing_card.dart';
 import '../widgets/quick_reply_chips.dart';
 import '../widgets/chat_input_field.dart';
 import '../widgets/salary_scenario_card.dart';
+import '../widgets/skill_breakdown_bar.dart';
+import '../widgets/recommendation_card.dart';
 import 'voice_mode_page.dart';
+import 'job_analysis_page.dart';
 
 enum SimulationState {
   initial, // 3 option cards
@@ -443,13 +446,23 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
     );
   }
 
+  /// Navigate to the full Job Analysis page
+  void _openJobAnalysis(JobAnalysisData data) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => JobAnalysisPage(jobData: data),
+      ),
+    );
+  }
+
   /// State 5: Jobdesk Analyzer - Job listing cards
   Widget _buildJobdeskAnalyzer() {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       children: [
         const ChatBubble(
-          message: 'Choose a specific job listing you want to analyze.',
+          message:
+              'I found several job listings matching your profile from LinkedIn, Jobstreet, and Glints. Tap "Analyze Job" to see a detailed skill match analysis.',
           time: '12:49 AM',
         ),
         const SizedBox(height: 16),
@@ -469,30 +482,173 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
                   SkillTag(name: 'Tailwind CSS'),
                   SkillTag(name: 'Web Performance'),
                 ],
-                salary: '8-15 million IDR/month',
+                salary: '8-15 M/month',
                 postedTime: '1 day ago',
                 experienceLevel: 'Entry-Mid',
-                onAnalyze: () =>
-                    _goToState(SimulationState.jobdeskAnalyzerChat),
+                onAnalyze: () => _openJobAnalysis(
+                  JobAnalysisData(
+                    jobTitle: 'Frontend Developer',
+                    company: 'Gojek',
+                    location: 'Jakarta, Indonesia',
+                    source: 'LinkedIn',
+                    matchPercent: 80,
+                    salary: '8-15 M/month',
+                    postedTime: '1 day ago',
+                    experienceLevel: 'Entry-Mid Level',
+                    jobDescription:
+                        'We are looking for a Frontend Developer to join our product team. '
+                        'You will be responsible for building responsive, high-performance web '
+                        'applications using React and TypeScript. Collaborate with designers '
+                        'and backend engineers to deliver world-class user experiences for '
+                        'millions of users across Southeast Asia.',
+                    requiredSkills: const [
+                      SkillTag(name: 'ReactJS'),
+                      SkillTag(name: 'TypeScript', isMatched: false),
+                      SkillTag(name: 'Tailwind CSS'),
+                      SkillTag(name: 'Web Performance'),
+                    ],
+                    skillBreakdown: const [
+                      SkillProficiency(name: 'ReactJS', percentage: 85),
+                      SkillProficiency(name: 'Tailwind CSS', percentage: 80),
+                      SkillProficiency(name: 'Web Performance', percentage: 65),
+                      SkillProficiency(name: 'TypeScript', percentage: 30, isMatched: false),
+                    ],
+                    recommendations: const [
+                      LearningRecommendation(
+                        skillName: 'TypeScript',
+                        description: 'Master type safety, generics, and advanced patterns used in production React codebases.',
+                        estimatedTime: '3-4 weeks',
+                        difficulty: 'Intermediate',
+                        icon: Icons.code,
+                      ),
+                      LearningRecommendation(
+                        skillName: 'Web Performance',
+                        description: 'Learn Core Web Vitals, lazy loading, code splitting, and performance profiling.',
+                        estimatedTime: '2-3 weeks',
+                        difficulty: 'Intermediate',
+                        icon: Icons.speed,
+                      ),
+                    ],
+                  ),
+                ),
               ),
               JobListingCard(
                 jobTitle: 'React Developer',
                 company: 'Tokopedia',
                 location: 'Jakarta',
-                source: 'LinkedIn',
+                source: 'Jobstreet',
                 matchPercent: 60,
                 skills: const [
                   SkillTag(name: 'ReactJS'),
                   SkillTag(name: 'Redux', isMatched: false),
-                  SkillTag(name: 'Unit Testing'),
+                  SkillTag(name: 'Unit Testing', isMatched: false),
                   SkillTag(name: 'CSS-in-JS'),
                   SkillTag(name: 'Accessibility'),
                 ],
-                salary: '8-15 million IDR/month',
-                postedTime: '1 day ago',
-                experienceLevel: 'Entry-Mid',
-                onAnalyze: () =>
-                    _goToState(SimulationState.jobdeskAnalyzerChat),
+                salary: '10-18 M/month',
+                postedTime: '2 days ago',
+                experienceLevel: 'Mid',
+                onAnalyze: () => _openJobAnalysis(
+                  JobAnalysisData(
+                    jobTitle: 'React Developer',
+                    company: 'Tokopedia',
+                    location: 'Jakarta, Indonesia',
+                    source: 'Jobstreet',
+                    matchPercent: 60,
+                    salary: '10-18 M/month',
+                    postedTime: '2 days ago',
+                    experienceLevel: 'Mid Level',
+                    jobDescription:
+                        'Join our core commerce team to build scalable e-commerce '
+                        'interfaces. Strong knowledge of Redux for state management '
+                        'and unit testing with Jest is required. You will work on '
+                        'accessible, high-traffic product pages serving millions of daily users.',
+                    requiredSkills: const [
+                      SkillTag(name: 'ReactJS'),
+                      SkillTag(name: 'Redux', isMatched: false),
+                      SkillTag(name: 'Unit Testing', isMatched: false),
+                      SkillTag(name: 'CSS-in-JS'),
+                      SkillTag(name: 'Accessibility'),
+                    ],
+                    skillBreakdown: const [
+                      SkillProficiency(name: 'ReactJS', percentage: 85),
+                      SkillProficiency(name: 'CSS-in-JS', percentage: 70),
+                      SkillProficiency(name: 'Accessibility', percentage: 55),
+                      SkillProficiency(name: 'Redux', percentage: 20, isMatched: false),
+                      SkillProficiency(name: 'Unit Testing', percentage: 15, isMatched: false),
+                    ],
+                    recommendations: const [
+                      LearningRecommendation(
+                        skillName: 'Redux & State Management',
+                        description: 'Learn Redux Toolkit, middleware patterns, and async state management with thunks.',
+                        estimatedTime: '2-3 weeks',
+                        difficulty: 'Intermediate',
+                        icon: Icons.account_tree,
+                      ),
+                      LearningRecommendation(
+                        skillName: 'Unit Testing (Jest)',
+                        description: 'Master Jest, React Testing Library, mocking, and test-driven development practices.',
+                        estimatedTime: '2 weeks',
+                        difficulty: 'Beginner',
+                        icon: Icons.bug_report_outlined,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              JobListingCard(
+                jobTitle: 'UI Engineer',
+                company: 'Traveloka',
+                location: 'Jakarta',
+                source: 'Glints',
+                matchPercent: 72,
+                skills: const [
+                  SkillTag(name: 'ReactJS'),
+                  SkillTag(name: 'CSS/SCSS'),
+                  SkillTag(name: 'Design System'),
+                  SkillTag(name: 'Figma', isMatched: false),
+                ],
+                salary: '12-20 M/month',
+                postedTime: '3 days ago',
+                experienceLevel: 'Mid-Senior',
+                onAnalyze: () => _openJobAnalysis(
+                  JobAnalysisData(
+                    jobTitle: 'UI Engineer',
+                    company: 'Traveloka',
+                    location: 'Jakarta, Indonesia',
+                    source: 'Glints',
+                    matchPercent: 72,
+                    salary: '12-20 M/month',
+                    postedTime: '3 days ago',
+                    experienceLevel: 'Mid-Senior Level',
+                    jobDescription:
+                        'As a UI Engineer you will own the design system and component '
+                        'library for our travel platform. Deep expertise in CSS architecture, '
+                        'responsive design, and Figma-to-code workflows is essential. '
+                        'Collaborate with product designers to ship pixel-perfect interfaces.',
+                    requiredSkills: const [
+                      SkillTag(name: 'ReactJS'),
+                      SkillTag(name: 'CSS/SCSS'),
+                      SkillTag(name: 'Design System'),
+                      SkillTag(name: 'Figma', isMatched: false),
+                    ],
+                    skillBreakdown: const [
+                      SkillProficiency(name: 'ReactJS', percentage: 85),
+                      SkillProficiency(name: 'CSS/SCSS', percentage: 80),
+                      SkillProficiency(name: 'Design System', percentage: 60),
+                      SkillProficiency(name: 'Figma', percentage: 35, isMatched: false),
+                    ],
+                    recommendations: const [
+                      LearningRecommendation(
+                        skillName: 'Figma for Developers',
+                        description: 'Learn design tokens, auto layout, component variants, and Dev Mode for efficient handoff.',
+                        estimatedTime: '1-2 weeks',
+                        difficulty: 'Beginner',
+                        icon: Icons.design_services,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
@@ -501,22 +657,8 @@ class _CareerSimulationPageState extends State<CareerSimulationPage> {
     );
   }
 
-  /// State 6: Jobdesk Analyzer Chat
+  /// State 6: Jobdesk Analyzer Chat - now unused, kept for back-nav compatibility
   Widget _buildJobdeskAnalyzerChat() {
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      children: [
-        VoiceChatBubble(
-          message:
-              'I am analyzing the Frontend Developer role at Gojek. Based on your profile, you match 80%. Let\'s focus on improving your TypeScript and Web Performance skills. Are you ready for a mock technical interview?',
-          time: '12:49 AM',
-          onVoiceTap: () {
-            Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (_) => const VoiceModePage()));
-          },
-        ),
-      ],
-    );
+    return _buildJobdeskAnalyzer();
   }
 }
