@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/services/supabase_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../widgets/custom_text_field.dart';
@@ -13,16 +14,47 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _rememberMe = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleSignIn() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      await SupabaseService.signIn(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+      if (mounted) {
+        context.go('/home');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -32,129 +64,161 @@ class _SignInPageState extends State<SignInPage> {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 40),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 40),
 
-              // Title
-              Center(
-                child: Column(
-                  children: [
-                    Text('Sign In', style: AppTextStyles.heading1),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Welcome Back! Your Path is Waiting.',
-                      style: AppTextStyles.bodyMedium,
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 40),
-
-              // Email Field
-              CustomTextField(
-                label: 'Email or Username',
-                hintText: 'Enter Your Email',
-                prefixIcon: Icons.email_outlined,
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-              ),
-
-              const SizedBox(height: 20),
-
-              // Password Field
-              CustomTextField(
-                label: 'Password',
-                hintText: 'Enter Your Password',
-                prefixIcon: Icons.lock_outline,
-                isPassword: true,
-                obscureText: _obscurePassword,
-                controller: _passwordController,
-                onToggleVisibility: () {
-                  setState(() => _obscurePassword = !_obscurePassword);
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              // Remember Me + Forgot Password
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
+                // Title
+                Center(
+                  child: Column(
                     children: [
-                      SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: Checkbox(
-                          value: _rememberMe,
-                          onChanged: (value) {
-                            setState(() => _rememberMe = value ?? false);
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 8),
+                      Text('Sign In', style: AppTextStyles.heading1),
+                      const SizedBox(height: 8),
                       Text(
-                        'Remember Me',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.textPrimary,
-                        ),
+                        'Welcome Back! Your Path is Waiting.',
+                        style: AppTextStyles.bodyMedium,
                       ),
                     ],
                   ),
-                  TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'Forgot Password?',
-                      style: AppTextStyles.link,
-                    ),
-                  ),
-                ],
-              ),
+                ),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 40),
 
-              // Sign In Button
-              ElevatedButton(
-                onPressed: () {
-                  // Navigate to Home
-                  context.go('/home');
-                },
-                child: const Text('Sign In'),
-              ),
+                // Email Field
+                CustomTextField(
+                  label: 'Email',
+                  hintText: 'Enter Your Email',
+                  prefixIcon: Icons.email_outlined,
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                        .hasMatch(value)) {
+                      return 'Please enter a valid email';
+                    }
+                    return null;
+                  },
+                ),
 
-              const SizedBox(height: 28),
+                const SizedBox(height: 20),
 
-              // Social Login
-              const SocialLoginRow(),
+                // Password Field
+                CustomTextField(
+                  label: 'Password',
+                  hintText: 'Enter Your Password',
+                  prefixIcon: Icons.lock_outline,
+                  isPassword: true,
+                  obscureText: _obscurePassword,
+                  controller: _passwordController,
+                  onToggleVisibility: () {
+                    setState(() => _obscurePassword = !_obscurePassword);
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your password';
+                    }
+                    if (value.length < 6) {
+                      return 'Password must be at least 6 characters';
+                    }
+                    return null;
+                  },
+                ),
 
-              const SizedBox(height: 32),
+                const SizedBox(height: 16),
 
-              // Create Account Link
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                // Remember Me + Forgot Password
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'New here? Your path starts now!',
-                      style: AppTextStyles.bodyMedium,
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: Checkbox(
+                            value: _rememberMe,
+                            onChanged: (value) {
+                              setState(() => _rememberMe = value ?? false);
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Remember Me',
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 4),
-                    GestureDetector(
-                      onTap: () => context.go('/create-account'),
+                    TextButton(
+                      onPressed: () {},
                       child: Text(
-                        'Create Account',
+                        'Forgot Password?',
                         style: AppTextStyles.link,
                       ),
                     ),
                   ],
                 ),
-              ),
 
-              const SizedBox(height: 24),
-            ],
+                const SizedBox(height: 24),
+
+                // Sign In Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleSignIn,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text('Sign In'),
+                  ),
+                ),
+
+                const SizedBox(height: 28),
+
+                // Social Login
+                const SocialLoginRow(),
+
+                const SizedBox(height: 32),
+
+                // Create Account Link
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'New here? Your path starts now!',
+                        style: AppTextStyles.bodyMedium,
+                      ),
+                      const SizedBox(height: 4),
+                      GestureDetector(
+                        onTap: () => context.go('/create-account'),
+                        child: Text(
+                          'Create Account',
+                          style: AppTextStyles.link,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../core/services/supabase_service.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class SplashPage extends StatefulWidget {
@@ -69,7 +71,24 @@ class _SplashPageState extends State<SplashPage>
     await Future.delayed(const Duration(milliseconds: 1100));
 
     if (mounted) {
-      context.go('/onboarding');
+      final user = SupabaseService.currentUser;
+      if (user != null) {
+        try {
+          // Verify session validity with the backend on startup
+          await Supabase.instance.client.auth.refreshSession();
+          if (mounted) {
+            context.go('/home');
+          }
+        } catch (_) {
+          // Stale session detected, clear local token and route to onboarding
+          await SupabaseService.signOut();
+          if (mounted) {
+            context.go('/onboarding');
+          }
+        }
+      } else {
+        context.go('/onboarding');
+      }
     }
   }
 

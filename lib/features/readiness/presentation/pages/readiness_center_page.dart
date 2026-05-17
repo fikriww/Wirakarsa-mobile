@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/services/supabase_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
@@ -16,11 +17,32 @@ class ReadinessCenterPage extends StatefulWidget {
 class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
   late int _selectedTabIndex;
   final List<String> _tabs = ["Overview", "Initial Test", "Skill Map", "Skill Gap"];
+  
+  List<Map<String, dynamic>> _tests = [];
+  List<Map<String, dynamic>> _submissions = [];
+  bool _isLoadingData = true;
 
   @override
   void initState() {
     super.initState();
     _selectedTabIndex = widget.initialTabIndex;
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    try {
+      final results = await Future.wait([
+        SupabaseService.getInitialTests(),
+        SupabaseService.getUserSubmissions(),
+      ]);
+      setState(() {
+        _tests = results[0];
+        _submissions = results[1];
+        _isLoadingData = false;
+      });
+    } catch (e) {
+      setState(() => _isLoadingData = false);
+    }
   }
 
   @override
@@ -157,24 +179,36 @@ class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
           ),
         ),
         const SizedBox(height: 32),
-        _buildTestTimelineItem(
-          "PROG", "L3", "Programming / Software Development", "Designs, codes, verifies, tests, documents, amends and refactors programs/scripts...", true, "Restart Test",
-          isFirst: true,
-          onPressed: () => context.push('/readiness-center/initial-test'),
-        ),
-        _buildTestTimelineItem(
-          "DTAN", "L2", "Data Analysis", "Applies data analysis, visualization and data modelling techniques...", true, "Restart Test",
-          onPressed: () => context.push('/readiness-center/data-analysis-test'),
-        ),
-        _buildTestTimelineItem(
-          "HCEV", "L3", "User Experience Design", "Produces design concepts and prototypes for user interactions and experiences...", false, "Start Test",
-          onPressed: () => context.push('/readiness-center/ux-design-test'),
-        ),
-        _buildTestTimelineItem(
-          "TEST", "L3", "Testing", "Plans, designs, manages, executes and reports tests using testing tools and...", false, "Start Test",
-          isLast: true,
-          onPressed: () => context.push('/readiness-center/testing-test'),
-        ),
+        if (_isLoadingData)
+          const Center(child: CircularProgressIndicator())
+        else if (_tests.isEmpty)
+          const Center(child: Text("No tests available yet."))
+        else
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _tests.length,
+            itemBuilder: (context, index) {
+              final test = _tests[index];
+              final category = test['test_categories'];
+              final isCompleted = _submissions.any((s) => s['test_id'] == test['id']);
+              
+              return _buildTestTimelineItem(
+                category['badge_text'] ?? "TEST",
+                "L3", // Hardcoded level for now
+                test['title'],
+                test['subtitle'] ?? "",
+                isCompleted,
+                isCompleted ? "Restart Test" : "Start Test",
+                isFirst: index == 0,
+                isLast: index == _tests.length - 1,
+                onPressed: () {
+                  // Navigate to specific test page or generic test runner
+                  context.push('/readiness-center/initial-test', extra: {'testId': test['id']});
+                },
+              );
+            },
+          ),
         const SizedBox(height: 40),
       ],
     );

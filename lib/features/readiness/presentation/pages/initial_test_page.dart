@@ -3,8 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 
+import '../../../../core/services/supabase_service.dart';
+
 class InitialTestPage extends StatefulWidget {
-  const InitialTestPage({super.key});
+  final String? testId;
+  const InitialTestPage({super.key, this.testId});
 
   @override
   State<InitialTestPage> createState() => _InitialTestPageState();
@@ -12,42 +15,39 @@ class InitialTestPage extends StatefulWidget {
 
 class _InitialTestPageState extends State<InitialTestPage> {
   final Map<int, int?> _answers = {};
+  List<Map<String, dynamic>> _questions = [];
+  bool _isLoading = true;
 
-  final List<Map<String, dynamic>> _questions = [
-    {
-      "question": "Which data structure uses LIFO (Last In, First Out) order?",
-      "options": ["Queue", "Stack", "Linked List", "Tree"],
-    },
-    {
-      "question": "Which HTTP method is idempotent and used to fully update a resource?",
-      "options": ["POST", "PATCH", "PUT", "DELETE"],
-    },
-    {
-      "question": "What is tail recursion?",
-      "options": [
-        "Recursion that never terminates",
-        "Recursion where the recursive call is the last operation",
-        "A loop disguised as recursion",
-        "Recursion with two base cases"
-      ],
-    },
-    {
-      "question": "Which testing approach tests a module in isolation with mocked dependencies?",
-      "options": ["Integration testing", "End-to-end testing", "Unit testing", "Smoke testing"],
-    },
-    {
-      "question": "What is eventual consistency in distributed systems?",
-      "options": [
-        "All nodes are always in sync",
-        "A transaction rollback mechanism",
-        "A replication strategy",
-        "Data updates propagate to all nodes over time, not instantly"
-      ],
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    if (widget.testId != null) {
+      _loadQuestions();
+    } else {
+      _isLoading = false;
+    }
+  }
+
+  Future<void> _loadQuestions() async {
+    try {
+      final questions = await SupabaseService.getQuestions(widget.testId!);
+      setState(() {
+        _questions = questions;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: AppBar(
@@ -57,36 +57,13 @@ class _InitialTestPageState extends State<InitialTestPage> {
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
           onPressed: () => context.go('/readiness-center', extra: {'initialTabIndex': 1}),
         ),
-        title: Row(
-          children: [
-            Expanded(
-              child: Text(
-                "Programming / Software Development",
-                style: GoogleFonts.poppins(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFEC85),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                "PROG",
-                style: GoogleFonts.poppins(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 10,
-                ),
-              ),
-            ),
-          ],
+        title: Text(
+          "Skill Assessment",
+          style: GoogleFonts.poppins(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -95,7 +72,7 @@ class _InitialTestPageState extends State<InitialTestPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Multiple Choice • 5 questions",
+              "Multiple Choice • ${_questions.length} questions",
               style: GoogleFonts.poppins(
                 color: Colors.grey,
                 fontSize: 12,
@@ -111,7 +88,7 @@ class _InitialTestPageState extends State<InitialTestPage> {
               height: 56,
               child: ElevatedButton(
                 onPressed: () {
-                  // Submit logic and navigate to review page
+                  // TODO: Submit answers to Supabase
                   context.go('/readiness-center/review-test');
                 },
                 style: ElevatedButton.styleFrom(
@@ -139,19 +116,21 @@ class _InitialTestPageState extends State<InitialTestPage> {
 
   Widget _buildQuestionCard(int index) {
     final question = _questions[index];
+    final options = question['test_question_options'] as List;
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.1)),
+        border: Border.all(color: Colors.black.withOpacity(0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Question ${index + 1} of 5",
+            "Question ${index + 1} of ${_questions.length}",
             style: GoogleFonts.poppins(
               color: Colors.grey,
               fontSize: 12,
@@ -159,7 +138,7 @@ class _InitialTestPageState extends State<InitialTestPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            question["question"],
+            question["question_text"],
             style: GoogleFonts.poppins(
               color: Colors.black,
               fontWeight: FontWeight.bold,
@@ -167,7 +146,8 @@ class _InitialTestPageState extends State<InitialTestPage> {
             ),
           ),
           const SizedBox(height: 16),
-          ...List.generate(question["options"].length, (optIndex) {
+          ...List.generate(options.length, (optIndex) {
+            final option = options[optIndex];
             bool isSelected = _answers[index] == optIndex;
             return GestureDetector(
               onTap: () {
@@ -193,7 +173,7 @@ class _InitialTestPageState extends State<InitialTestPage> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        question["options"][optIndex],
+                        option["option_text"],
                         style: GoogleFonts.poppins(
                           color: Colors.black,
                           fontSize: 14,

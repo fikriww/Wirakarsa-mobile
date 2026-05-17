@@ -10,6 +10,10 @@ class CustomTextField extends StatelessWidget {
   final VoidCallback? onToggleVisibility;
   final TextEditingController? controller;
   final TextInputType keyboardType;
+  final String? Function(String?)? validator;
+  final void Function(String?)? onSaved;
+  final TextInputAction? textInputAction;
+  final void Function(String)? onFieldSubmitted;
 
   const CustomTextField({
     super.key,
@@ -21,6 +25,10 @@ class CustomTextField extends StatelessWidget {
     this.onToggleVisibility,
     this.controller,
     this.keyboardType = TextInputType.text,
+    this.validator,
+    this.onSaved,
+    this.textInputAction,
+    this.onFieldSubmitted,
   });
 
   @override
@@ -37,10 +45,14 @@ class CustomTextField extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        TextField(
+        TextFormField(
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
+          validator: validator,
+          onSaved: onSaved,
+          textInputAction: textInputAction,
+          onFieldSubmitted: onFieldSubmitted,
           style: const TextStyle(
             fontSize: 14,
             color: AppColors.textPrimary,
