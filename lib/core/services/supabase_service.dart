@@ -51,11 +51,21 @@ class SupabaseService {
 
   static Future<bool> linkGitHub() async {
     try {
-      final success = await client.auth.linkIdentity(
-        OAuthProvider.github,
-        redirectTo: 'io.supabase.wirapath://login-callback/',
-      );
-      return success;
+      if (currentUser == null) {
+        // Not authenticated: sign in with GitHub instead of linking
+        final success = await client.auth.signInWithOAuth(
+          OAuthProvider.github,
+          redirectTo: 'io.supabase.wirapath://login-callback/',
+        );
+        return success;
+      } else {
+        // Authenticated: link GitHub to the current account
+        final success = await client.auth.linkIdentity(
+          OAuthProvider.github,
+          redirectTo: 'io.supabase.wirapath://login-callback/',
+        );
+        return success;
+      }
     } on AuthException catch (e) {
       throw e.message;
     } catch (e) {

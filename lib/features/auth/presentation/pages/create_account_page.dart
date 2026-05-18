@@ -172,6 +172,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
                 // Terms & Conditions Checkbox
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(
                       width: 24,
@@ -184,19 +185,29 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      "I'm Agree with ",
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        // TODO: Open Terms & Conditions
-                      },
-                      child: Text(
-                        'Terms & Conditions',
-                        style: AppTextStyles.link,
+                    Expanded(
+                      child: RichText(
+                        text: TextSpan(
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: AppColors.textPrimary,
+                          ),
+                          children: [
+                            const TextSpan(text: "I agree to the "),
+                            WidgetSpan(
+                              alignment: PlaceholderAlignment.baseline,
+                              baseline: TextBaseline.alphabetic,
+                              child: GestureDetector(
+                                onTap: () {
+                                  // TODO: Open Terms & Conditions
+                                },
+                                child: Text(
+                                  'Terms & Conditions',
+                                  style: AppTextStyles.link,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/services/supabase_service.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -70,6 +71,7 @@ class _ConnectGithubPageState extends State<ConnectGithubPage> {
       final isSessionInvalid = errorMessage.contains('session_id') || 
                                errorMessage.contains('JWT') || 
                                errorMessage.contains('session') ||
+                               errorMessage.contains('Bearer') ||
                                errorMessage.contains('AuthException');
 
       if (mounted) {
@@ -118,10 +120,11 @@ class _ConnectGithubPageState extends State<ConnectGithubPage> {
               const SizedBox(height: 40),
               // GitHub Logo
               Center(
-                child: Image.asset(
-                  'assets/images/github_logo.png',
+                child: SvgPicture.asset(
+                  'assets/icons/github.svg',
                   height: 80,
-                  errorBuilder: (context, error, stackTrace) => const Icon(
+                  width: 80,
+                  placeholderBuilder: (context) => const Icon(
                     Icons.code,
                     size: 80,
                     color: AppColors.primaryDark,

@@ -71,20 +71,25 @@ class _SplashPageState extends State<SplashPage>
     await Future.delayed(const Duration(milliseconds: 1100));
 
     if (mounted) {
-      final user = SupabaseService.currentUser;
-      if (user != null) {
-        try {
-          // Verify session validity with the backend on startup
-          await Supabase.instance.client.auth.refreshSession();
-          if (mounted) {
-            context.go('/home');
+      final session = Supabase.instance.client.auth.currentSession;
+      if (session != null) {
+        if (session.isExpired) {
+          try {
+            // Persisted token is expired, attempt backend refresh
+            await Supabase.instance.client.auth.refreshSession();
+            if (mounted) {
+              context.go('/home');
+            }
+          } catch (_) {
+            // Stale refresh token, clean up local cache and route to onboarding
+            await SupabaseService.signOut();
+            if (mounted) {
+              context.go('/onboarding');
+            }
           }
-        } catch (_) {
-          // Stale session detected, clear local token and route to onboarding
-          await SupabaseService.signOut();
-          if (mounted) {
-            context.go('/onboarding');
-          }
+        } else {
+          // Token is fresh and valid, route directly to home with zero network latency
+          context.go('/home');
         }
       } else {
         context.go('/onboarding');
