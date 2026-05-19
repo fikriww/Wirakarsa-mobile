@@ -111,6 +111,10 @@ class _InitialTestPageState extends State<InitialTestPage> {
               height: 56,
               child: ElevatedButton(
                 onPressed: () {
+                  debugPrint('--- TEST SUBMITTED (Programming) ---');
+                  debugPrint('Answers: $_answers');
+                  debugPrint('------------------------------------');
+                  
                   // Submit logic and navigate to review page
                   context.go('/readiness-center/review-test');
                 },

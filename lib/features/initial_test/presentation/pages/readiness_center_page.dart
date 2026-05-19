@@ -8,6 +8,8 @@ import '../../domain/entities/test_result_data.dart';
 import 'initial_test_page.dart';
 import 'test_graded_page.dart';
 
+import '../../../../core/services/firebase_auth_service.dart';
+
 class ReadinessCenterPage extends StatefulWidget {
   const ReadinessCenterPage({super.key});
 
@@ -16,6 +18,7 @@ class ReadinessCenterPage extends StatefulWidget {
 }
 
 class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
+  final FirebaseAuthService _authService = FirebaseAuthService();
   int _selectedTab = 1; // Default: Initial Test tab
 
   final List<String> _tabs = ['Overview', 'Initial Test', 'Skill Map', 'Skill Gap'];
@@ -339,7 +342,7 @@ class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => TestGradedPage(data: result),
+                          builder: (_) => TestGradedPage(data: result.toCore()),
                         ),
                       );
                     },
@@ -371,23 +374,43 @@ class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => InitialTestPage(
-                          data: test,
-                          onSubmit: () {
-                            Navigator.of(context).pop(); // Go back from test
-                            final testResult = allTestResults[index];
+                          data: test.toCore(),
+                          onSubmit: (selectedAnswers, essayAnswers) async {
+                            debugPrint('ReadinessCenterPage: Test ${test.testTitle} submitted.');
                             
-                            // Optional: Update state to mark as done
-                            setState(() {
-                              _testCompleted[index] = true;
-                              _testResults[index] = testResult;
-                            });
+                            final user = _authService.currentUser;
+                            if (user != null) {
+                              final resultData = {
+                                'testId': test.id,
+                                'testTitle': test.testTitle,
+                                'selectedAnswers': selectedAnswers.map((k, v) => MapEntry(k.toString(), v)),
+                                'essayAnswers': essayAnswers.map((k, v) => MapEntry(k.toString(), v)),
+                                'status': 'completed',
+                              };
+                              
+                              await _authService.saveTestResult(
+                                uid: user.uid,
+                                resultData: resultData,
+                              );
+                            }
 
-                            // Go to result page
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => TestGradedPage(data: testResult),
-                              ),
-                            );
+                            if (mounted) {
+                              Navigator.of(context).pop(); // Go back from test
+                              final testResult = allTestResults[index];
+                              
+                              // Optional: Update state to mark as done
+                              setState(() {
+                                _testCompleted[index] = true;
+                                _testResults[index] = testResult;
+                              });
+
+                              // Go to result page
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => TestGradedPage(data: testResult.toCore()),
+                                ),
+                              );
+                            }
                           },
                         ),
                       ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/models/initial_test_model.dart' as core;
+
 
 /// Represents a single question option
 class QuestionOption {
@@ -46,6 +48,7 @@ class EssayField {
 
 /// All data needed to render an initial test page
 class InitialTestData {
+  final String id;
   final String testTitle;
   final String testSubtitle;
   final String badgeText;
@@ -65,6 +68,7 @@ class InitialTestData {
   final List<EssayField>? essayFields;
 
   const InitialTestData({
+    required this.id,
     required this.testTitle,
     required this.testSubtitle,
     required this.badgeText,
@@ -76,3 +80,33 @@ class InitialTestData {
     this.essayFields,
   });
 }
+
+extension InitialTestDataConv on InitialTestData {
+  core.InitialTestData toCore() {
+    return core.InitialTestData(
+      id: id,
+      testTitle: testTitle,
+      testSubtitle: testSubtitle,
+      badgeText: badgeText,
+      badgeColorHex: '0x${badgeColor.value.toRadixString(16)}',
+      badgeTextColorHex: '0x${badgeTextColor.value.toRadixString(16)}',
+      practicalTaskDescription: practicalTaskDescription,
+      questions: questions?.map((q) => core.TestQuestion(
+        questionText: q.questionText,
+        options: q.options.map((o) => core.QuestionOption(
+          text: o.text,
+          isCorrect: o.isCorrect,
+        )).toList(),
+      )).toList(),
+      uploadFields: uploadFields?.map((u) => core.UploadField(
+        label: u.label,
+        supportedFormats: u.supportedFormats,
+      )).toList(),
+      essayFields: essayFields?.map((e) => core.EssayField(
+        label: e.label,
+        placeholder: e.placeholder,
+      )).toList(),
+    );
+  }
+}
+

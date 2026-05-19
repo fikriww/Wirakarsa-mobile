@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/services/firebase_auth_service.dart';
 
 class AssessmentPage extends StatefulWidget {
   const AssessmentPage({super.key});
@@ -11,9 +13,11 @@ class AssessmentPage extends StatefulWidget {
 }
 
 class _AssessmentPageState extends State<AssessmentPage> {
+  final FirebaseAuthService _authService = FirebaseAuthService();
   final PageController _pageController = PageController();
   int _currentStep = 0;
   final int _totalSteps = 5;
+  bool _isSaving = false;
 
   // Form states
   final TextEditingController _nameController = TextEditingController();
@@ -60,7 +64,45 @@ class _AssessmentPageState extends State<AssessmentPage> {
     super.dispose();
   }
 
-  void _nextStep() {
+  Future<void> _saveAssessmentData() async {
+    final user = _authService.currentUser;
+    if (user == null) return;
+
+    final data = {
+      'displayName': _nameController.text,
+      'preferences': {
+        'major': _majorController.text,
+        'university': _universityController.text,
+        'feelings': _selectedFeelings,
+        'needs': _selectedNeeds,
+        'interests': _selectedInterests,
+      },
+      'hasCompletedAssessment': _currentStep == _totalSteps - 1,
+    };
+
+    debugPrint('--- SAVING ASSESSMENT DATA ---');
+    debugPrint('Data: $data');
+    debugPrint('------------------------------');
+
+    try {
+      await _authService.updateUserProfile(uid: user.uid, data: data).timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          debugPrint('Assessment data save timed out');
+        },
+      );
+      debugPrint('Assessment data saved successfully for UID: ${user.uid}');
+    } catch (e) {
+      debugPrint('Error saving assessment data: $e');
+    }
+  }
+
+  void _nextStep() async {
+    // Save data periodically or at specific steps
+    if (_currentStep == 0 || _currentStep == 2 || _currentStep == _totalSteps - 1) {
+      await _saveAssessmentData();
+    }
+
     if (_currentStep < _totalSteps - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
@@ -481,13 +523,9 @@ class _AssessmentPageState extends State<AssessmentPage> {
           const Spacer(),
           // Placeholder for GitHub Logo
           Center(
-            child: Image.asset(
-              'assets/images/github_logo.png',
+            child: SvgPicture.asset(
+              'assets/icons/github.svg',
               height: 100,
-              errorBuilder: (context, error, stackTrace) => const Icon(
-                Icons.code,
-                size: 100,
-              ),
             ),
           ),
           const SizedBox(height: 40),
@@ -504,7 +542,10 @@ class _AssessmentPageState extends State<AssessmentPage> {
           ),
           const Spacer(),
           ElevatedButton(
-            onPressed: () => context.go('/connect-github'),
+            onPressed: () async {
+              await _saveAssessmentData();
+              if (mounted) context.go('/connect-github');
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryBlue,
               foregroundColor: AppColors.white,
@@ -516,7 +557,10 @@ class _AssessmentPageState extends State<AssessmentPage> {
           const SizedBox(height: 24),
           Center(
             child: GestureDetector(
-              onTap: () => context.go('/home'),
+              onTap: () async {
+                await _saveAssessmentData();
+                if (mounted) context.go('/home');
+              },
               child: Text("Skip for now", style: AppTextStyles.bodyMedium.copyWith(color: AppColors.primaryBlue, fontWeight: FontWeight.bold)),
             ),
           ),

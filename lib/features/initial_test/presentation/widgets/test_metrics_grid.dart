@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../domain/entities/test_result_data.dart';
+import '../../../../core/models/test_result_model.dart';
 
 /// 2x2 metrics grid showing check/cross/value for each metric
 class TestMetricsGrid extends StatelessWidget {

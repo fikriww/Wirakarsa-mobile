@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/services/firebase_auth_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../widgets/custom_text_field.dart';
@@ -13,19 +14,100 @@ class CreateAccountPage extends StatefulWidget {
 }
 
 class _CreateAccountPageState extends State<CreateAccountPage> {
+  final _authService = FirebaseAuthService();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _agreeToTerms = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  void _register() async {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill in all fields.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Passwords do not match.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    if (!_agreeToTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please agree to the Terms & Conditions.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    debugPrint('Registration started for: $email');
+
+    try {
+      await _authService.signUpWithEmailAndPassword(
+        email: email,
+        password: password,
+        displayName: name,
+      );
+      debugPrint('Registration successful, navigating to /assessment');
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Account created successfully! Welcome.'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+        context.go('/assessment');
+      }
+    } catch (e) {
+      debugPrint('Registration failed: $e');
+      if (mounted) {
+        String message = e.toString();
+        if (message.startsWith('Exception: ')) {
+          message = message.substring(11);
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -55,6 +137,17 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               ),
 
               const SizedBox(height: 36),
+
+              // Full Name Field
+              CustomTextField(
+                label: 'Full Name',
+                hintText: 'Enter Your Full Name',
+                prefixIcon: Icons.person_outline,
+                controller: _nameController,
+                keyboardType: TextInputType.name,
+              ),
+
+              const SizedBox(height: 20),
 
               // Email Field
               CustomTextField(
@@ -132,13 +225,17 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
               const SizedBox(height: 24),
 
-              ElevatedButton(
-                onPressed: () {
-                  // Navigate to Assessment
-                  context.go('/assessment');
-                },
-                child: const Text('Create Account'),
-              ),
+              _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(AppColors.primaryBlue),
+                      ),
+                    )
+                  : ElevatedButton(
+                      onPressed: _register,
+                      child: const Text('Create Account'),
+                    ),
 
               const SizedBox(height: 28),
 

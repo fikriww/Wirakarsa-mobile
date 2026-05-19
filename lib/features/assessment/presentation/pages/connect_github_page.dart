@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../auth/presentation/widgets/custom_text_field.dart';
+import '../../../../core/providers/user_provider.dart';
 
-class ConnectGithubPage extends StatefulWidget {
+class ConnectGithubPage extends ConsumerStatefulWidget {
   const ConnectGithubPage({super.key});
 
   @override
-  State<ConnectGithubPage> createState() => _ConnectGithubPageState();
+  ConsumerState<ConnectGithubPage> createState() => _ConnectGithubPageState();
 }
 
-class _ConnectGithubPageState extends State<ConnectGithubPage> {
+class _ConnectGithubPageState extends ConsumerState<ConnectGithubPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
@@ -19,6 +22,7 @@ class _ConnectGithubPageState extends State<ConnectGithubPage> {
   bool _isLoading = false;
   bool _hasError = false;
   bool _isSuccess = false;
+  String _githubUsername = "";
 
   void _handleAuthorize() async {
     setState(() {
@@ -29,17 +33,35 @@ class _ConnectGithubPageState extends State<ConnectGithubPage> {
     // Mock network delay
     await Future.delayed(const Duration(seconds: 1));
 
-    // For demonstration, if email contains 'error', we show the error state.
-    // Otherwise, we show the success state.
     if (_emailController.text.toLowerCase().contains('error')) {
       setState(() {
         _isLoading = false;
         _hasError = true;
       });
     } else {
+      final username = _emailController.text.split('@').first;
+      
+      // Save GitHub username to Firestore
+      final user = ref.read(authServiceProvider).currentUser;
+      if (user != null) {
+        try {
+          await ref.read(authServiceProvider).updateUserProfile(
+            uid: user.uid,
+            data: {
+              'preferences': {
+                'githubUsername': username,
+              }
+            },
+          );
+        } catch (e) {
+          debugPrint('Error saving github username: $e');
+        }
+      }
+
       setState(() {
         _isLoading = false;
         _isSuccess = true;
+        _githubUsername = username;
       });
     }
   }
@@ -57,13 +79,9 @@ class _ConnectGithubPageState extends State<ConnectGithubPage> {
               const SizedBox(height: 40),
               // GitHub Logo
               Center(
-                child: Image.asset(
-                  'assets/images/github_logo.png',
+                child: SvgPicture.asset(
+                  'assets/icons/github.svg',
                   height: 80,
-                  errorBuilder: (context, error, stackTrace) => const Icon(
-                    Icons.code,
-                    size: 80,
-                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -148,6 +166,11 @@ class _ConnectGithubPageState extends State<ConnectGithubPage> {
   }
 
   Widget _buildSuccessState() {
+    final userProfile = ref.watch(userProfileProvider).value;
+    final displayUsername = _githubUsername.isNotEmpty 
+        ? _githubUsername 
+        : (userProfile?.displayName.toLowerCase().replaceAll(' ', '-') ?? 'user');
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -169,8 +192,8 @@ class _ConnectGithubPageState extends State<ConnectGithubPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("@john-doe", style: AppTextStyles.bodyMedium.copyWith(color: const Color(0xFF2E7D32), fontWeight: FontWeight.bold)),
-                  Text("github.com/john-doe", style: AppTextStyles.bodySmall.copyWith(color: const Color(0xFF4CAF50))),
+                  Text("@$displayUsername", style: AppTextStyles.bodyMedium.copyWith(color: const Color(0xFF2E7D32), fontWeight: FontWeight.bold)),
+                  Text("github.com/$displayUsername", style: AppTextStyles.bodySmall.copyWith(color: const Color(0xFF4CAF50))),
                 ],
               ),
             ],
