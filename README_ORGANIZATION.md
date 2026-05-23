@@ -1,40 +1,30 @@
-<p align="center">
-  <img src="assets/images/logo.png" alt="Wirakarsa Logo" width="150" />
-</p>
-
 # Wirakarsa
 
-<p align="center">
-  <i>Ekosistem Akselerasi Karier & Evaluasi Kesiapan Kerja (Job Readiness Index) Lulusan IT Berbasis AI Mentor</i>
-  <br>
-  <strong>Grup WMA-02 • MSIB Batch 6</strong>
-  <br>
-  <strong>Magang & Studi Independen Bersertifikat (MSIB) - Infinite Learning</strong>
-</p>
+### Ekosistem Akselerasi Karier & Evaluasi Kesiapan Kerja (Job Readiness Index) Lulusan IT Berbasis AI Mentor (Wirapath)
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter" />
-  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
-  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
-  <img src="https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase" />
-  <br>
-  <img src="https://img.shields.io/badge/Infinite_Learning-FF5A5F?style=for-the-badge" alt="Infinite Learning" />
-  <img src="https://img.shields.io/badge/MBKM-Kampus_Merdeka-blue?style=for-the-badge" alt="Kampus Merdeka" />
-</p>
+**Grup WMA-02 • MSIB Batch 6**  
+**Magang & Studi Independen Bersertifikat (MSIB) - Infinite Learning**
+
+[![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org)
+[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org)
+[![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)
+[![Infinite Learning](https://img.shields.io/badge/Infinite_Learning-FF5A5F?style=for-the-badge)](https://www.infinitelearning.id)
+[![MBKM Kampus Merdeka](https://img.shields.io/badge/MBKM-Kampus_Merdeka-blue?style=for-the-badge)](https://kampusmerdeka.kemdikbud.go.id)
 
 ---
 
 ## 🧠 Tentang Proyek
 
-**Wirakarsa** adalah sebuah ekosistem solusi digital terintegrasi yang dirancang untuk membantu lulusan baru (*fresh graduates*) di bidang IT mengidentifikasi, mengukur, dan menjembatani kesenjangan keterampilan (*skill gap*) mereka agar siap bersaing di industri profesional. 
+**Wirakarsa** adalah sebuah ekosistem solusi digital terintegrasi yang dirancang untuk membantu lulusan baru (*fresh graduates*) di bidang IT mengidentifikasi, mengukur, dan menjembatani kesenjangan keterampilan (*skill gap*) mereka agar siap bersaing di industri profesional.
 
 Ekosistem ini menyatukan aplikasi mobile (**Wirapath**), portal web, dan teknologi AI untuk menghadirkan penilaian kesiapan kerja terukur (*Job Readiness Index*), pembelajaran praktis berbasis proyek (*DevHub*), audit resume otomatis (*CV Screening*), hingga simulasi wawancara kerja dan negosiasi gaji secara interaktif.
 
 ### 🔍 Masalah yang Ingin Diselesaikan
 
-- **Asimetri Informasi Kualifikasi:** Banyak lulusan baru melamar pekerjaan tanpa mengetahui apakah keahlian mereka cocok dengan kebutuhan industri sehingga berujung pada tingkat penolakan yang tinggi.
-- **Kurangnya Keterampilan Industri Praktis:** Lulusan baru sering kali kesulitan menerapkan konsep-konsep industri penting seperti penulisan pengujian perangkat lunak (*TDD/Unit Testing*), pembuatan layout responsif yang ramah aksesibilitas (*WCAG 2.1 AA*), dan optimasi performa web.
-- **Mentalitas Menghadapi Proses Rekrutmen:** Kecemasan dan ketidaksiapan menghadapi proses wawancara kerja teknis dan manajerial, serta kurangnya kemampuan dalam bernegosiasi gaji.
+* **Asimetri Informasi Kualifikasi:** Banyak lulusan baru melamar pekerjaan tanpa mengetahui apakah keahlian mereka cocok dengan kebutuhan industri sehingga berujung pada tingkat penolakan yang tinggi.
+* **Kurangnya Keterampilan Industri Praktis:** Lulusan baru sering kali kesulitan menerapkan konsep-konsep industri penting seperti penulisan pengujian perangkat lunak (*TDD/Unit Testing*), pembuatan layout responsif yang ramah aksesibilitas (*WCAG 2.1 AA*), dan optimasi performa web.
+* **Mentalitas Menghadapi Proses Rekrutmen:** Kecemasan dan ketidaksiapan menghadapi proses wawancara kerja teknis dan manajerial, serta kurangnya kemampuan dalam bernegosiasi gaji.
 
 ### 🧩 Solusi Ekosistem Wirakarsa
 
@@ -60,9 +50,9 @@ Ide Wirakarsa lahir dari diskusi intensif anggota tim Grup **WMA-02** mengenai t
 
 Ekosistem Wirakarsa terbagi menjadi beberapa repositori khusus demi mempermudah pemeliharaan kode dan kolaborasi:
 
-- 📱 **[Wirakarsa Mobile (Wirapath)](https://github.com/fikriww/Wirakarsa-mobile):** Kode sumber aplikasi mobile berbasis Flutter & Riverpod.
-- 💻 **[Wirakarsa Web Portal](https://github.com/fikriww/hi-fi-website-main):** Repositori web/landing page berbasis framework frontend.
-- 🤖 **[Wirakarsa AI (Model-AI)](https://github.com/fikriww/wirakarsa-model-ai):** Kode sumber model kecerdasan buatan untuk analisis bahasa, pencocokan kompetensi, dan simulasi interview.
+* 📱 **[Wirakarsa Mobile (Wirapath)](https://github.com/fikriww/Wirakarsa-mobile):** Kode sumber aplikasi mobile berbasis Flutter & Riverpod.
+* 💻 **[Wirakarsa Web Portal](https://github.com/fikriww/hi-fi-website-main):** Repositori web/landing page berbasis framework frontend.
+* 🤖 **[Wirakarsa AI (Model-AI)](https://github.com/fikriww/wirakarsa-model-ai):** Kode sumber model kecerdasan buatan untuk analisis bahasa, pencocokan kompetensi, dan simulasi interview.
 
 ---
 
@@ -105,6 +95,5 @@ Laboratorium pengkodean mini tempat pengguna dapat mengintegrasikan repositori G
 | **Jihan** | UI/UX Design | Product Manager, Assets & Technical Writer | [@jihan-designer](https://github.com) |
 
 ---
-<p align="center">
-  Dikembangkan bersama oleh Grup WMA-02 untuk Program MSIB <strong>Infinite Learning</strong>.
-</p>
+
+Developed with ❤️ by Group WMA-02 for **Infinite Learning** MSIB Program.
