@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/services/firebase_auth_service.dart';
+import '../../../../core/services/api_service.dart';
 
 class AssessmentPage extends StatefulWidget {
   const AssessmentPage({super.key});
@@ -13,16 +13,18 @@ class AssessmentPage extends StatefulWidget {
 }
 
 class _AssessmentPageState extends State<AssessmentPage> {
-  final FirebaseAuthService _authService = FirebaseAuthService();
+  final ApiService _apiService = ApiService();
   final PageController _pageController = PageController();
   int _currentStep = 0;
   final int _totalSteps = 5;
   bool _isSaving = false;
 
   // Form states
-  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _majorController = TextEditingController();
   final TextEditingController _universityController = TextEditingController();
+  final TextEditingController _gradYearController = TextEditingController();
 
   // Selections for Screen 2
   final List<String> _selectedFeelings = [];
@@ -58,42 +60,36 @@ class _AssessmentPageState extends State<AssessmentPage> {
   @override
   void dispose() {
     _pageController.dispose();
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _majorController.dispose();
     _universityController.dispose();
+    _gradYearController.dispose();
     super.dispose();
   }
 
   Future<void> _saveAssessmentData() async {
-    final user = _authService.currentUser;
-    if (user == null) return;
-
-    final data = {
-      'displayName': _nameController.text,
-      'preferences': {
-        'major': _majorController.text,
-        'university': _universityController.text,
-        'feelings': _selectedFeelings,
-        'needs': _selectedNeeds,
-        'interests': _selectedInterests,
-      },
-      'hasCompletedAssessment': _currentStep == _totalSteps - 1,
-    };
-
-    debugPrint('--- SAVING ASSESSMENT DATA ---');
-    debugPrint('Data: $data');
-    debugPrint('------------------------------');
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
 
     try {
-      await _authService.updateUserProfile(uid: user.uid, data: data).timeout(
-        const Duration(seconds: 5),
-        onTimeout: () {
-          debugPrint('Assessment data save timed out');
-        },
+      final session = await _apiService.getCurrentUser();
+      final userId = session['result']['user']['id'];
+
+      await _apiService.updateOnboardingProfile(
+        userId: userId,
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        university: _universityController.text.trim(),
+        fieldOfStudy: _majorController.text.trim(),
+        graduationYear: _gradYearController.text.trim(),
       );
-      debugPrint('Assessment data saved successfully for UID: ${user.uid}');
+
+      debugPrint('Assessment data saved successfully to Express backend!');
     } catch (e) {
       debugPrint('Error saving assessment data: $e');
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
@@ -184,31 +180,60 @@ class _AssessmentPageState extends State<AssessmentPage> {
         children: [
           const SizedBox(height: 60),
           Text(
-            "Great!",
+            "Tell us about yourself",
             style: AppTextStyles.heading1,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           Text(
-            "Now, what should we call you?",
+            "We'll personalize your experience based on this",
             style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 60),
-          Text("Label", style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _nameController,
-            decoration: InputDecoration(
-              hintText: "Enter Your Name",
-              hintStyle: TextStyle(color: AppColors.textHint),
-              filled: true,
-              fillColor: AppColors.inputBackground,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
+          
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("First Name", style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _firstNameController,
+                      decoration: InputDecoration(
+                        hintText: "e.g. Alex",
+                        hintStyle: TextStyle(color: AppColors.textHint),
+                        filled: true,
+                        fillColor: AppColors.inputBackground,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Last Name", style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _lastNameController,
+                      decoration: InputDecoration(
+                        hintText: "e.g. Rahman",
+                        hintStyle: TextStyle(color: AppColors.textHint),
+                        filled: true,
+                        fillColor: AppColors.inputBackground,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 32),
           ElevatedButton(
@@ -240,7 +265,7 @@ class _AssessmentPageState extends State<AssessmentPage> {
                 children: [
                   const SizedBox(height: 20),
                   Center(
-                    child: Text("Hi, ${_nameController.text.isEmpty ? 'John' : _nameController.text}", style: AppTextStyles.heading1),
+                    child: Text("Hi, ${_firstNameController.text.isEmpty ? 'There' : _firstNameController.text}", style: AppTextStyles.heading1),
                   ),
                   const SizedBox(height: 8),
                   Center(
@@ -385,7 +410,21 @@ class _AssessmentPageState extends State<AssessmentPage> {
           TextField(
             controller: _universityController,
             decoration: InputDecoration(
-              hintText: "Enter Your University",
+              hintText: "e.g. Universitas Indonesia",
+              hintStyle: TextStyle(color: AppColors.textHint),
+              filled: true,
+              fillColor: AppColors.inputBackground,
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text("Graduation Year", style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _gradYearController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              hintText: "e.g. 2025",
               hintStyle: TextStyle(color: AppColors.textHint),
               filled: true,
               fillColor: AppColors.inputBackground,

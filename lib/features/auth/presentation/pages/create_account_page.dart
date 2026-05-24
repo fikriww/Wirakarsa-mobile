@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/services/firebase_auth_service.dart';
+import '../../../../core/services/api_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../widgets/custom_text_field.dart';
@@ -14,8 +14,7 @@ class CreateAccountPage extends StatefulWidget {
 }
 
 class _CreateAccountPageState extends State<CreateAccountPage> {
-  final _authService = FirebaseAuthService();
-  final _nameController = TextEditingController();
+  final _apiService = ApiService();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -26,7 +25,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
   @override
   void dispose() {
-    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -34,12 +32,11 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   void _register() async {
-    final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
-    if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill in all fields.'),
@@ -73,10 +70,9 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     debugPrint('Registration started for: $email');
 
     try {
-      await _authService.signUpWithEmailAndPassword(
+      await _apiService.register(
         email: email,
         password: password,
-        displayName: name,
       );
       debugPrint('Registration successful, navigating to /assessment');
       
@@ -137,17 +133,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               ),
 
               const SizedBox(height: 36),
-
-              // Full Name Field
-              CustomTextField(
-                label: 'Full Name',
-                hintText: 'Enter Your Full Name',
-                prefixIcon: Icons.person_outline,
-                controller: _nameController,
-                keyboardType: TextInputType.name,
-              ),
-
-              const SizedBox(height: 20),
 
               // Email Field
               CustomTextField(
