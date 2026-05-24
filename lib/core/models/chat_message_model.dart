@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatMessage {
   final String id;
@@ -41,7 +40,7 @@ class ChatMessage {
       'sender': sender,
       'text': text,
       'audioUrl': audioUrl,
-      'timestamp': Timestamp.fromDate(timestamp),
+      'timestamp': timestamp.toIso8601String(),
       'metadata': metadata,
     };
   }
@@ -52,7 +51,7 @@ class ChatMessage {
       sender: map['sender'] ?? 'user',
       text: map['text'] ?? '',
       audioUrl: map['audioUrl'],
-      timestamp: (map['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      timestamp: map['timestamp'] != null ? DateTime.parse(map['timestamp']) : DateTime.now(),
       metadata: map['metadata'] != null
           ? Map<String, dynamic>.from(map['metadata'])
           : null,

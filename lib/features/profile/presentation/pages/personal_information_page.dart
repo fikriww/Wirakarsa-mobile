@@ -45,19 +45,21 @@ class _PersonalInformationPageState extends ConsumerState<PersonalInformationPag
   }
 
   Future<void> _handleSave() async {
-    final user = ref.read(authServiceProvider).currentUser;
+    final user = ref.read(userProfileProvider).value;
     if (user == null) return;
 
-    final data = {
-      'displayName': _firstNameController.text,
-      'preferences': {
-        'university': _universityController.text,
-        'major': _majorController.text,
-      },
-    };
-
     try {
-      await ref.read(authServiceProvider).updateUserProfile(uid: user.uid, data: data);
+      await ref.read(apiServiceProvider).updateOnboardingProfile(
+        userId: user.uid,
+        firstName: _firstNameController.text.split(' ').first,
+        lastName: _firstNameController.text.split(' ').length > 1 ? _firstNameController.text.split(' ').sublist(1).join(' ') : '',
+        university: _universityController.text,
+        major: _majorController.text,
+        graduationYear: 2026, // default since we don't have this field
+      );
+      
+      // Refresh profile data
+      await ref.read(userProfileProvider.notifier).refreshProfile();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

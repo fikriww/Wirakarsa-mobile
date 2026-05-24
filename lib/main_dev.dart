@@ -17,9 +17,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'firebase_options.dart';
 import 'core/theme/app_theme.dart';
 import 'features/splash/presentation/pages/splash_page.dart';
 import 'features/auth/presentation/pages/sign_in_page.dart';
@@ -37,28 +34,9 @@ import 'features/assessment/presentation/pages/connect_github_page.dart';
 
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'core/services/firebase_db_service.dart';
 
-import 'core/config/firebase_config.dart';
-
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  
-  // Disable persistence for Web to avoid hanging issues in some environments
-  FirebaseFirestore.instanceFor(
-    app: Firebase.app(),
-    databaseId: FirebaseConfig.databaseId,
-  ).settings = const Settings(
-    persistenceEnabled: false,
-  );
-
-  // Seed database with mock data if empty in background
-  FirebaseDbService().seedDatabaseIfEmpty().catchError((e) {
-    debugPrint('Error seeding database: $e');
-  });
   
   runApp(
     const ProviderScope(

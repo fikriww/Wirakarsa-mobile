@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
   final String uid;
@@ -54,8 +53,8 @@ class UserModel {
       'uid': uid,
       'email': email,
       'displayName': displayName,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'lastActive': Timestamp.fromDate(lastActive),
+      'createdAt': createdAt.toIso8601String(),
+      'lastActive': lastActive.toIso8601String(),
       'hasCompletedAssessment': hasCompletedAssessment,
       'role': role,
       'skills': skills,
@@ -68,8 +67,8 @@ class UserModel {
       uid: id,
       email: map['email'] ?? '',
       displayName: map['displayName'] ?? '',
-      createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      lastActive: (map['lastActive'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt: map['createdAt'] != null ? DateTime.parse(map['createdAt']) : DateTime.now(),
+      lastActive: map['lastActive'] != null ? DateTime.parse(map['lastActive']) : DateTime.now(),
       hasCompletedAssessment: map['hasCompletedAssessment'] ?? false,
       role: map['role'] ?? 'user',
       skills: Map<String, double>.from(map['skills'] ?? {}),

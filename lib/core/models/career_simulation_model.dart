@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class CareerSimulationSession {
   final String id;
@@ -56,8 +56,8 @@ class CareerSimulationSession {
       'role': role,
       'level': level,
       'status': status,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': Timestamp.fromDate(updatedAt),
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
   }
 
@@ -70,8 +70,8 @@ class CareerSimulationSession {
       role: map['role'] ?? '',
       level: map['level'] ?? '',
       status: map['status'] ?? 'active',
-      createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      updatedAt: (map['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt: map['createdAt'] != null ? DateTime.parse(map['createdAt']) : null ?? DateTime.now(),
+      updatedAt: map['updatedAt'] != null ? DateTime.parse(map['updatedAt']) : null ?? DateTime.now(),
     );
   }
 

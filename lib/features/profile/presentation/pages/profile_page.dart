@@ -339,8 +339,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         // Logout Button
         ElevatedButton(
           onPressed: () async {
-            await ref.read(authServiceProvider).signOut();
-            if (mounted) context.go('/sign-in');
+            await ref.read(apiServiceProvider).logout();
+            ref.read(userProfileProvider.notifier).logout();
+            if (context.mounted) {
+              context.go('/sign-in');
+            }
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.white,

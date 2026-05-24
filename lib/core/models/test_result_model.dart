@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:flutter/material.dart';
 
 class TestResultData {
@@ -114,7 +114,7 @@ class TestResultData {
       'scoreValue': scoreValue,
       'maxScore': maxScore,
       'numericScore': numericScore,
-      'submittedDate': Timestamp.fromDate(submittedDate),
+      'submittedDate': submittedDate.toIso8601String(),
       'statusText': statusText,
       'statusColorHex': statusColorHex,
       'statusTextColorHex': statusTextColorHex,
@@ -141,7 +141,7 @@ class TestResultData {
       maxScore: (map['maxScore'] as num?)?.toDouble() ?? 0.0,
       numericScore: (map['numericScore'] as num?)?.toDouble() ?? 0.0,
       submittedDate:
-          (map['submittedDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          map['submittedDate'] != null ? DateTime.parse(map['submittedDate']) : null ?? DateTime.now(),
       statusText: map['statusText'] ?? '',
       statusColorHex: map['statusColorHex'] ?? '0xFF000000',
       statusTextColorHex: map['statusTextColorHex'] ?? '0xFFFFFFFF',

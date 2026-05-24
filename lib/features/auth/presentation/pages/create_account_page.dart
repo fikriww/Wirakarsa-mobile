@@ -6,14 +6,17 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/social_login_row.dart';
 
-class CreateAccountPage extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/user_provider.dart';
+
+class CreateAccountPage extends ConsumerStatefulWidget {
   const CreateAccountPage({super.key});
 
   @override
-  State<CreateAccountPage> createState() => _CreateAccountPageState();
+  ConsumerState<CreateAccountPage> createState() => _CreateAccountPageState();
 }
 
-class _CreateAccountPageState extends State<CreateAccountPage> {
+class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
   final _apiService = ApiService();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -75,6 +78,9 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         password: password,
       );
       debugPrint('Registration successful, navigating to /assessment');
+      
+      // Update global user state
+      await ref.read(userProfileProvider.notifier).refreshProfile();
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

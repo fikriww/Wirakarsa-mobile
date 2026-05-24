@@ -6,14 +6,17 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/social_login_row.dart';
 
-class SignInPage extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/user_provider.dart';
+
+class SignInPage extends ConsumerStatefulWidget {
   const SignInPage({super.key});
 
   @override
-  State<SignInPage> createState() => _SignInPageState();
+  ConsumerState<SignInPage> createState() => _SignInPageState();
 }
 
-class _SignInPageState extends State<SignInPage> {
+class _SignInPageState extends ConsumerState<SignInPage> {
   final _apiService = ApiService();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -49,6 +52,10 @@ class _SignInPageState extends State<SignInPage> {
         email: email,
         password: password,
       );
+      
+      // Update global user state
+      await ref.read(userProfileProvider.notifier).refreshProfile();
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

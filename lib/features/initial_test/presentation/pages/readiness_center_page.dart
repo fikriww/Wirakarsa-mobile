@@ -8,17 +8,16 @@ import '../../domain/entities/test_result_data.dart';
 import 'initial_test_page.dart';
 import 'test_graded_page.dart';
 
-import '../../../../core/services/firebase_auth_service.dart';
-
-class ReadinessCenterPage extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/user_provider.dart';
+class ReadinessCenterPage extends ConsumerStatefulWidget {
   const ReadinessCenterPage({super.key});
 
   @override
-  State<ReadinessCenterPage> createState() => _ReadinessCenterPageState();
+  ConsumerState<ReadinessCenterPage> createState() => _ReadinessCenterPageState();
 }
 
-class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
-  final FirebaseAuthService _authService = FirebaseAuthService();
+class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
   int _selectedTab = 1; // Default: Initial Test tab
 
   final List<String> _tabs = ['Overview', 'Initial Test', 'Skill Map', 'Skill Gap'];
@@ -378,7 +377,7 @@ class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
                           onSubmit: (selectedAnswers, essayAnswers) async {
                             debugPrint('ReadinessCenterPage: Test ${test.testTitle} submitted.');
                             
-                            final user = _authService.currentUser;
+                            final user = ref.read(userProfileProvider).value;
                             if (user != null) {
                               final resultData = {
                                 'testId': test.id,
@@ -388,10 +387,8 @@ class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
                                 'status': 'completed',
                               };
                               
-                              await _authService.saveTestResult(
-                                uid: user.uid,
-                                resultData: resultData,
-                              );
+                              // Mock saving result to backend
+                              debugPrint('Saving result: $resultData');
                             }
 
                             if (mounted) {

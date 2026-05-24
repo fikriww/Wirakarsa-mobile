@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class CodeReview {
   final String id;
@@ -50,7 +50,7 @@ class CodeReview {
       'projectId': projectId,
       'submittedCode': submittedCode,
       'status': status,
-      'createdAt': Timestamp.fromDate(createdAt),
+      'createdAt': createdAt.toIso8601String(),
       'feedbackSummary': feedbackSummary,
       'improvements': improvements.map((x) => x.toMap()).toList(),
     };
@@ -63,7 +63,7 @@ class CodeReview {
       projectId: map['projectId'] ?? '',
       submittedCode: map['submittedCode'] ?? '',
       status: map['status'] ?? 'pending',
-      createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt: map['createdAt'] != null ? DateTime.parse(map['createdAt']) : null ?? DateTime.now(),
       feedbackSummary: map['feedbackSummary'],
       improvements: List<ReviewImprovement>.from(
           map['improvements']?.map((x) => ReviewImprovement.fromMap(x)) ?? []),
