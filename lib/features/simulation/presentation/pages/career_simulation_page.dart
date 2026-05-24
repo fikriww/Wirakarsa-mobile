@@ -789,7 +789,7 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
                     hintStyle: TextStyle(color: AppColors.textHint, fontSize: 13),
                     border: InputBorder.none,
                   ),
-                  style: GoogleFonts.poppins(
+                  style: const TextStyle(
                     fontSize: 13,
                     color: AppColors.textPrimary,
                   ),
@@ -827,9 +827,9 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
                   ),
                   elevation: 0,
                 ),
-                child: Text(
+                child: const Text(
                   'Analyze',
-                  style: GoogleFonts.poppins(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),

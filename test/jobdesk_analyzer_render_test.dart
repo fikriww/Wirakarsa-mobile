@@ -1,0 +1,31 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wirapath/features/simulation/presentation/pages/career_simulation_page.dart';
+
+void main() {
+  testWidgets('CareerSimulationPage renders jobdesk analyzer state without errors', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(
+          home: CareerSimulationPage(),
+        ),
+      ),
+    );
+    
+    // Tap on the Jobdesk Analyzer card to switch to SimulationState.jobdeskAnalyzer
+    final cardFinder = find.text('Jobdesk Analyzer');
+    expect(cardFinder, findsOneWidget);
+    await tester.tap(cardFinder);
+    await tester.pumpAndSettle();
+    
+    // Check if the chat bubble is found
+    expect(find.textContaining('Choose a specific job listing'), findsOneWidget);
+    
+    // Check if the search bar hint text is found
+    expect(find.textContaining('Enter custom job'), findsOneWidget);
+    
+    // Check if the Gojek job card is found
+    expect(find.text('Gojek'), findsOneWidget);
+  });
+}
