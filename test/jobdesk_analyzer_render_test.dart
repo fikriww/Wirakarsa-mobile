@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wirapath/core/theme/app_theme.dart';
 import 'package:wirapath/features/simulation/presentation/pages/career_simulation_page.dart';
 
 void main() {
@@ -14,9 +15,10 @@ void main() {
     });
 
     await tester.pumpWidget(
-      const ProviderScope(
+      ProviderScope(
         child: MaterialApp(
-          home: CareerSimulationPage(),
+          theme: AppTheme.lightTheme,
+          home: const CareerSimulationPage(),
         ),
       ),
     );
