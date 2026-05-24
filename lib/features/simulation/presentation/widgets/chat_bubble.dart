@@ -31,7 +31,7 @@ class ChatBubble extends StatelessWidget {
                 color: AppColors.white,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: AppColors.primaryBlue.withValues(alpha: 0.3),
+                  color: AppColors.primaryBlue.withOpacity(0.3),
                   width: 1.5,
                 ),
               ),

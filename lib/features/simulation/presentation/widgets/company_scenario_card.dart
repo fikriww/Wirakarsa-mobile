@@ -77,7 +77,7 @@ class CompanyScenarioCard extends StatelessWidget {
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: _levelColor.withValues(alpha: 0.12),
+                    color: _levelColor.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(

@@ -37,7 +37,7 @@ class SimulationOptionCard extends StatelessWidget {
                   width: 28,
                   height: 28,
                   decoration: BoxDecoration(
-                    color: AppColors.primaryBlue.withValues(alpha: 0.08),
+                    color: AppColors.primaryBlue.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Icon(icon, size: 16, color: AppColors.primaryBlue),

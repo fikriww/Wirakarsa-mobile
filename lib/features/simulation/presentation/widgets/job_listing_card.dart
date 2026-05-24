@@ -132,8 +132,8 @@ class JobListingCard extends StatelessWidget {
                 final checkColor =
                     skill.isMatched ? AppColors.success : AppColors.error;
                 final bgColor = skill.isMatched
-                    ? AppColors.success.withValues(alpha: 0.08)
-                    : AppColors.error.withValues(alpha: 0.08);
+                    ? AppColors.success.withOpacity(0.08)
+                    : AppColors.error.withOpacity(0.08);
                 return Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,

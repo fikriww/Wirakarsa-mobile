@@ -980,7 +980,7 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
           border: Border.all(color: AppColors.divider),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: Colors.black.withOpacity(0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -1067,7 +1067,7 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
                             color: isMatched 
-                                ? AppColors.success.withValues(alpha: 0.08)
+                                ? AppColors.success.withOpacity(0.08)
                                 : const Color(0xFFFEF3C7),
                             borderRadius: BorderRadius.circular(6),
                           ),

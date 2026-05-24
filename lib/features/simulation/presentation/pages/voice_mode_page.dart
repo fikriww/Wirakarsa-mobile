@@ -107,7 +107,7 @@ class _VoiceModePageState extends State<VoiceModePage>
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF066EFF).withValues(alpha: 0.2),
+                    color: const Color(0xFF066EFF).withOpacity(0.2),
                     blurRadius: 40,
                     spreadRadius: 10,
                   ),
@@ -222,13 +222,13 @@ class _CircleButton extends StatelessWidget {
           color: AppColors.white,
           border: Border.all(
             color: isPrimary
-                ? AppColors.primaryBlue.withValues(alpha: 0.3)
+                ? AppColors.primaryBlue.withOpacity(0.3)
                 : AppColors.divider,
             width: isPrimary ? 2 : 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: Colors.black.withOpacity(0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),

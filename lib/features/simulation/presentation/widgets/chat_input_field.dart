@@ -46,12 +46,12 @@ class ChatInputField extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: AppColors.white,
                       border: Border.all(
-                        color: AppColors.primaryBlue.withValues(alpha: 0.5),
+                        color: AppColors.primaryBlue.withOpacity(0.5),
                         width: 1.5,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                          color: AppColors.primaryBlue.withOpacity(0.1),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),

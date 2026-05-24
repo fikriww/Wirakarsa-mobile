@@ -28,7 +28,7 @@ class QuickReplyChips extends StatelessWidget {
                   color: AppColors.white,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: AppColors.primaryBlue.withValues(alpha: 0.4),
+                    color: AppColors.primaryBlue.withOpacity(0.4),
                     width: 1,
                   ),
                 ),
