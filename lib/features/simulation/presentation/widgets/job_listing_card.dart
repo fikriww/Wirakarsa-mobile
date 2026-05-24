@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 
 /// Represents a skill with match status
@@ -73,7 +72,7 @@ class JobListingCard extends StatelessWidget {
                     children: [
                       Text(
                         jobTitle,
-                        style: GoogleFonts.poppins(
+                        style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
@@ -82,7 +81,7 @@ class JobListingCard extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         '$company · $location · $source',
-                        style: GoogleFonts.poppins(
+                        style: const TextStyle(
                           fontSize: 11,
                           color: AppColors.textSecondary,
                         ),
@@ -102,7 +101,7 @@ class JobListingCard extends StatelessWidget {
                   ),
                   child: Text(
                     '$matchPercent% match',
-                    style: GoogleFonts.poppins(
+                    style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
                       color: _matchColor,
@@ -117,7 +116,7 @@ class JobListingCard extends StatelessWidget {
             // Required Skills label
             Text(
               'Required Skills:',
-              style: GoogleFonts.poppins(
+              style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
                 color: AppColors.textPrimary,
@@ -151,7 +150,7 @@ class JobListingCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         skill.name,
-                        style: GoogleFonts.poppins(
+                        style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w400,
                           color: AppColors.textSecondary,
@@ -168,7 +167,7 @@ class JobListingCard extends StatelessWidget {
             // Salary
             Text(
               'Salary: $salary',
-              style: GoogleFonts.poppins(
+              style: const TextStyle(
                 fontSize: 11,
                 color: AppColors.textSecondary,
               ),
@@ -181,7 +180,7 @@ class JobListingCard extends StatelessWidget {
               children: [
                 Text(
                   '$postedTime · $experienceLevel',
-                  style: GoogleFonts.poppins(
+                  style: const TextStyle(
                     fontSize: 11,
                     color: AppColors.textHint,
                   ),
@@ -199,7 +198,7 @@ class JobListingCard extends StatelessWidget {
                     ),
                     child: Text(
                       'Analyze Job',
-                      style: GoogleFonts.poppins(
+                      style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         color: AppColors.white,

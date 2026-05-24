@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class CompanyScenarioCard extends StatelessWidget {
@@ -54,7 +53,7 @@ class CompanyScenarioCard extends StatelessWidget {
                 // Company name
                 Text(
                   companyName,
-                  style: GoogleFonts.poppins(
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -64,7 +63,7 @@ class CompanyScenarioCard extends StatelessWidget {
                 // Role - Focus
                 Text(
                   '$role – $focus',
-                  style: GoogleFonts.poppins(
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
                     color: AppColors.textSecondary,
@@ -83,7 +82,7 @@ class CompanyScenarioCard extends StatelessWidget {
                   ),
                   child: Text(
                     level,
-                    style: GoogleFonts.poppins(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                       color: _levelColor,

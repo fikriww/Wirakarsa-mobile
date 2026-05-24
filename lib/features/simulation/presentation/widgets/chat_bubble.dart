@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class ChatBubble extends StatelessWidget {
@@ -36,7 +35,7 @@ class ChatBubble extends StatelessWidget {
                   width: 1.5,
                 ),
               ),
-              child: Center(
+              child: const Center(
                 child: Icon(
                   Icons.smart_toy_outlined,
                   size: 18,
@@ -69,7 +68,7 @@ class ChatBubble extends StatelessWidget {
                   ),
                   child: Text(
                     message,
-                    style: GoogleFonts.poppins(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
                       color: isUser ? AppColors.white : AppColors.textPrimary,
@@ -82,7 +81,7 @@ class ChatBubble extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 4),
                   child: Text(
                     time,
-                    style: GoogleFonts.poppins(
+                    style: const TextStyle(
                       fontSize: 11,
                       color: AppColors.textHint,
                     ),

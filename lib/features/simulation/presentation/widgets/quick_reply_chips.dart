@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class QuickReplyChips extends StatelessWidget {
@@ -35,7 +34,7 @@ class QuickReplyChips extends StatelessWidget {
                 ),
                 child: Text(
                   reply,
-                  style: GoogleFonts.poppins(
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: AppColors.primaryBlue,

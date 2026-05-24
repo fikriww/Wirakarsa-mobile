@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class SalaryScenarioCard extends StatelessWidget {
@@ -42,7 +41,7 @@ class SalaryScenarioCard extends StatelessWidget {
                     children: [
                       Text(
                         companyName,
-                        style: GoogleFonts.poppins(
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
@@ -51,7 +50,7 @@ class SalaryScenarioCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         'Level: $level',
-                        style: GoogleFonts.poppins(
+                        style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
                           color: AppColors.textSecondary,
@@ -71,7 +70,7 @@ class SalaryScenarioCard extends StatelessWidget {
                   ),
                   child: Text(
                     salaryRange,
-                    style: GoogleFonts.poppins(
+                    style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w500,
                       color: AppColors.success,

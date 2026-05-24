@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 
 /// Chat bubble with optional voice/audio indicator icon
@@ -78,7 +77,7 @@ class VoiceChatBubble extends StatelessWidget {
                         ),
                         child: Text(
                           message,
-                          style: GoogleFonts.poppins(
+                          style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w400,
                             color: isUser
@@ -119,7 +118,7 @@ class VoiceChatBubble extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 4),
                   child: Text(
                     time,
-                    style: GoogleFonts.poppins(
+                    style: const TextStyle(
                       fontSize: 11,
                       color: AppColors.textHint,
                     ),

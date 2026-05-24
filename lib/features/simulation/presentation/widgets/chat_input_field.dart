@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class ChatInputField extends StatelessWidget {
@@ -77,17 +76,17 @@ class ChatInputField extends StatelessWidget {
                     ),
                     child: TextField(
                       controller: controller,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: 'Reply to simulation here...',
-                        hintStyle: GoogleFonts.poppins(
+                        hintStyle: TextStyle(
                           fontSize: 13,
                           color: AppColors.textHint,
                         ),
                         border: InputBorder.none,
                         contentPadding:
-                            const EdgeInsets.symmetric(vertical: 10),
+                            EdgeInsets.symmetric(vertical: 10),
                       ),
-                      style: GoogleFonts.poppins(
+                      style: const TextStyle(
                         fontSize: 13,
                         color: AppColors.textPrimary,
                       ),
@@ -136,7 +135,7 @@ class ChatInputField extends StatelessWidget {
                   const Spacer(),
                   Text(
                     timerText!,
-                    style: GoogleFonts.poppins(
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.error,
@@ -182,7 +181,7 @@ class _FilterChip extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               label,
-              style: GoogleFonts.poppins(
+              style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
                 color: AppColors.textSecondary,

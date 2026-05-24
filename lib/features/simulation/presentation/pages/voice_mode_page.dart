@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 
 /// Voice Mode page - full screen listening interface
@@ -50,20 +49,20 @@ class _VoiceModePageState extends State<VoiceModePage>
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Column(
+        title: const Column(
           children: [
             Text(
               'Career Simulation',
-              style: GoogleFonts.poppins(
+              style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: 2),
             Text(
               'Voice Mode',
-              style: GoogleFonts.poppins(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w400,
                 color: AppColors.primaryBlue,
@@ -139,9 +138,9 @@ class _VoiceModePageState extends State<VoiceModePage>
           const SizedBox(height: 20),
 
           // "Listening." text
-          Text(
+          const Text(
             'Listening.',
-            style: GoogleFonts.poppins(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.black,
@@ -151,12 +150,12 @@ class _VoiceModePageState extends State<VoiceModePage>
           const Spacer(flex: 1),
 
           // Timer
-          Text(
+          const Text(
             '05:00',
-            style: GoogleFonts.poppins(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFFEE443F),
+              color: Color(0xFFEE443F),
             ),
           ),
 

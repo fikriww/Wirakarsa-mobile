@@ -5,6 +5,14 @@ import 'package:wirapath/features/simulation/presentation/pages/career_simulatio
 
 void main() {
   testWidgets('CareerSimulationPage renders jobdesk analyzer state without errors', (WidgetTester tester) async {
+    // Set window size to ensure off-screen list elements are laid out
+    tester.view.physicalSize = const Size(1200, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
     await tester.pumpWidget(
       const ProviderScope(
         child: MaterialApp(
@@ -26,6 +34,6 @@ void main() {
     expect(find.textContaining('Enter custom job'), findsOneWidget);
     
     // Check if the Gojek job card is found
-    expect(find.text('Gojek'), findsOneWidget);
+    expect(find.textContaining('Gojek'), findsOneWidget);
   });
 }

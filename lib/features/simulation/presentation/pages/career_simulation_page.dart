@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/providers/user_provider.dart';
 import '../../../../core/models/career_simulation_model.dart';
@@ -302,7 +301,7 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
                 'Conversation History',
-                style: GoogleFonts.poppins(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -330,11 +329,11 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
                         leading: Icon(icon, color: AppColors.primaryBlue),
                         title: Text(
                           "${s.role} - ${s.companyName}",
-                          style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
                         ),
                         subtitle: Text(
                           "Status: ${s.status} · Level: ${s.level}",
-                          style: GoogleFonts.poppins(fontSize: 11, color: AppColors.textHint),
+                          style: const TextStyle(fontSize: 11, color: AppColors.textHint),
                         ),
                         onTap: () {
                           Navigator.pop(context);
@@ -520,7 +519,7 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
                 'Interesting Questions',
-                style: GoogleFonts.poppins(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -549,7 +548,7 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         child: Text(
           text,
-          style: GoogleFonts.poppins(
+          style: const TextStyle(
             fontSize: 14,
             color: AppColors.textSecondary,
           ),
@@ -1011,7 +1010,7 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
                     children: [
                       Text(
                         'Market Skill Demand',
-                        style: GoogleFonts.poppins(
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
@@ -1019,7 +1018,7 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
                       ),
                       Text(
                         'Confidence threshold: ${result.thresholdApplied}',
-                        style: GoogleFonts.poppins(
+                        style: const TextStyle(
                           fontSize: 11,
                           color: AppColors.textHint,
                         ),
@@ -1056,7 +1055,7 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
                             const SizedBox(width: 8),
                             Text(
                               skill.skill,
-                              style: GoogleFonts.poppins(
+                              style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textPrimary,
@@ -1074,7 +1073,7 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
                           ),
                           child: Text(
                             isMatched ? 'Matched' : 'Gap',
-                            style: GoogleFonts.poppins(
+                            style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                               color: isMatched ? AppColors.success : const Color(0xFFD97706),
@@ -1102,7 +1101,7 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
                         const SizedBox(width: 12),
                         Text(
                           '${skill.confidencePct.toStringAsFixed(1)}%',
-                          style: GoogleFonts.poppins(
+                          style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
                             color: AppColors.textSecondary,
@@ -1138,7 +1137,7 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
             const SizedBox(height: 24),
             Text(
               'Analyzing Job Requirements...',
-              style: GoogleFonts.poppins(
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -1148,7 +1147,7 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
             Text(
               'Fetching market skills database for job predictions...',
               textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
+              style: const TextStyle(
                 fontSize: 12,
                 color: AppColors.textSecondary,
               ),
@@ -1176,9 +1175,9 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
           Expanded(
             child: Text(
               _errorMessage!,
-              style: GoogleFonts.poppins(
+              style: const TextStyle(
                 fontSize: 12,
-                color: const Color(0xFF991B1B),
+                color: Color(0xFF991B1B),
               ),
             ),
           ),

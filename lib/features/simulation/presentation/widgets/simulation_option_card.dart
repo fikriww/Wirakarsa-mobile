@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class SimulationOptionCard extends StatelessWidget {
@@ -46,7 +45,7 @@ class SimulationOptionCard extends StatelessWidget {
                 const SizedBox(width: 12),
                 Text(
                   label,
-                  style: GoogleFonts.poppins(
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: AppColors.primaryBlue,
