@@ -1,40 +1,109 @@
-# Wirapath - Your Path to Success
+# Wirapath — Your Path to Success
 
-Wirapath is a modern Flutter application designed to guide users on their journey to success. It features a clean, professional UI built with Flutter's Material 3 design system, leveraging high-quality typography and smooth animations.
+Wirapath is a Flutter mobile application built for the **Wirakarsa MBKM program**, designed to help students evaluate their tech-readiness, practice coding projects, and prepare for internship-level roles. It features a polished, multi-screen experience with skill assessments, a developer hub, CV screening, and simulation flows.
+
+---
 
 ## 🚀 Features
 
-- **Dynamic Splash Screen:** A polished entry animation to welcome users.
-- **Authentication Suite:**
-  - **Sign In:** Secure login with "Remember Me" and "Forgot Password" functionality.
-  - **Create Account:** Easy onboarding for new users.
-  - **Social Login:** Ready-to-implement Google and Facebook authentication.
-- **Modern UI/UX:** Built with Google Fonts (Poppins) and custom SVG icons.
-- **Efficient Routing:** Powered by `go_router` for deep linking and declarative navigation.
+### 🔐 Authentication
+- **Splash Screen** — Animated entry screen on app launch.
+- **Onboarding** — Step-by-step introduction for new users.
+- **Sign In / Create Account** — Secure auth with social login support (Google, Facebook).
+- **GitHub Integration** — Connect GitHub account via the assessment flow.
+
+### 🏠 Home
+- Dashboard with quick access to all main features.
+
+### 📋 Readiness Center
+Track and improve readiness for internship roles through structured tests:
+- **Initial Test** — Baseline skill assessment with review.
+- **Data Analysis Test** — Task-based data analysis challenges with review.
+- **UX Design Test** — UX/UI design challenges with review.
+- **Testing Test** — Software QA & testing challenges with review.
+- **CV Screening** — Upload and get AI-powered CV analysis with results page.
+
+### 💻 DevHub
+Hands-on coding project challenges to build a portfolio:
+- **React Testing Fundamentals** — Testing patterns for React apps.
+- **CSS Responsive Mastery** — Responsive layout and CSS challenges.
+- **React Component Basics** — Core React component design tasks.
+- **Async JavaScript Mastery** — Promises, async/await, and event loop challenges.
+- Each project has a dedicated **detail page**, a **code submission flow**, and a **result view**.
+
+### 🎮 Simulation
+Simulated internship scenarios to practice real-world tasks.
+
+### 👤 Profile
+Full user account management:
+- **Personal Information** — View and edit user profile data.
+- **Password & Security** — Update credentials and security settings.
+- **Notifications** — Manage notification preferences.
+- **Language & Appearance** — Localization and theme settings.
+- **Integrations** — Third-party service connections.
+- **Help & Support** — FAQs and support contact.
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Framework:** [Flutter](https://flutter.dev/)
-- **Language:** [Dart](https://dart.dev/)
-- **State Management/Routing:** [Go Router](https://pub.dev/packages/go_router)
-- **UI Components:** Material 3, Google Fonts, Flutter SVG
-- **Architecture:** Feature-based folder structure for scalability.
+| Layer | Technology |
+|---|---|
+| **Framework** | [Flutter](https://flutter.dev/) |
+| **Language** | [Dart](https://dart.dev/) |
+| **State Management** | [Flutter Riverpod](https://riverpod.dev/) `^3.3.1` |
+| **Navigation** | [Go Router](https://pub.dev/packages/go_router) `^15.1.2` |
+| **UI** | Material 3, [Google Fonts](https://pub.dev/packages/google_fonts) (Poppins), [Flutter SVG](https://pub.dev/packages/flutter_svg) |
+| **Networking** | [http](https://pub.dev/packages/http) `^1.2.0` |
+| **Backend** | Firebase (see `firebase.json`) |
+| **Architecture** | Feature-based folder structure |
+
+---
+
+## 📁 Project Structure
+
+```
+lib/
+├── main.dart               # App entry point
+├── app.dart                # Root MaterialApp config
+├── core/
+│   ├── models/             # Shared data models
+│   ├── providers/          # Global Riverpod providers
+│   ├── router/             # Go Router configuration
+│   ├── services/           # API & business logic services
+│   ├── theme/              # App theme & design tokens
+│   └── widgets/            # Shared/reusable widgets
+└── features/
+    ├── splash/             # Splash screen
+    ├── onboarding/         # Onboarding flow
+    ├── auth/               # Sign in & create account
+    ├── assessment/         # Skill assessment & GitHub connect
+    ├── main/               # Main shell with bottom navigation
+    ├── home/               # Home dashboard
+    ├── readiness/          # Readiness Center tests & CV screening
+    ├── devhub/             # DevHub coding projects
+    ├── simulation/         # Simulation feature
+    ├── profile/            # User profile & settings
+    └── initial_test/       # Initial test module
+```
+
+---
 
 ## 📋 Prerequisites
 
-Before you begin, ensure you have the following installed:
+- **Flutter SDK:** `^3.11.5` — [Install Flutter](https://docs.flutter.dev/get-started/install)
+- **Dart SDK:** Included with Flutter (`^3.10.0`)
+- **IDE:** [VS Code](https://code.visualstudio.com/) with the Flutter extension, or [Android Studio](https://developer.android.com/studio)
+- **Device:** Android Emulator, iOS Simulator, or a physical device
 
-- **Flutter SDK:** [Install Flutter](https://docs.flutter.dev/get-started/install) (version `^3.11.5` or higher)
-- **Dart SDK:** Included with Flutter.
-- **IDE:** [VS Code](https://code.visualstudio.com/) with Flutter extensions or [Android Studio](https://developer.android.com/studio).
-- **Emulators/Devices:** An Android Emulator, iOS Simulator, or a physical device.
+---
 
 ## ⚙️ Setup & Installation
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/wirapath-mobile.git
-   cd wirapath-mobile
+   git clone https://github.com/your-username/wirakarsa-mobile.git
+   cd wirakarsa-mobile
    ```
 
 2. **Install dependencies:**
@@ -42,49 +111,71 @@ Before you begin, ensure you have the following installed:
    flutter pub get
    ```
 
-3. **Check for issues:**
+3. **Verify your environment:**
    ```bash
    flutter doctor
    ```
 
+4. **Add Firebase config files** (required for backend features):
+   - Android: place `google-services.json` in `android/app/`
+   - iOS: place `GoogleService-Info.plist` in `ios/Runner/`
+
+---
+
 ## 🏃 Running the Project
 
-To run the application in debug mode:
-
+**Debug mode:**
 ```bash
 flutter run
 ```
 
-To build for production:
-
-### Android
+**Development entry point (with mock data):**
 ```bash
-flutter build apk --release
+flutter run -t lib/main_dev.dart
 ```
 
-### iOS
+**Release builds:**
+
 ```bash
+# Android
+flutter build apk --release
+
+# iOS
 flutter build ios --release
 ```
 
-## 🤝 Contributing
+---
 
-We welcome contributions! To contribute to Wirapath:
+## ✅ Code Quality
 
-1. **Fork** the project.
-2. **Create** your feature branch: `git checkout -b feature/AmazingFeature`.
-3. **Commit** your changes: `git commit -m 'Add some AmazingFeature'`.
-4. **Push** to the branch: `git push origin feature/AmazingFeature`.
-5. **Open** a Pull Request.
-
-Please ensure your code adheres to the project's linting rules by running:
+Run the analyzer before submitting a PR:
 ```bash
 flutter analyze
 ```
 
-## 📄 License
-
-This project is for internal use and "publish_to: none". See individual files for specific licensing if applicable.
+Run tests:
+```bash
+flutter test
+```
 
 ---
-Built with ❤️ by the Wirapath Team.
+
+## 🤝 Contributing
+
+1. **Fork** the repository.
+2. **Create** a feature branch: `git checkout -b feature/your-feature-name`
+3. **Commit** your changes: `git commit -m 'feat: add your feature'`
+4. **Push** to your branch: `git push origin feature/your-feature-name`
+5. **Open** a Pull Request.
+
+> Please ensure `flutter analyze` passes with no errors before opening a PR.
+
+---
+
+## 📄 License
+
+This project is developed for the **MBKM Wirakarsa program** and is set to `publish_to: none`. All rights reserved by the Wirapath Team.
+
+---
+
+Built with ❤️ by the **Wirapath Team**
