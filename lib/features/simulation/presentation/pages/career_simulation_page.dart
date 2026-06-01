@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/providers/user_provider.dart';
 import '../../../../core/models/career_simulation_model.dart';
@@ -16,6 +15,8 @@ import '../widgets/quick_reply_chips.dart';
 import '../widgets/chat_input_field.dart';
 import '../widgets/salary_scenario_card.dart';
 import 'voice_mode_page.dart';
+import '../../data/models/job_analysis_response.dart';
+import '../../data/services/job_analysis_api_service.dart';
 
 enum SimulationState {
   initial, // 3 option cards
@@ -36,14 +37,96 @@ class CareerSimulationPage extends ConsumerStatefulWidget {
 
 class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
   final _chatController = TextEditingController();
+  final _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   SimulationState _currentState = SimulationState.initial;
   String _currentSessionId = "";
   bool _isResponding = false;
 
+  final _apiService = JobAnalysisApiService();
+  bool _isAnalyzing = false;
+  String? _errorMessage;
+  JobAnalysisResponse? _analysisResult;
+
+  final Map<String, double> _userSkills = {
+    'testing (jest)': 0.30,
+    'testing': 0.30,
+    'jest': 0.30,
+    'web performance': 0.55,
+    'performance': 0.55,
+    'accessibility': 0.50,
+    'a11y': 0.50,
+    'state management': 0.85,
+    'redux': 0.85,
+    'react.js': 0.80,
+    'reactjs': 0.80,
+    'react': 0.80,
+    'css/tailwind': 0.83,
+    'css': 0.83,
+    'tailwind': 0.83,
+    'javascript': 0.75,
+    'typescript': 0.40,
+    'html5': 0.90,
+    'html': 0.90,
+  };
+
+  bool _doesUserMeetSkill(String skillName) {
+    final normalized = skillName.toLowerCase().trim();
+    for (final entry in _userSkills.entries) {
+      if (normalized.contains(entry.key) || entry.key.contains(normalized)) {
+        return entry.value >= 0.70;
+      }
+    }
+    return false;
+  }
+
+  Future<void> _analyzeJob(String jobTitle, {String? company, String? location, String? level}) async {
+    setState(() {
+      _isAnalyzing = true;
+      _errorMessage = null;
+      _analysisResult = null;
+    });
+
+    try {
+      final result = await _apiService.predictRequiredSkills(jobTitle);
+      setState(() {
+        _analysisResult = result;
+      });
+
+      final gaps = result.skills.where((s) => !_doesUserMeetSkill(s.skill)).map((s) => s.skill).toList();
+      String botMsg = 'I am analyzing the $jobTitle role';
+      if (company != null) botMsg += ' at $company';
+      botMsg += '. Based on your profile, we found a **${result.matchedJobSimilarityPct.toStringAsFixed(0)}%** match. ';
+      if (gaps.isNotEmpty) {
+        botMsg += 'Let\'s focus on improving your ${gaps.take(2).join(" and ")} skills. Are you ready for a mock technical interview?';
+      } else {
+        botMsg += 'You meet all major requirements! Are you ready for a mock technical interview?';
+      }
+
+      await _startNewSession(
+        type: 'jobdesk',
+        companyName: company ?? 'Custom Search',
+        role: jobTitle,
+        level: level ?? 'Entry-Mid',
+        initialBotMessage: botMsg,
+        targetState: SimulationState.jobdeskAnalyzerChat,
+      );
+
+      setState(() {
+        _isAnalyzing = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString().replaceAll('Exception: ', '');
+        _isAnalyzing = false;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _chatController.dispose();
+    _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -218,7 +301,7 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
                 'Conversation History',
-                style: GoogleFonts.poppins(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -246,11 +329,11 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
                         leading: Icon(icon, color: AppColors.primaryBlue),
                         title: Text(
                           "${s.role} - ${s.companyName}",
-                          style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
                         ),
                         subtitle: Text(
                           "Status: ${s.status} · Level: ${s.level}",
-                          style: GoogleFonts.poppins(fontSize: 11, color: AppColors.textHint),
+                          style: const TextStyle(fontSize: 11, color: AppColors.textHint),
                         ),
                         onTap: () {
                           Navigator.pop(context);
@@ -377,8 +460,23 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
             ),
           if (_currentState == SimulationState.jobdeskAnalyzerChat)
             QuickReplyChips(
-              replies: const ['How to improve TypeScript?', 'Start mock interview'],
-              onTap: _sendMessage,
+              replies: [
+                if (_analysisResult != null && _analysisResult!.skills.any((s) => !_doesUserMeetSkill(s.skill)))
+                  'How to improve ${_analysisResult!.skills.firstWhere((s) => !_doesUserMeetSkill(s.skill)).skill}?'
+                else
+                  'How to improve TypeScript?',
+                'Start mock interview',
+              ],
+              onTap: (reply) {
+                if (reply.startsWith('How to improve')) {
+                  final skill = reply.replaceAll('How to improve ', '').replaceAll('?', '');
+                  _sendMessage('I want to focus on learning and improving my $skill skill. What resources or steps do you suggest?');
+                } else if (reply == 'Start mock interview') {
+                  _sendMessage('I am ready to start the mock technical interview for the ${_analysisResult?.jobTitle ?? "Frontend Developer"} position.');
+                } else {
+                  _sendMessage(reply);
+                }
+              },
             ),
 
           // Chat input field
@@ -421,7 +519,7 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
                 'Interesting Questions',
-                style: GoogleFonts.poppins(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -450,7 +548,7 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         child: Text(
           text,
-          style: GoogleFonts.poppins(
+          style: const TextStyle(
             fontSize: 14,
             color: AppColors.textSecondary,
           ),
@@ -653,14 +751,95 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
 
   /// State 5: Jobdesk Analyzer - Job listing cards
   Widget _buildJobdeskAnalyzer() {
+    if (_isAnalyzing) {
+      return _buildLoadingState();
+    }
+
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       children: [
         const ChatBubble(
-          message: 'Choose a specific job listing you want to analyze.',
+          message: 'Choose a specific job listing or type a custom job title below to analyze required skills.',
           time: '12:49 AM',
         ),
         const SizedBox(height: 16),
+        
+        // Error banner if any
+        _buildErrorBanner(),
+
+        // Search Bar for custom jobs
+        Container(
+          margin: const EdgeInsets.only(left: 46, bottom: 16),
+          decoration: BoxDecoration(
+            color: AppColors.inputBackground,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.divider),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          child: Row(
+            children: [
+              const Icon(Icons.search, color: Colors.grey, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  decoration: const InputDecoration(
+                    hintText: 'Enter custom job (e.g. Flutter Developer)',
+                    hintStyle: TextStyle(color: AppColors.textHint, fontSize: 13),
+                    border: InputBorder.none,
+                  ),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textPrimary,
+                  ),
+                  onChanged: (val) => setState(() {}),
+                  onSubmitted: (value) {
+                    if (value.trim().isNotEmpty) {
+                      _analyzeJob(value.trim());
+                    }
+                  },
+                ),
+              ),
+              if (_searchController.text.isNotEmpty)
+                IconButton(
+                  icon: const Icon(Icons.clear, size: 16, color: Colors.grey),
+                  onPressed: () {
+                    setState(() {
+                      _searchController.clear();
+                    });
+                  },
+                ),
+              ElevatedButton(
+                onPressed: _searchController.text.trim().isEmpty
+                    ? null
+                    : () {
+                        final query = _searchController.text.trim();
+                        _analyzeJob(query);
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryBlue,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: Colors.grey.shade300,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'Analyze',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
         Padding(
           padding: const EdgeInsets.only(left: 46),
           child: Column(
@@ -680,14 +859,7 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
                 salary: '8-15 million IDR/month',
                 postedTime: '1 day ago',
                 experienceLevel: 'Entry-Mid',
-                onAnalyze: () => _startNewSession(
-                  type: 'jobdesk',
-                  companyName: 'Gojek',
-                  role: 'Frontend Developer',
-                  level: 'Entry-Mid',
-                  initialBotMessage: 'I am analyzing the Frontend Developer role at Gojek. Based on your profile, you match 80%. Let\'s focus on improving your TypeScript and Web Performance skills. Are you ready for a mock technical interview?',
-                  targetState: SimulationState.jobdeskAnalyzerChat,
-                ),
+                onAnalyze: () => _analyzeJob('Frontend Developer', company: 'Gojek', location: 'Jakarta', level: 'Entry-Mid'),
               ),
               JobListingCard(
                 jobTitle: 'React Developer',
@@ -705,14 +877,7 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
                 salary: '8-15 million IDR/month',
                 postedTime: '1 day ago',
                 experienceLevel: 'Entry-Mid',
-                onAnalyze: () => _startNewSession(
-                  type: 'jobdesk',
-                  companyName: 'Tokopedia',
-                  role: 'React Developer',
-                  level: 'Entry-Mid',
-                  initialBotMessage: 'I am analyzing the React Developer role at Tokopedia. Let\'s evaluate your competency in Redux state slice structures and Unit Testing. What state manager do you have the most hours of experience with?',
-                  targetState: SimulationState.jobdeskAnalyzerChat,
-                ),
+                onAnalyze: () => _analyzeJob('React Developer', company: 'Tokopedia', location: 'Jakarta', level: 'Entry-Mid'),
               ),
             ],
           ),
@@ -737,17 +902,26 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
         }
 
         final messages = snapshot.data ?? [];
-        if (messages.isEmpty) {
+        if (messages.isEmpty && _currentState != SimulationState.jobdeskAnalyzerChat) {
           return const Center(child: Text("Initializing chat mentorship session..."));
         }
 
         _scrollToBottom();
 
+        final showAnalysisCard = _currentState == SimulationState.jobdeskAnalyzerChat && _analysisResult != null;
+
         return ListView.builder(
           controller: _scrollController,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          itemCount: messages.length + (_isResponding ? 1 : 0),
+          itemCount: messages.length + (_isResponding ? 1 : 0) + (showAnalysisCard ? 1 : 0),
           itemBuilder: (context, idx) {
+            if (showAnalysisCard) {
+              if (idx == 0) {
+                return _buildAnalysisResultsCard();
+              }
+              idx -= 1; // Shift message index by 1
+            }
+
             if (idx == messages.length) {
               // Show typing indicator or skeleton
               return const Padding(
@@ -789,6 +963,236 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildAnalysisResultsCard() {
+    final result = _analysisResult;
+    if (result == null) return const SizedBox.shrink();
+
+    final skills = result.skills;
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 46, bottom: 20),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.divider),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE1F0FF),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.analytics_outlined,
+                    color: AppColors.primaryBlue,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Market Skill Demand',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        'Confidence threshold: ${result.thresholdApplied}',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textHint,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Divider(height: 1),
+            const SizedBox(height: 16),
+            
+            ...skills.map((skill) {
+              final isMatched = _doesUserMeetSkill(skill.skill);
+              final matchColor = isMatched ? AppColors.success : const Color(0xFFF59E0B);
+              final progressVal = skill.confidence;
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              isMatched ? Icons.check_circle_outline : Icons.warning_amber_rounded,
+                              color: matchColor,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              skill.skill,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: isMatched 
+                                ? AppColors.success.withOpacity(0.08)
+                                : const Color(0xFFFEF3C7),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            isMatched ? 'Matched' : 'Gap',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: isMatched ? AppColors.success : const Color(0xFFD97706),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: progressVal,
+                              backgroundColor: AppColors.divider,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                isMatched ? AppColors.success : AppColors.primaryBlue,
+                              ),
+                              minHeight: 6,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          '${skill.confidencePct.toStringAsFixed(1)}%',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 64),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(
+              width: 48,
+              height: 48,
+              child: CircularProgressIndicator(
+                strokeWidth: 4,
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryBlue),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Analyzing Job Requirements...',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Fetching market skills database for job predictions...',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorBanner() {
+    if (_errorMessage == null) return const SizedBox.shrink();
+    return Container(
+      margin: const EdgeInsets.only(left: 46, bottom: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFEE2E2),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFFCA5A5)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, color: Color(0xFFEF4444), size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              _errorMessage!,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Color(0xFF991B1B),
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, color: Color(0xFF991B1B), size: 16),
+            onPressed: () {
+              setState(() {
+                _errorMessage = null;
+              });
+            },
+          ),
+        ],
+      ),
     );
   }
 }
