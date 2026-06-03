@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../widgets/segment_button.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../widgets/project_card.dart';
-import '../widgets/radar_chart.dart';
-import 'code_review_page.dart';
 
 class DevhubPage extends StatefulWidget {
   final bool initialIsCodeReviewActive;
@@ -18,100 +16,42 @@ class DevhubPage extends StatefulWidget {
 }
 
 class _DevhubPageState extends State<DevhubPage> {
-  final int _selectedIndex = 2;
-  late bool _isCodeReviewActive;
-
-  @override
-  void initState() {
-    super.initState();
-    _isCodeReviewActive = widget.initialIsCodeReviewActive;
-  }
-
-  @override
-  void didUpdateWidget(DevhubPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.initialIsCodeReviewActive != oldWidget.initialIsCodeReviewActive) {
-      setState(() {
-        _isCodeReviewActive = widget.initialIsCodeReviewActive;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/home');
-            }
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.menu, color: Colors.black),
-            onPressed: () {},
-          ),
-        ],
-        centerTitle: true,
-        title: Column(
-          children: const [
-            Text(
-              'Development Hub',
-              style: TextStyle(
-                  color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            Text(
-              'Level up your skills and work readiness',
-              style: TextStyle(color: Colors.grey, fontSize: 12),
-            ),
-          ],
-        ),
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(1),
-          child: Divider(height: 1, color: Colors.black12),
-        ),
-      ),
+      backgroundColor: AppColors.background,
+      appBar: _buildAppBar(),
       body: ScrollConfiguration(
         behavior: const ScrollBehavior().copyWith(overscroll: false),
         child: SingleChildScrollView(
           physics: const ClampingScrollPhysics(),
-          padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 100),
+          padding: const EdgeInsets.only(left: 20, right: 20, top: 24, bottom: 100),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: SegmentButton(
-                      label: "Mini Project",
-                      isActive: !_isCodeReviewActive,
-                      onTap: () => setState(() => _isCodeReviewActive = false),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: SegmentButton(
-                      label: "Code Review",
-                      isActive: _isCodeReviewActive,
-                      onTap: () => setState(() => _isCodeReviewActive = true),
-                    ),
-                  ),
-                ],
+              // ── Heading ──
+              const Text(
+                'Development Hub',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primaryDark,
+                  letterSpacing: -0.3,
+                ),
               ),
-              const SizedBox(height: 16),
-              _isCodeReviewActive 
-                  ? CodeReviewSection(
-                      onSwitchToMiniProject: () => setState(() => _isCodeReviewActive = false),
-                    )
-                  : _buildMainContent(),
+              const SizedBox(height: 8),
+              const Text(
+                'Rancang dan kembangkan proyek nyata untuk memperkuat portofolio Anda dengan ulasan instan dari AI.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                  height: 1.6,
+                ),
+              ),
+              const SizedBox(height: 28),
+
+              // ── Project Cards ──
+              _buildProjectsList(),
             ],
           ),
         ),
@@ -119,76 +59,87 @@ class _DevhubPageState extends State<DevhubPage> {
     );
   }
 
-  Widget _buildMainContent() {
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      backgroundColor: AppColors.white,
+      surfaceTintColor: AppColors.white,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.textPrimary, size: 20),
+        onPressed: () {
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go('/home');
+          }
+        },
+      ),
+      bottom: const PreferredSize(
+        preferredSize: Size.fromHeight(1),
+        child: Divider(height: 1, color: AppColors.divider),
+      ),
+    );
+  }
+
+  Widget _buildProjectsList() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Your Skill Map',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 15),
-        AspectRatio(
-          aspectRatio: 1.1,
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.black.withOpacity(0.05)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                )
-              ],
-            ),
-            child: CustomPaint(
-              painter: RadarChartPainter(),
-            ),
-          ),
-        ),
-        const SizedBox(height: 30),
-        const Text(
-          'Mini Projects for You',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 15),
+        // Card 1 — Reviewed
         ProjectCard(
-          title: "React Testing Fundamentals",
-          description: "Build a complete checkout form using TDD approach with Jest & React Testing Library.",
-          gap: "Skill Gap: 78%",
-          tags: ["Intermediate", "6 hrs", "4 variants"],
-          progress: 0.3,
-          onTapStartProject: () => context.push('/devhub/react-testing-fundamentals'),
+          title: 'Responsive Portfolio Landing Page',
+          description:
+              'Build a modern, mobile-first portfolio landing page demonstrating semantic layout and responsive grid...',
+          level: 'BEGINNER',
+          status: 'SELESAI DIREVIEW',
+          duration: '2 hours',
+          techTags: ['HTML/CSS'],
+          score: 80,
+          onTapViewResult: () =>
+              context.push('/devhub/css-responsive-mastery/submit'),
         ),
-        const SizedBox(height: 15),
+        const SizedBox(height: 16),
+
+        // Card 2 — Reviewed
         ProjectCard(
-          title: "CSS Responsive Mastery",
-          description: "Build a fully accessible UI component library following WCAG 2.1 AA.",
-          gap: "Skill Gap: 15%",
-          tags: ["Intermediate", "4 hrs", "3 variants"],
-          progress: 0.9,
-          onTapStartProject: () => context.push('/devhub/css-responsive-mastery'),
+          title: 'React Task Tracker Dashboard',
+          description:
+              'Build a highly interactive React task tracker application showcasing complex state management...',
+          level: 'INTERMEDIATE',
+          status: 'SELESAI DIREVIEW',
+          duration: '4 hours',
+          techTags: ['React'],
+          score: 80,
+          onTapViewResult: () =>
+              context.push('/devhub/react-component-basic/submit'),
         ),
-        const SizedBox(height: 15),
+        const SizedBox(height: 16),
+
+        // Card 3 — Not started
         ProjectCard(
-          title: "React Component Basic",
-          description: "Build responsive landing page including a navbar, hero section, and call-to-action.",
-          gap: "Skill Gap: 48%",
-          tags: ["Intermediate", "4 hrs", "4 variants"],
-          progress: 0.85,
-          onTapStartProject: () => context.push('/devhub/react-component-basic'),
+          title: 'Analytics Dashboard with Charts',
+          description:
+              'Create a premium data analytics dashboard featuring visual charts, deep filtering, and smooth interactive...',
+          level: 'ADVANCED',
+          status: 'BELUM MULAI',
+          duration: '8 hours',
+          techTags: ['React/Next.js'],
+          onTapStartProject: () =>
+              context.push('/devhub/react-testing-fundamentals'),
         ),
-        const SizedBox(height: 15),
+        const SizedBox(height: 16),
+
+        // Card 4 — Not started
         ProjectCard(
-          title: "Async JavaScript Mastery",
-          description: "Master asynchronous JavaScript to handle tasks like API calls and timers.",
-          gap: "Skill Gap: 25%",
-          tags: ["Intermediate", "6 hrs", "3 variants"],
-          progress: 0.74,
-          onTapStartProject: () => context.push('/devhub/async-javascript-mastery'),
+          title: 'Async JavaScript Mastery',
+          description:
+              'Master asynchronous JavaScript to handle tasks like API calls and timers effectively...',
+          level: 'INTERMEDIATE',
+          status: 'BELUM MULAI',
+          duration: '6 hours',
+          techTags: ['JavaScript'],
+          onTapStartProject: () =>
+              context.push('/devhub/async-javascript-mastery'),
         ),
         const SizedBox(height: 20),
       ],

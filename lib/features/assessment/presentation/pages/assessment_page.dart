@@ -13,7 +13,7 @@ class AssessmentPage extends StatefulWidget {
 class _AssessmentPageState extends State<AssessmentPage> {
   final PageController _pageController = PageController();
   int _currentStep = 0;
-  final int _totalSteps = 5;
+  final int _totalSteps = 4;
 
   // Form states
   final TextEditingController _nameController = TextEditingController();
@@ -102,7 +102,6 @@ class _AssessmentPageState extends State<AssessmentPage> {
                   _buildScreen1(),
                   _buildScreen2(),
                   _buildScreen3(),
-                  _buildScreen4(),
                   _buildScreen5(),
                 ],
               ),
@@ -374,104 +373,7 @@ class _AssessmentPageState extends State<AssessmentPage> {
     );
   }
 
-  // SCREEN 4
-  Widget _buildScreen4() {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: 40),
-          Text(
-            "Show us what you\nalready have.",
-            style: AppTextStyles.heading1.copyWith(height: 1.3),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            "Upload your CV and transcript so we can see your potential.",
-            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 60),
-          _buildUploadField("Upload CV"),
-          const SizedBox(height: 24),
-          _buildUploadField("Upload Transcript"),
-          const Spacer(),
-          ElevatedButton(
-            onPressed: _nextStep,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryBlue,
-              foregroundColor: AppColors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            child: const Text('Next'),
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: GestureDetector(
-              onTap: _nextStep,
-              child: RichText(
-                text: TextSpan(
-                  text: "Don't have CV or transcript? No worries, ",
-                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
-                  children: [
-                    TextSpan(
-                      text: "Skip for now",
-                      style: AppTextStyles.bodySmall.copyWith(color: AppColors.primaryBlue, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: _previousStep,
-              child: Text('Back', style: TextStyle(color: AppColors.primaryBlue, fontWeight: FontWeight.bold)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildUploadField(String label) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  color: AppColors.inputBackground,
-                  borderRadius: const BorderRadius.horizontal(left: Radius.circular(8)),
-                ),
-                child: Text(".pdf or .docx", style: TextStyle(color: AppColors.textHint)),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              decoration: BoxDecoration(
-                color: AppColors.primaryBlue,
-                borderRadius: const BorderRadius.horizontal(right: Radius.circular(8)),
-              ),
-              child: Text("Browse", style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold)),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // SCREEN 5
+  // SCREEN 5 (was Screen 4 after removal of CV upload)
   Widget _buildScreen5() {
     return Padding(
       padding: const EdgeInsets.all(24.0),
