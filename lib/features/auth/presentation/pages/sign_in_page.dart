@@ -1,88 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/services/api_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/social_login_row.dart';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/providers/user_provider.dart';
-
-class SignInPage extends ConsumerStatefulWidget {
+class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
 
   @override
-  ConsumerState<SignInPage> createState() => _SignInPageState();
+  State<SignInPage> createState() => _SignInPageState();
 }
 
-class _SignInPageState extends ConsumerState<SignInPage> {
-  final _apiService = ApiService();
+class _SignInPageState extends State<SignInPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _rememberMe = false;
-  bool _isLoading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  void _signIn() async {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
-
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill in all fields.'),
-          backgroundColor: AppColors.error,
-        ),
-      );
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    try {
-      await _apiService.login(
-        email: email,
-        password: password,
-      );
-      
-      // Update global user state
-      await ref.read(userProfileProvider.notifier).refreshProfile();
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Signed in successfully! Welcome back.'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-        context.go('/home');
-      }
-    } catch (e) {
-      if (mounted) {
-        String message = e.toString();
-        if (message.startsWith('Exception: ')) {
-          message = message.substring(11);
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
   }
 
   @override
@@ -177,17 +117,13 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               const SizedBox(height: 24),
 
               // Sign In Button
-              _isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(AppColors.primaryBlue),
-                      ),
-                    )
-                  : ElevatedButton(
-                      onPressed: _signIn,
-                      child: const Text('Sign In'),
-                    ),
+              ElevatedButton(
+                onPressed: () {
+                  // Navigate to Home
+                  context.go('/home');
+                },
+                child: const Text('Sign In'),
+              ),
 
               const SizedBox(height: 28),
 

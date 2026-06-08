@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/models/initial_test_model.dart';
+import '../../domain/entities/initial_test_data.dart';
 
 class InitialTestPage extends StatefulWidget {
   final InitialTestData data;
-  final Function(Map<int, int> selectedAnswers, Map<int, String> essayAnswers)? onSubmit;
+  final VoidCallback? onSubmit;
 
   const InitialTestPage({
     super.key,
@@ -167,18 +167,8 @@ class _InitialTestPageState extends State<InitialTestPage> {
               height: 50,
               child: ElevatedButton(
                 onPressed: () {
-                  final essayAnswers = _essayControllers.map(
-                    (key, controller) => MapEntry(key, controller.text),
-                  );
-
-                  debugPrint('--- TEST SUBMITTED ---');
-                  debugPrint('Test: ${widget.data.testTitle}');
-                  debugPrint('Selected Answers: $_selectedAnswers');
-                  debugPrint('Essay Answers: $essayAnswers');
-                  debugPrint('----------------------');
-
                   if (widget.onSubmit != null) {
-                    widget.onSubmit!(_selectedAnswers, essayAnswers);
+                    widget.onSubmit!();
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(

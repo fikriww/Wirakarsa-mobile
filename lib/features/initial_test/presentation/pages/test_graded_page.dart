@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/models/test_result_model.dart';
+import '../../domain/entities/test_result_data.dart';
 import '../widgets/test_grade_score.dart';
 import '../widgets/test_review_summary.dart';
 import '../widgets/test_metrics_grid.dart';
@@ -91,7 +91,7 @@ class TestGradedPage extends StatelessWidget {
                     scoreValue: data.scoreValue,
                     numericScore: data.numericScore,
                     maxScore: data.maxScore,
-                    submittedDate: "Submitted ${data.submittedDate.day}/${data.submittedDate.month}/${data.submittedDate.year}",
+                    submittedDate: data.submittedDate,
                     statusText: data.statusText,
                     statusColor: data.statusColor,
                     statusTextColor: data.statusTextColor,

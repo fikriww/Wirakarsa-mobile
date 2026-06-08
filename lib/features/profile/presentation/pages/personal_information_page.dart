@@ -1,89 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/providers/user_provider.dart';
 
-class PersonalInformationPage extends ConsumerStatefulWidget {
+class PersonalInformationPage extends StatefulWidget {
   const PersonalInformationPage({super.key});
 
   @override
-  ConsumerState<PersonalInformationPage> createState() =>
+  State<PersonalInformationPage> createState() =>
       _PersonalInformationPageState();
 }
 
-class _PersonalInformationPageState extends ConsumerState<PersonalInformationPage> {
-  late TextEditingController _firstNameController;
-  late TextEditingController _universityController;
-  late TextEditingController _majorController;
-  bool _isInitialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _firstNameController = TextEditingController();
-    _universityController = TextEditingController();
-    _majorController = TextEditingController();
-  }
+class _PersonalInformationPageState extends State<PersonalInformationPage> {
+  final _firstNameController = TextEditingController(text: 'John');
+  final _lastNameController = TextEditingController(text: 'Doe');
+  final _universityController =
+      TextEditingController(text: 'Universitas Indonesia');
+  final _majorController =
+      TextEditingController(text: 'Teknik Informatika');
 
   @override
   void dispose() {
     _firstNameController.dispose();
+    _lastNameController.dispose();
     _universityController.dispose();
     _majorController.dispose();
     super.dispose();
   }
 
-  void _initializeData() {
-    final userProfile = ref.read(userProfileProvider).value;
-    if (userProfile != null && !_isInitialized) {
-      _firstNameController.text = userProfile.displayName;
-      _universityController.text = userProfile.preferences['university'] ?? '';
-      _majorController.text = userProfile.preferences['major'] ?? '';
-      _isInitialized = true;
-    }
-  }
-
-  Future<void> _handleSave() async {
-    final user = ref.read(userProfileProvider).value;
-    if (user == null) return;
-
-    try {
-      await ref.read(apiServiceProvider).updateOnboardingProfile(
-        userId: user.uid,
-        firstName: _firstNameController.text.split(' ').first,
-        lastName: _firstNameController.text.split(' ').length > 1 ? _firstNameController.text.split(' ').sublist(1).join(' ') : '',
-        university: _universityController.text,
-        major: _majorController.text,
-        graduationYear: 2026, // default since we don't have this field
-      );
-      
-      // Refresh profile data
-      await ref.read(userProfileProvider.notifier).refreshProfile();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Changes saved successfully'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error saving changes: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    _initializeData();
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -168,10 +113,24 @@ class _PersonalInformationPageState extends ConsumerState<PersonalInformationPag
                   ),
                   const SizedBox(height: 32),
 
-                  // Full Name
-                  _buildLabeledField(
-                    label: 'Full Name',
-                    controller: _firstNameController,
+                  // First Name & Last Name Row
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: _buildLabeledField(
+                          label: 'First Name',
+                          controller: _firstNameController,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildLabeledField(
+                          label: 'Last Name',
+                          controller: _lastNameController,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 20),
 
@@ -198,7 +157,14 @@ class _PersonalInformationPageState extends ConsumerState<PersonalInformationPag
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _handleSave,
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Changes saved successfully'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryBlue,
                   foregroundColor: Colors.white,

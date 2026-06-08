@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/providers/user_provider.dart';
 
-class HomePage extends ConsumerWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final userProfileAsync = ref.watch(userProfileProvider);
-
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
@@ -21,11 +17,7 @@ class HomePage extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                userProfileAsync.when(
-                  data: (user) => _buildHeader(user?.displayName ?? "User"),
-                  loading: () => _buildHeader("Loading..."),
-                  error: (_, __) => _buildHeader("User"),
-                ),
+                _buildHeader(),
                 const SizedBox(height: 24),
                 _buildSearchBar(),
                 const SizedBox(height: 32),
@@ -66,7 +58,7 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(String displayName) {
+  Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -82,7 +74,7 @@ class HomePage extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text("Welcome back!", style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary)),
-                Text(displayName, style: AppTextStyles.heading1.copyWith(fontSize: 24)),
+                Text("John", style: AppTextStyles.heading1.copyWith(fontSize: 24)),
               ],
             ),
           ],

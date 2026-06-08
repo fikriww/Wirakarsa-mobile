@@ -8,16 +8,14 @@ import '../../domain/entities/test_result_data.dart';
 import 'initial_test_page.dart';
 import 'test_graded_page.dart';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/providers/user_provider.dart';
-class ReadinessCenterPage extends ConsumerStatefulWidget {
+class ReadinessCenterPage extends StatefulWidget {
   const ReadinessCenterPage({super.key});
 
   @override
-  ConsumerState<ReadinessCenterPage> createState() => _ReadinessCenterPageState();
+  State<ReadinessCenterPage> createState() => _ReadinessCenterPageState();
 }
 
-class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
+class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
   int _selectedTab = 1; // Default: Initial Test tab
 
   final List<String> _tabs = ['Overview', 'Initial Test', 'Skill Map', 'Skill Gap'];
@@ -341,7 +339,7 @@ class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => TestGradedPage(data: result.toCore()),
+                          builder: (_) => TestGradedPage(data: result),
                         ),
                       );
                     },
@@ -373,41 +371,23 @@ class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => InitialTestPage(
-                          data: test.toCore(),
-                          onSubmit: (selectedAnswers, essayAnswers) async {
-                            debugPrint('ReadinessCenterPage: Test ${test.testTitle} submitted.');
+                          data: test,
+                          onSubmit: () {
+                            Navigator.of(context).pop(); // Go back from test
+                            final testResult = allTestResults[index];
                             
-                            final user = ref.read(userProfileProvider).value;
-                            if (user != null) {
-                              final resultData = {
-                                'testId': test.id,
-                                'testTitle': test.testTitle,
-                                'selectedAnswers': selectedAnswers.map((k, v) => MapEntry(k.toString(), v)),
-                                'essayAnswers': essayAnswers.map((k, v) => MapEntry(k.toString(), v)),
-                                'status': 'completed',
-                              };
-                              
-                              // Mock saving result to backend
-                              debugPrint('Saving result: $resultData');
-                            }
+                            // Optional: Update state to mark as done
+                            setState(() {
+                              _testCompleted[index] = true;
+                              _testResults[index] = testResult;
+                            });
 
-                            if (mounted) {
-                              Navigator.of(context).pop(); // Go back from test
-                              final testResult = allTestResults[index];
-                              
-                              // Optional: Update state to mark as done
-                              setState(() {
-                                _testCompleted[index] = true;
-                                _testResults[index] = testResult;
-                              });
-
-                              // Go to result page
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => TestGradedPage(data: testResult.toCore()),
-                                ),
-                              );
-                            }
+                            // Go to result page
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => TestGradedPage(data: testResult),
+                              ),
+                            );
                           },
                         ),
                       ),

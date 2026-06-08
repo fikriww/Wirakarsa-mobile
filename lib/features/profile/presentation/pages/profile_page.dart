@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/providers/user_provider.dart';
-import '../../../../core/models/user_model.dart';
 import '../widgets/profile_header_card.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/competition_card.dart';
@@ -11,20 +8,18 @@ import '../widgets/skill_progress.dart';
 import '../widgets/settings_section.dart';
 import '../widgets/settings_tile.dart';
 
-class ProfilePage extends ConsumerStatefulWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  ConsumerState<ProfilePage> createState() => _ProfilePageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends ConsumerState<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage> {
   int _selectedTab = 0; // 0 for My Profile, 1 for Settings
 
   @override
   Widget build(BuildContext context) {
-    final userProfileAsync = ref.watch(userProfileProvider);
-    
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -138,7 +133,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
             // Content
             if (_selectedTab == 0)
-              _buildProfileContent(userProfileAsync)
+              _buildProfileContent()
             else
               _buildSettingsContent(),
           ],
@@ -147,16 +142,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildProfileContent(AsyncValue<UserModel?> userProfileAsync) {
-    final userProfile = userProfileAsync.value;
-    
+  Widget _buildProfileContent() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ProfileHeaderCard(
-          name: userProfile?.displayName ?? 'User',
-          role: userProfile?.role ?? 'Frontend Developer',
-        ),
+        const ProfileHeaderCard(name: 'John Doe', role: 'Frontend Developer'),
         const SizedBox(height: 16),
 
         // Stats
@@ -338,12 +328,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
         // Logout Button
         ElevatedButton(
-          onPressed: () async {
-            await ref.read(apiServiceProvider).logout();
-            ref.read(userProfileProvider.notifier).logout();
-            if (context.mounted) {
-              context.go('/sign-in');
-            }
+          onPressed: () {
+            context.go('/sign-in');
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.white,

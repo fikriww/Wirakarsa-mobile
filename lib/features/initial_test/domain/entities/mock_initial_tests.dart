@@ -4,7 +4,6 @@ import 'initial_test_data.dart';
 /// Mock data for the 4 initial tests based on Figma screenshots
 // Initial Test 1
 final programmingTestData = InitialTestData(
-  id: 'programming',
   testTitle: 'Programming /\nSoftware Development',
   testSubtitle: 'Multiple Choice · 5 questions',
   badgeText: 'PROG',
@@ -60,7 +59,6 @@ final programmingTestData = InitialTestData(
 );
 
 final dataAnalysisTestData = InitialTestData(
-  id: 'data_analysis',
   testTitle: 'Data Analysis',
   testSubtitle: 'File Upload + Short Essay',
   badgeText: 'DTAN',
@@ -97,7 +95,6 @@ final dataAnalysisTestData = InitialTestData(
 );
 
 final uxDesignTestData = InitialTestData(
-  id: 'ux_design',
   testTitle: 'User Experience Design',
   testSubtitle: 'Design Brief + Portfolio Upload',
   badgeText: 'HCEV',
@@ -123,7 +120,6 @@ final uxDesignTestData = InitialTestData(
 );
 
 final testingTestData = InitialTestData(
-  id: 'testing',
   testTitle: 'Testing',
   testSubtitle: 'Multiple Choice · 5 questions',
   badgeText: 'TEST',

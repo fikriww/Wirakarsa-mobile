@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/models/test_result_model.dart';
+import '../../domain/entities/test_result_data.dart';
 
 /// Colored card displaying an issue to fix
 class IssueToFixCard extends StatelessWidget {

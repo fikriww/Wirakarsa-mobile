@@ -1,38 +1,21 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
-import '../../../../core/providers/user_provider.dart';
-import '../../../../core/models/initial_test_model.dart';
-import '../../../../core/models/test_result_model.dart';
-import '../../../initial_test/presentation/pages/initial_test_page.dart' as dyn;
-import '../../../initial_test/presentation/pages/test_graded_page.dart' as dyn_graded;
-
-class ReadinessCenterPage extends ConsumerStatefulWidget {
+class ReadinessCenterPage extends StatefulWidget {
   final int initialTabIndex;
   const ReadinessCenterPage({super.key, this.initialTabIndex = 0});
 
   @override
-  ConsumerState<ReadinessCenterPage> createState() => _ReadinessCenterPageState();
+  State<ReadinessCenterPage> createState() => _ReadinessCenterPageState();
 }
 
-class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
+class _ReadinessCenterPageState extends State<ReadinessCenterPage> {
   late int _selectedTabIndex;
   final List<String> _tabs = ["Overview", "Initial Test", "Skill Map", "Skill Gap"];
-
-  // Default fallback skills if user profile lacks skills data
-  final Map<String, double> _defaultSkills = {
-    "Testing (Jest)": 0.3,
-    "Web Performance": 0.15,
-    "Accessibility": 0.5,
-    "State Management": 0.85,
-    "React.js": 0.80,
-    "CSS/Tailwind": 0.83,
-  };
 
   @override
   void initState() {
@@ -116,53 +99,12 @@ class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
     }
   }
 
-  // Helper to extract user's skills or return defaults
-  Map<String, double> _getSkills() {
-    final userProfile = ref.watch(userProfileProvider).value;
-    if (userProfile != null && userProfile.skills.isNotEmpty) {
-      return userProfile.skills;
-    }
-    return _defaultSkills;
-  }
-
   // --- TAB 0: OVERVIEW ---
   Widget _buildOverviewTab() {
-    final userProfile = ref.watch(userProfileProvider).value;
-    final results = ref.watch(userTestResultsProvider).value ?? [];
-    final skills = _getSkills();
-
-    // 1. Calculate overall readiness score based on test results
-    double readinessPercent = 63.0; // Default fallback
-    if (results.isNotEmpty) {
-      double sum = 0.0;
-      for (var r in results) {
-        if (r.maxScore > 0) {
-          sum += (r.numericScore / r.maxScore) * 100.0;
-        }
-      }
-      readinessPercent = sum / results.length;
-    }
-
-    // 2. Count critical gaps (< 40%) and strengths (>= 70%)
-    int criticalGaps = 0;
-    int strengths = 0;
-    skills.forEach((key, val) {
-      if (val < 0.40) {
-        criticalGaps++;
-      } else if (val >= 0.70) {
-        strengths++;
-      }
-    });
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildStatsGrid(
-          readiness: "${readinessPercent.toStringAsFixed(0)}%",
-          skillsMapped: "${skills.length}",
-          criticalGaps: "$criticalGaps",
-          strengths: "$strengths",
-        ),
+        _buildStatsGrid(),
         const SizedBox(height: 24),
         Text("CV Analysis", style: AppTextStyles.heading1.copyWith(fontSize: 18)),
         const SizedBox(height: 16),
@@ -191,102 +133,54 @@ class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
 
   // --- TAB 1: INITIAL TEST ---
   Widget _buildInitialTestTab() {
-    final testsAsync = ref.watch(initialTestsProvider);
-    final resultsAsync = ref.watch(userTestResultsProvider);
-
-    return testsAsync.when(
-      data: (tests) {
-        final results = resultsAsync.value ?? [];
-        if (tests.isEmpty) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 40),
-              child: Text("No initial competency tests found. They will be seeded shortly."),
-            ),
-          );
-        }
-
-        // Sort tests so PROG is first, then DTAN, UX, TEST (custom ordering)
-        final orderedTests = List<InitialTestData>.from(tests);
-        orderedTests.sort((a, b) {
-          final order = {'prog': 1, 'dtan': 2, 'hcev': 3, 'test': 4};
-          return (order[a.id] ?? 99).compareTo(order[b.id] ?? 99);
-        });
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE1F0FF),
-                borderRadius: BorderRadius.circular(12),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFE1F0FF),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.info, color: AppColors.primaryBlue),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  "Initial competency test using static questions + standardized scoring rubric. Test results are used to measure your starting level and recommend the right learning path.",
+                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.primaryBlue, height: 1.5),
+                ),
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(Icons.info, color: AppColors.primaryBlue),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      "Initial competency test using static questions + standardized scoring rubric. Test results are used to measure your starting level and recommend the right learning path.",
-                      style: AppTextStyles.bodySmall.copyWith(color: AppColors.primaryBlue, height: 1.5),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
-            ...orderedTests.asMap().entries.map((entry) {
-              final idx = entry.key;
-              final test = entry.value;
-              final isFirst = idx == 0;
-              final isLast = idx == orderedTests.length - 1;
-
-              // Check if test has been completed
-              final completedResult = results.cast<TestResultData?>().firstWhere(
-                    (r) => r?.testId == test.id,
-                    orElse: () => null,
-                  );
-              final isCompleted = completedResult != null;
-
-              return _buildTestTimelineItem(
-                test,
-                isCompleted,
-                completedResult,
-                isFirst: isFirst,
-                isLast: isLast,
-              );
-            }),
-            const SizedBox(height: 40),
-          ],
-        );
-      },
-      loading: () => const Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 60),
-          child: CircularProgressIndicator(),
+            ],
+          ),
         ),
-      ),
-      error: (err, stack) => Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 40),
-          child: Text("Error loading tests: $err"),
+        const SizedBox(height: 32),
+        _buildTestTimelineItem(
+          "PROG", "L3", "Programming / Software Development", "Designs, codes, verifies, tests, documents, amends and refactors programs/scripts...", true, "Restart Test",
+          isFirst: true,
+          onPressed: () => context.push('/readiness-center/initial-test'),
         ),
-      ),
+        _buildTestTimelineItem(
+          "DTAN", "L2", "Data Analysis", "Applies data analysis, visualization and data modelling techniques...", true, "Restart Test",
+          onPressed: () => context.push('/readiness-center/data-analysis-test'),
+        ),
+        _buildTestTimelineItem(
+          "HCEV", "L3", "User Experience Design", "Produces design concepts and prototypes for user interactions and experiences...", false, "Start Test",
+          onPressed: () => context.push('/readiness-center/ux-design-test'),
+        ),
+        _buildTestTimelineItem(
+          "TEST", "L3", "Testing", "Plans, designs, manages, executes and reports tests using testing tools and...", false, "Start Test",
+          isLast: true,
+          onPressed: () => context.push('/readiness-center/testing-test'),
+        ),
+        const SizedBox(height: 40),
+      ],
     );
   }
 
-  Widget _buildTestTimelineItem(
-    InitialTestData test,
-    bool isCompleted,
-    TestResultData? completedResult, {
-    bool isFirst = false,
-    bool isLast = false,
-  }) {
-    final userProfile = ref.watch(userProfileProvider).value;
-    final buttonText = isCompleted ? "Restart Test" : "Start Test";
-
+  Widget _buildTestTimelineItem(String code, String level, String title, String desc, bool isCompleted, String buttonText, {bool isFirst = false, bool isLast = false, VoidCallback? onPressed}) {
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -330,13 +224,7 @@ class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.divider),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  )
-                ],
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -346,108 +234,29 @@ class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: test.badgeColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          test.badgeText,
-                          style: AppTextStyles.bodySmall.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 10,
-                            color: test.badgeTextColor,
-                          ),
-                        ),
+                        decoration: BoxDecoration(color: const Color(0xFFFFE0A0), borderRadius: BorderRadius.circular(4)),
+                        child: Text(code, style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold, fontSize: 10)),
                       ),
-                      Text("L3", style: AppTextStyles.bodySmall.copyWith(color: AppColors.textHint, fontSize: 10)),
+                      Text(level, style: AppTextStyles.bodySmall.copyWith(color: AppColors.textHint, fontSize: 10)),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Text(
-                    test.testTitle.replaceAll('\n', ' '),
-                    style: AppTextStyles.bodyMedium.copyWith(color: const Color(0xFF1046A0), fontWeight: FontWeight.bold),
-                  ),
+                  Text(title, style: AppTextStyles.bodyMedium.copyWith(color: const Color(0xFF1046A0), fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
-                  Text(
-                    test.practicalTaskDescription ?? "Competency test with dynamic graded results, multiple choice questions, file uploads, or short interpretation essays evaluated by senior AI developers.",
-                    style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary, fontSize: 10, height: 1.5),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  Text(desc, style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary, fontSize: 10, height: 1.5)),
                   const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      if (isCompleted && completedResult != null) ...[
-                        OutlinedButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => dyn_graded.TestGradedPage(data: completedResult),
-                              ),
-                            );
-                          },
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: AppColors.primaryBlue),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          ),
-                          child: const Text("View Results", style: TextStyle(fontSize: 11)),
-                        ),
-                        const SizedBox(width: 8),
-                      ],
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => dyn.InitialTestPage(
-                                data: test,
-                                onSubmit: (selectedAnswers, essayAnswers) async {
-                                  // 1. Grade the test dynamically
-                                  final result = _gradeTest(test, selectedAnswers, essayAnswers, userProfile?.uid ?? 'guest');
-                                  
-                                  // 2. Save result to Firestore database
-                                  await ref.read(dbServiceProvider).saveTestResult(result);
-                                  
-                                  // 3. Update user profile skill metrics in Firestore if they passed
-                                  if (userProfile != null) {
-                                    final currentSkills = Map<String, double>.from(userProfile.skills);
-                                    if (test.id == 'prog') {
-                                      currentSkills['Testing (Jest)'] = result.numericScore / result.maxScore;
-                                      currentSkills['React.js'] = 0.85;
-                                      currentSkills['CSS/Tailwind'] = 0.90;
-                                    } else if (test.id == 'dtan') {
-                                      currentSkills['Web Performance'] = 0.80;
-                                    } else if (test.id == 'test') {
-                                      currentSkills['Testing (Jest)'] = result.numericScore / result.maxScore;
-                                    }
-                                    await ref.read(dbServiceProvider).updateUserProfile(userProfile.uid, {
-                                      'skills': currentSkills,
-                                    });
-                                  }
-
-                                  if (mounted) {
-                                    Navigator.of(context).pop(); // Back from test
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) => dyn_graded.TestGradedPage(data: result),
-                                      ),
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryBlue,
-                          foregroundColor: AppColors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                        child: Text(buttonText),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton(
+                      onPressed: onPressed ?? () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryBlue,
+                        foregroundColor: AppColors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                    ],
+                      child: Text(buttonText),
+                    ),
                   ),
                 ],
               ),
@@ -458,85 +267,8 @@ class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
     );
   }
 
-  // Dynamic grading utility
-  TestResultData _gradeTest(InitialTestData test, Map<int, int> selectedAnswers, Map<int, String> essayAnswers, String uid) {
-    int correctCount = 0;
-    int totalQuestions = test.questions?.length ?? 0;
-    List<TestIssue> issues = [];
-
-    if (test.questions != null) {
-      for (int i = 0; i < test.questions!.length; i++) {
-        final q = test.questions![i];
-        final selectedOptIndex = selectedAnswers[i];
-        if (selectedOptIndex != null && selectedOptIndex < q.options.length) {
-          if (q.options[selectedOptIndex].isCorrect) {
-            correctCount++;
-          } else {
-            final correctOpt = q.options.firstWhere((o) => o.isCorrect);
-            issues.add(TestIssue(
-              title: "Q${i + 1} Review",
-              description: "You selected '${q.options[selectedOptIndex].text}'. The correct answer is '${correctOpt.text}'. Focus on this concept to secure structural stability.",
-              cardColorHex: "0xFFFFE5E5",
-              borderColorHex: "0xFFFFC4C4",
-              titleColorHex: "0xFFD32F2F",
-            ));
-          }
-        } else {
-          issues.add(TestIssue(
-            title: "Q${i + 1} Skipped",
-            description: "You left this question blank. Review this core area to complete your skill profile.",
-            cardColorHex: "0xFFFFF9E6",
-            borderColorHex: "0xFFFFE69C",
-            titleColorHex: "0xFF856404",
-          ));
-        }
-      }
-    }
-
-    final scoreVal = totalQuestions > 0 ? "$correctCount/$totalQuestions" : "100/100";
-    final isPassed = totalQuestions > 0 ? (correctCount / totalQuestions >= 0.6) : true;
-    final percentage = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 100.0;
-
-    String summary = "Dynamic Evaluation: ";
-    if (totalQuestions > 0) {
-      summary += "You completed the multiple-choice section with $correctCount correct answers out of $totalQuestions. ";
-      if (isPassed) {
-        summary += "This indicates a strong starting grasp of ${test.testTitle.replaceAll('\n', ' ')}. Good job!";
-      } else {
-        summary += "Review the concept details below and restart the test to boost your skill status.";
-      }
-    } else {
-      summary += "Your file submission and short essay for ${test.testTitle.replaceAll('\n', ' ')} have been logged. AI evaluator assessed excellent formatting and insight.";
-    }
-
-    return TestResultData(
-      id: '',
-      userId: uid,
-      testId: test.id,
-      testTitle: test.testTitle,
-      testSubtitle: test.testSubtitle,
-      badgeText: test.badgeText,
-      badgeColorHex: test.badgeColorHex,
-      badgeTextColorHex: test.badgeTextColorHex,
-      scoreValue: scoreVal,
-      maxScore: totalQuestions > 0 ? totalQuestions.toDouble() : 100,
-      numericScore: totalQuestions > 0 ? correctCount.toDouble() : 100,
-      submittedDate: DateTime.now(),
-      statusText: isPassed ? 'Passed' : 'Needs Improvement',
-      statusColorHex: isPassed ? '0xFFDCFCE3' : '0xFFFFE5E5',
-      statusTextColorHex: isPassed ? '0xFF158031' : '0xFFD32F2F',
-      aiSummary: summary,
-      issues: issues,
-      essayAnswers: essayAnswers.map((k, v) => MapEntry(k.toString(), v)),
-    );
-  }
-
   // --- TAB 2: SKILL MAP ---
   Widget _buildSkillMapTab() {
-    final skills = _getSkills();
-    final sortedKeys = skills.keys.toList();
-    final sortedValues = sortedKeys.map((k) => skills[k] ?? 0.0).toList();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -558,8 +290,7 @@ class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
                   width: double.infinity,
                   child: CustomPaint(
                     painter: _SkillMapPainter(
-                      values: sortedValues,
-                      labels: sortedKeys.map((k) => k.replaceAll(' ', '\n')).toList(),
+                      values: [0.3, 0.15, 0.5, 0.85, 0.8, 0.83], // Matches the progress values below
                     ),
                   ),
                 ),
@@ -580,23 +311,12 @@ class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
             children: [
               Text("Your Skill Details", style: AppTextStyles.heading1.copyWith(fontSize: 18)),
               const SizedBox(height: 24),
-              ...sortedKeys.map((key) {
-                final val = skills[key] ?? 0.0;
-                Color statusColor = const Color(0xFFD32F2F); // Red (< 40%)
-                if (val >= 0.70) {
-                  statusColor = const Color(0xFF388E3C); // Green
-                } else if (val >= 0.40) {
-                  statusColor = const Color(0xFFF57F17); // Orange
-                }
-
-                return _buildSkillDetailRow(
-                  key,
-                  "${(val * 100).toStringAsFixed(0)}%",
-                  "Level: ${(val * 10).toStringAsFixed(1)}/10",
-                  val,
-                  statusColor,
-                );
-              }),
+              _buildSkillDetailRow("Testing (Jest)", "30%", "TEST L3 • Mar 9, 2026", 0.3, const Color(0xFFD32F2F)),
+              _buildSkillDetailRow("Web Performance", "15%", "SINT L3 • Mar 5, 2026", 0.15, const Color(0xFFD32F2F)),
+              _buildSkillDetailRow("Accessibility", "50%", "USEV L2 • Mar 4, 2026", 0.5, const Color(0xFFF57F17)),
+              _buildSkillDetailRow("State Management", "85%", "PROG-SM L3 • Mar 6, 2026", 0.85, const Color(0xFF388E3C)),
+              _buildSkillDetailRow("React.js", "80%", "PROG-SM L3 • Mar 6, 2026", 0.8, const Color(0xFF388E3C)),
+              _buildSkillDetailRow("CSS/Tailwind", "83%", "PROG-SM L3 • Mar 6, 2026", 0.83, const Color(0xFF388E3C)),
             ],
           ),
         ),
@@ -635,61 +355,23 @@ class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
 
   // --- TAB 3: SKILL GAP ---
   Widget _buildSkillGapTab() {
-    final skills = _getSkills();
-    
-    final needsToLearn = <String, double>{};
-    final needsImprovement = <String, double>{};
-    final alreadyStrong = <String, double>{};
-
-    skills.forEach((k, v) {
-      if (v < 0.40) {
-        needsToLearn[k] = v;
-      } else if (v < 0.70) {
-        needsImprovement[k] = v;
-      } else {
-        alreadyStrong[k] = v;
-      }
-    });
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (needsToLearn.isNotEmpty) ...[
-          _buildGapSectionHeader("Needs to Be Learned", const Color(0xFFD32F2F)),
-          ...needsToLearn.entries.map((e) => _buildGapCard(
-                e.key,
-                "High priority gap • Recruiter demand: critical",
-                "${(e.value * 100).toStringAsFixed(0)}%",
-                const Color(0xFFFFF1F1),
-                const Color(0xFFD32F2F),
-              )),
-          const SizedBox(height: 16),
-        ],
+        _buildGapSectionHeader("Needs to Be Learned", const Color(0xFFD32F2F)),
+        _buildGapCard("Testing (Jest)", "85% of job listings require this skill • Trend: Growing", "30%", const Color(0xFFF9C8C8), const Color(0xFFD32F2F)),
+        _buildGapCard("Web Performance", "72% of job listings require this skill • Trend: Growing", "15%", const Color(0xFFF9C8C8), const Color(0xFFD32F2F)),
         
-        if (needsImprovement.isNotEmpty) ...[
-          _buildGapSectionHeader("Needs Improvement", const Color(0xFFF57F17)),
-          ...needsImprovement.entries.map((e) => _buildGapCard(
-                e.key,
-                "Medium priority gap • Recruiter demand: moderate",
-                "${(e.value * 100).toStringAsFixed(0)}%",
-                const Color(0xFFFFF9E6),
-                const Color(0xFFF57F17),
-              )),
-          const SizedBox(height: 16),
-        ],
-
-        if (alreadyStrong.isNotEmpty) ...[
-          _buildGapSectionHeader("Already Strong", const Color(0xFF388E3C)),
-          ...alreadyStrong.entries.map((e) => _buildGapCard(
-                e.key,
-                "Competency high • Recruiter demand: satisfied",
-                "${(e.value * 100).toStringAsFixed(0)}%",
-                const Color(0xFFEAF6EA),
-                const Color(0xFF388E3C),
-              )),
-          const SizedBox(height: 16),
-        ],
-
+        const SizedBox(height: 24),
+        _buildGapSectionHeader("Needs Improvement", const Color(0xFFF57F17)),
+        _buildGapCard("Accessibility", "61% of job listings require this skill • Trend: Stable", "50%", const Color(0xFFFFE0A0), const Color(0xFFF57F17)),
+        
+        const SizedBox(height: 24),
+        _buildGapSectionHeader("Already Strong", const Color(0xFF388E3C)),
+        _buildGapCard("State Management", "68% of job listings require this skill • Trend: Stable", "85%", const Color(0xFFC8E6C9), const Color(0xFF388E3C)),
+        _buildGapCard("React.js", "94% of job listings require this skill • Trend: Growing", "80%", const Color(0xFFC8E6C9), const Color(0xFF388E3C)),
+        _buildGapCard("CSS/Tailwind", "78% of job listings require this skill • Trend: Growing", "83%", const Color(0xFFC8E6C9), const Color(0xFF388E3C)),
+        
         const SizedBox(height: 24),
         Container(
           padding: const EdgeInsets.all(24),
@@ -810,27 +492,22 @@ class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
     );
   }
 
-  Widget _buildStatsGrid({
-    required String readiness,
-    required String skillsMapped,
-    required String criticalGaps,
-    required String strengths,
-  }) {
+  Widget _buildStatsGrid() {
     return Column(
       children: [
         Row(
           children: [
-            Expanded(child: _buildStatItem(Icons.cloud_upload_outlined, const Color(0xFFE8EAF6), readiness, "Overall Readiness")),
+            Expanded(child: _buildStatItem(Icons.cloud_upload_outlined, const Color(0xFFE8EAF6), "63%", "Overall Readiness")),
             const SizedBox(width: 16),
-            Expanded(child: _buildStatItem(Icons.bar_chart, const Color(0xFFE8F5E9), skillsMapped, "Skills Mapped")),
+            Expanded(child: _buildStatItem(Icons.bar_chart, const Color(0xFFE8F5E9), "12", "Skills Mapped")),
           ],
         ),
         const SizedBox(height: 24),
         Row(
           children: [
-            Expanded(child: _buildStatItem(Icons.warning_amber_rounded, const Color(0xFFFFEBEE), criticalGaps, "Critical Gaps", iconColor: const Color(0xFFD32F2F))),
+            Expanded(child: _buildStatItem(Icons.warning_amber_rounded, const Color(0xFFFFEBEE), "3", "Critical Gaps", iconColor: const Color(0xFFD32F2F))),
             const SizedBox(width: 16),
-            Expanded(child: _buildStatItem(Icons.check_circle_outline, const Color(0xFFE8F5E9), strengths, "Strengths", iconColor: const Color(0xFF388E3C))),
+            Expanded(child: _buildStatItem(Icons.check_circle_outline, const Color(0xFFE8F5E9), "3", "Strengths", iconColor: const Color(0xFF388E3C))),
           ],
         ),
       ],
@@ -932,9 +609,17 @@ class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
 
 class _SkillMapPainter extends CustomPainter {
   final List<double> values;
-  final List<String> labels;
 
-  _SkillMapPainter({required this.values, required this.labels});
+  _SkillMapPainter({required this.values});
+
+  final List<String> labels = [
+    "Testing\n(Jest)",
+    "Web\nPerformance",
+    "Accessibility",
+    "State\nManagement",
+    "React.js",
+    "CSS",
+  ];
 
   final List<Color> dotColors = [
     const Color(0xFFD32F2F), // Testing
@@ -947,7 +632,6 @@ class _SkillMapPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (values.isEmpty) return;
     final center = Offset(size.width / 2, size.height / 2);
     final radius = min(size.width / 2, size.height / 2) - 60; // leave room for labels
 
@@ -966,12 +650,11 @@ class _SkillMapPainter extends CustomPainter {
       ..strokeWidth = 2;
 
     // Draw concentric hexagons
-    final n = values.length;
     for (int i = 1; i <= 4; i++) {
       final path = Path();
       final r = radius * (i / 4);
-      for (int j = 0; j < n; j++) {
-        final angle = j * (2 * pi / n) - (pi / 2);
+      for (int j = 0; j < 6; j++) {
+        final angle = j * (pi / 3) - (pi / 2);
         final x = center.dx + r * cos(angle);
         final y = center.dy + r * sin(angle);
         if (j == 0) {
@@ -985,8 +668,8 @@ class _SkillMapPainter extends CustomPainter {
     }
 
     // Draw axes
-    for (int j = 0; j < n; j++) {
-      final angle = j * (2 * pi / n) - (pi / 2);
+    for (int j = 0; j < 6; j++) {
+      final angle = j * (pi / 3) - (pi / 2);
       final x = center.dx + radius * cos(angle);
       final y = center.dy + radius * sin(angle);
       canvas.drawLine(center, Offset(x, y), outlinePaint);
@@ -994,8 +677,8 @@ class _SkillMapPainter extends CustomPainter {
 
     // Draw values polygon
     final valuePath = Path();
-    for (int j = 0; j < n; j++) {
-      final angle = j * (2 * pi / n) - (pi / 2);
+    for (int j = 0; j < 6; j++) {
+      final angle = j * (pi / 3) - (pi / 2);
       final val = values[j];
       final r = radius * val;
       final x = center.dx + r * cos(angle);
@@ -1012,8 +695,8 @@ class _SkillMapPainter extends CustomPainter {
     canvas.drawPath(valuePath, strokePaint);
 
     // Draw labels
-    for (int j = 0; j < n; j++) {
-      final angle = j * (2 * pi / n) - (pi / 2);
+    for (int j = 0; j < 6; j++) {
+      final angle = j * (pi / 3) - (pi / 2);
       final labelRadius = radius + 15; // padding for label
       final labelX = center.dx + labelRadius * cos(angle);
       final labelY = center.dy + labelRadius * sin(angle);
@@ -1028,9 +711,8 @@ class _SkillMapPainter extends CustomPainter {
       );
       textPainter.layout();
 
-      final dotColor = j < dotColors.length ? dotColors[j] : const Color(0xFF388E3C);
       final dotPaint = Paint()
-        ..color = dotColor
+        ..color = dotColors[j]
         ..style = PaintingStyle.fill;
 
       double totalWidth = 12 + 8 + textPainter.width;
@@ -1058,9 +740,10 @@ class _SkillMapPainter extends CustomPainter {
       textPainter.paint(canvas, Offset(startX + 12 + 8, startY));
     }
   }
-
+  
   @override
   bool shouldRepaint(covariant _SkillMapPainter oldDelegate) {
-    return oldDelegate.values != values || oldDelegate.labels != labels;
+    return oldDelegate.values != values;
   }
 }
+
