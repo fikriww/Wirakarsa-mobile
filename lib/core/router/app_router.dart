@@ -3,6 +3,7 @@ import '../../features/splash/presentation/pages/splash_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/sign_in_page.dart';
 import '../../features/auth/presentation/pages/create_account_page.dart';
+import '../../features/auth/presentation/pages/oauth_callback_page.dart';
 import '../../features/assessment/presentation/pages/assessment_page.dart';
 import '../../features/assessment/presentation/pages/connect_github_page.dart';
 import '../../features/readiness/presentation/pages/cv_screening_page.dart';
@@ -51,6 +52,17 @@ class AppRouter {
       GoRoute(
         path: '/create-account',
         builder: (context, state) => const CreateAccountPage(),
+      ),
+      GoRoute(
+        path: '/oauth-callback',
+        builder: (context, state) {
+          final accessToken = state.uri.queryParameters['access_token'];
+          final refreshToken = state.uri.queryParameters['refresh_token'];
+          return OAuthCallbackPage(
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+          );
+        },
       ),
       GoRoute(
         path: '/assessment',

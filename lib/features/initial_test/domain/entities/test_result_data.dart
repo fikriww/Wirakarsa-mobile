@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/models/test_result_model.dart' as core;
+
 
 /// Represents one metric item in the 2x2 grid
 class TestMetric {
@@ -92,3 +94,42 @@ class TestResultData {
     this.quotedText,
   });
 }
+
+extension TestResultDataConv on TestResultData {
+  core.TestResultData toCore() {
+    return core.TestResultData(
+      id: '',
+      userId: 'mock_user',
+      testId: 'mock_test',
+      testTitle: testTitle,
+      testSubtitle: testSubtitle,
+      badgeText: badgeText,
+      badgeColorHex: '0x${badgeColor.value.toRadixString(16)}',
+      badgeTextColorHex: '0x${badgeTextColor.value.toRadixString(16)}',
+      scoreValue: scoreValue,
+      maxScore: maxScore,
+      numericScore: numericScore,
+      submittedDate: DateTime.now(),
+      statusText: statusText,
+      statusColorHex: '0x${statusColor.value.toRadixString(16)}',
+      statusTextColorHex: '0x${statusTextColor.value.toRadixString(16)}',
+      aiSummary: aiSummary,
+      quotedText: quotedText,
+      metrics: metrics?.map((m) => core.TestMetric(
+        label: m.label,
+        sublabel: m.sublabel,
+        checkStatus: m.checkStatus,
+        valueText: m.valueText,
+        valueColorHex: m.valueColor != null ? '0x${m.valueColor!.value.toRadixString(16)}' : null,
+      )).toList(),
+      issues: issues.map((i) => core.TestIssue(
+        title: i.title,
+        description: i.description,
+        cardColorHex: '0x${i.cardColor.value.toRadixString(16)}',
+        borderColorHex: '0x${i.borderColor.value.toRadixString(16)}',
+        titleColorHex: '0x${i.titleColor.value.toRadixString(16)}',
+      )).toList(),
+    );
+  }
+}
+

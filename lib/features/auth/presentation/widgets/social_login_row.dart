@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class SocialLoginRow extends StatelessWidget {
@@ -40,7 +42,21 @@ class SocialLoginRow extends StatelessWidget {
             const SizedBox(width: 20),
             _SocialButton(
               svgAsset: 'assets/icons/google.svg',
-              onTap: () {},
+              onTap: () async {
+                final String redirectUri = kIsWeb ? '${Uri.base.origin}/#/oauth-callback' : '';
+                final String queryParams = redirectUri.isNotEmpty
+                    ? '?redirect_uri=${Uri.encodeComponent(redirectUri)}'
+                    : '';
+                final url = Uri.parse('http://localhost:3000/google-login$queryParams');
+                try {
+                  await launchUrl(
+                    url,
+                    mode: kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication,
+                  );
+                } catch (e) {
+                  debugPrint('Failed to launch Google OAuth: $e');
+                }
+              },
               iconSize: 24,
             ),
             const SizedBox(width: 20),

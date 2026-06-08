@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/services/api_service.dart';
 
 class AssessmentPage extends StatefulWidget {
   const AssessmentPage({super.key});
@@ -11,56 +13,116 @@ class AssessmentPage extends StatefulWidget {
 }
 
 class _AssessmentPageState extends State<AssessmentPage> {
+  final ApiService _apiService = ApiService();
   final PageController _pageController = PageController();
   int _currentStep = 0;
   final int _totalSteps = 5;
+  bool _isSaving = false;
 
   // Form states
-  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _majorController = TextEditingController();
   final TextEditingController _universityController = TextEditingController();
+  final TextEditingController _gradYearController = TextEditingController();
 
-  // Selections for Screen 2
-  final List<String> _selectedFeelings = [];
-  final List<String> _selectedNeeds = [];
-  final List<String> _selectedInterests = [];
+  // Selection for Screen 2 (Goal)
+  String? _selectedGoal;
 
-  final List<String> _feelings = [
-    "😞 Not confident in my skills",
-    "🤯 Don't know where to start",
-    "😓 Comparing myself to others",
-    "⏳ Job hunting for a while",
-    "🔄 No progress despite trying",
-    "📉 Not getting job responses"
-  ];
+  // Selection for Screen 3 (Role)
+  String? _selectedRole;
 
-  final List<String> _needs = [
-    "🧭 Know what skills I'm missing",
-    "📄 Improve CV / portfolio",
-    "🪄 Practice real projects",
-    "🎯 Clear learning direction",
-    "💬 Get feedback"
-  ];
+  final Map<String, String> _goals = {
+    "Get my first job in tech": "GET_FIRST_JOB",
+    "Switch to a developer role": "SWITCH_DEVELOPER_ROLE",
+    "Improve my coding skills": "IMPROVE_CODING_SKILLS",
+    "Prepare for technical interviews": "PREPARE_INTERVIEWS",
+    "Build a strong portfolio": "BUILD_PORTFOLIO",
+    "Understand market demands": "UNDERSTAND_MARKET",
+  };
 
-  final List<String> _interests = [
-    "💻 Frontend",
-    "🧠 Backend",
-    "🎨 UI/UX",
-    "📊 Data / AI",
-    "🌱 Exploring",
-    "🚀 Freelance"
+  final List<Map<String, dynamic>> _roles = [
+    {
+      "title": "Frontend Developer",
+      "subtitle": "React, Vue, UI/UX implementation",
+      "icon": Icons.code,
+    },
+    {
+      "title": "Backend Developer",
+      "subtitle": "APIs, databases, server logic",
+      "icon": Icons.storage,
+    },
+    {
+      "title": "Data Scientist",
+      "subtitle": "ML, analytics, data pipelines",
+      "icon": Icons.psychology,
+    },
+    {
+      "title": "Freelance",
+      "subtitle": "Work From Home",
+      "icon": Icons.cloud_outlined,
+    },
+    {
+      "title": "UI/UX Designer",
+      "subtitle": "Design systems, prototyping",
+      "icon": Icons.color_lens_outlined,
+    },
+    {
+      "title": "Other / Exploring",
+      "subtitle": "I'm still figuring it out",
+      "icon": Icons.adjust,
+    },
   ];
 
   @override
   void dispose() {
     _pageController.dispose();
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _majorController.dispose();
     _universityController.dispose();
+    _gradYearController.dispose();
     super.dispose();
   }
 
-  void _nextStep() {
+  Future<void> _saveAssessmentData() async {
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
+
+    try {
+      final session = await _apiService.getCurrentUser();
+      final userId = session['result']['user']['id'];
+
+      await _apiService.updateOnboardingProfile(
+        userId: userId,
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        university: _universityController.text.trim(),
+        fieldOfStudy: _majorController.text.trim(),
+        graduationYear: _gradYearController.text.trim(),
+      );
+
+      if (_selectedGoal != null) {
+        await _apiService.updateOnboardingGoal(
+          userId: userId,
+          goal: _selectedGoal!,
+        );
+      }
+
+      debugPrint('Assessment data saved successfully to Express backend!');
+    } catch (e) {
+      debugPrint('Error saving assessment data: $e');
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  void _nextStep() async {
+    // Save data periodically or at specific steps
+    if (_currentStep == 0 || _currentStep == 2 || _currentStep == _totalSteps - 1) {
+      await _saveAssessmentData();
+    }
+
     if (_currentStep < _totalSteps - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
@@ -140,35 +202,116 @@ class _AssessmentPageState extends State<AssessmentPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 60),
-          Text(
-            "Great!",
-            style: AppTextStyles.heading1,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            "Now, what should we call you?",
-            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 60),
-          Text("Label", style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _nameController,
-            decoration: InputDecoration(
-              hintText: "Enter Your Name",
-              hintStyle: TextStyle(color: AppColors.textHint),
-              filled: true,
-              fillColor: AppColors.inputBackground,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 60),
+                  Center(
+                    child: Text(
+                      "Tell us about yourself",
+                      style: AppTextStyles.heading1,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: Text(
+                      "We'll personalize your experience based on this",
+                      style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("First Name", style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: _firstNameController,
+                              decoration: InputDecoration(
+                                hintText: "e.g. Alex",
+                                hintStyle: TextStyle(color: AppColors.textHint),
+                                filled: true,
+                                fillColor: AppColors.inputBackground,
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Last Name", style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: _lastNameController,
+                              decoration: InputDecoration(
+                                hintText: "e.g. Rahman",
+                                hintStyle: TextStyle(color: AppColors.textHint),
+                                filled: true,
+                                fillColor: AppColors.inputBackground,
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Text("University / Institution", style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _universityController,
+                    decoration: InputDecoration(
+                      hintText: "e.g. Universitas Indonesia",
+                      hintStyle: TextStyle(color: AppColors.textHint),
+                      filled: true,
+                      fillColor: AppColors.inputBackground,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text("Field of Study", style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _majorController,
+                    decoration: InputDecoration(
+                      hintText: "e.g. Computer Science",
+                      hintStyle: TextStyle(color: AppColors.textHint),
+                      filled: true,
+                      fillColor: AppColors.inputBackground,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text("Graduation Year", style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _gradYearController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      hintText: "e.g. 2025",
+                      hintStyle: TextStyle(color: AppColors.textHint),
+                      filled: true,
+                      fillColor: AppColors.inputBackground,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                ],
               ),
             ),
           ),
-          const SizedBox(height: 32),
           ElevatedButton(
             onPressed: _nextStep,
             style: ElevatedButton.styleFrom(
@@ -196,64 +339,46 @@ class _AssessmentPageState extends State<AssessmentPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 20),
-                  Center(
-                    child: Text("Hi, ${_nameController.text.isEmpty ? 'John' : _nameController.text}", style: AppTextStyles.heading1),
+                  const SizedBox(height: 60),
+                  Text(
+                    "What do you want to achieve?",
+                    style: AppTextStyles.heading1,
                   ),
-                  const SizedBox(height: 8),
-                  Center(
-                    child: Text(
-                      "Tell us a bit about your situation.",
-                      style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
-                    ),
+                  const SizedBox(height: 12),
+                  Text(
+                    "Select your primary goal. This helps us personalize your dashboard.",
+                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: 40),
-                  Text("As an IT graduate, you might feel...", style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _feelings.map((e) => _buildChip(e, _selectedFeelings.contains(e), () {
-                      setState(() {
-                        if (_selectedFeelings.contains(e)) {
-                          _selectedFeelings.remove(e);
-                        } else {
-                          _selectedFeelings.add(e);
-                        }
-                      });
-                    })).toList(),
-                  ),
-                  const SizedBox(height: 32),
-                  Text("What do you need right now?", style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _needs.map((e) => _buildChip(e, _selectedNeeds.contains(e), () {
-                      setState(() {
-                        if (_selectedNeeds.contains(e)) {
-                          _selectedNeeds.remove(e);
-                        } else {
-                          _selectedNeeds.add(e);
-                        }
-                      });
-                    })).toList(),
-                  ),
-                  const SizedBox(height: 32),
-                  Text("Your Interest", style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _interests.map((e) => _buildChip(e, _selectedInterests.contains(e), () {
-                      setState(() {
-                        if (_selectedInterests.contains(e)) {
-                          _selectedInterests.remove(e);
-                        } else {
-                          _selectedInterests.add(e);
-                        }
-                      });
-                    })).toList(),
+                  Column(
+                    children: [
+                      for (int i = 0; i < _goals.entries.length; i += 2) ...[
+                        IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: _buildGoalCard(
+                                  _goals.entries.elementAt(i).key,
+                                  _goals.entries.elementAt(i).value,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              if (i + 1 < _goals.entries.length)
+                                Expanded(
+                                  child: _buildGoalCard(
+                                    _goals.entries.elementAt(i + 1).key,
+                                    _goals.entries.elementAt(i + 1).value,
+                                  ),
+                                )
+                              else
+                                const Expanded(child: SizedBox()),
+                            ],
+                          ),
+                        ),
+                        if (i + 2 < _goals.entries.length) const SizedBox(height: 16),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 40),
                 ],
@@ -261,9 +386,10 @@ class _AssessmentPageState extends State<AssessmentPage> {
             ),
           ),
           ElevatedButton(
-            onPressed: _nextStep,
+            onPressed: _selectedGoal == null ? null : _nextStep,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryBlue,
+              disabledBackgroundColor: AppColors.divider,
               foregroundColor: AppColors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -283,27 +409,7 @@ class _AssessmentPageState extends State<AssessmentPage> {
     );
   }
 
-  Widget _buildChip(String label, bool isSelected, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryBlue.withOpacity(0.1) : AppColors.white,
-          border: Border.all(color: AppColors.primaryBlue, width: 1.5),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Text(
-          label,
-          style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.primaryBlue,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            fontSize: 14,
-          ),
-        ),
-      ),
-    );
-  }
+
 
   // SCREEN 3
   Widget _buildScreen3() {
@@ -312,49 +418,56 @@ class _AssessmentPageState extends State<AssessmentPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 60),
-          Text(
-            "Tell us about yourself",
-            style: AppTextStyles.heading1,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            "So Wirapath can build a path that actually fits you.",
-            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 60),
-          Text("Your Major", style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _majorController,
-            decoration: InputDecoration(
-              hintText: "Enter Your Major",
-              hintStyle: TextStyle(color: AppColors.textHint),
-              filled: true,
-              fillColor: AppColors.inputBackground,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 60),
+                  Text(
+                    "What role are you targeting?",
+                    style: AppTextStyles.heading1,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    "We'll tailor your assessment, projects, and career path around your chosen role.",
+                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 40),
+                  Column(
+                    children: [
+                      for (int i = 0; i < _roles.length; i += 2) ...[
+                        IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: _buildRoleCard(_roles[i]),
+                              ),
+                              const SizedBox(width: 16),
+                              if (i + 1 < _roles.length)
+                                Expanded(
+                                  child: _buildRoleCard(_roles[i + 1]),
+                                )
+                              else
+                                const Expanded(child: SizedBox()),
+                            ],
+                          ),
+                        ),
+                        if (i + 2 < _roles.length) const SizedBox(height: 16),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 24),
-          Text("University", style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _universityController,
-            decoration: InputDecoration(
-              hintText: "Enter Your University",
-              hintStyle: TextStyle(color: AppColors.textHint),
-              filled: true,
-              fillColor: AppColors.inputBackground,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-            ),
-          ),
-          const Spacer(),
           ElevatedButton(
-            onPressed: _nextStep,
+            onPressed: _selectedRole == null ? null : _nextStep,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryBlue,
+              disabledBackgroundColor: AppColors.divider,
               foregroundColor: AppColors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -481,13 +594,9 @@ class _AssessmentPageState extends State<AssessmentPage> {
           const Spacer(),
           // Placeholder for GitHub Logo
           Center(
-            child: Image.asset(
-              'assets/images/github_logo.png',
+            child: SvgPicture.asset(
+              'assets/icons/github.svg',
               height: 100,
-              errorBuilder: (context, error, stackTrace) => const Icon(
-                Icons.code,
-                size: 100,
-              ),
             ),
           ),
           const SizedBox(height: 40),
@@ -504,7 +613,10 @@ class _AssessmentPageState extends State<AssessmentPage> {
           ),
           const Spacer(),
           ElevatedButton(
-            onPressed: () => context.go('/connect-github'),
+            onPressed: () async {
+              await _saveAssessmentData();
+              if (mounted) context.go('/connect-github');
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryBlue,
               foregroundColor: AppColors.white,
@@ -516,7 +628,10 @@ class _AssessmentPageState extends State<AssessmentPage> {
           const SizedBox(height: 24),
           Center(
             child: GestureDetector(
-              onTap: () => context.go('/home'),
+              onTap: () async {
+                await _saveAssessmentData();
+                if (mounted) context.go('/home');
+              },
               child: Text("Skip for now", style: AppTextStyles.bodyMedium.copyWith(color: AppColors.primaryBlue, fontWeight: FontWeight.bold)),
             ),
           ),
@@ -529,6 +644,105 @@ class _AssessmentPageState extends State<AssessmentPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildGoalCard(String title, String value) {
+    final isSelected = _selectedGoal == value;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedGoal = value;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          border: Border.all(
+            color: isSelected ? AppColors.primaryBlue : AppColors.divider,
+            width: 1.5,
+          ),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: isSelected
+              ? [BoxShadow(color: AppColors.primaryBlue.withOpacity(0.1), blurRadius: 8)]
+              : [],
+        ),
+        alignment: Alignment.centerLeft,
+        child: Text(
+          title,
+          style: AppTextStyles.bodyMedium.copyWith(
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            color: isSelected ? AppColors.primaryBlue : null,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoleCard(Map<String, dynamic> roleData) {
+    final title = roleData['title'] as String;
+    final subtitle = roleData['subtitle'] as String;
+    final icon = roleData['icon'] as IconData;
+    final isSelected = _selectedRole == title;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedRole = title;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          border: Border.all(
+            color: isSelected ? AppColors.primaryBlue : AppColors.divider,
+            width: 1.5,
+          ),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: isSelected
+              ? [BoxShadow(color: AppColors.primaryBlue.withOpacity(0.1), blurRadius: 8)]
+              : [],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F7FA), // Light grey background for icon
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: AppColors.textSecondary, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

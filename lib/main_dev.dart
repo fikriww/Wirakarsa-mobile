@@ -26,10 +26,23 @@ import 'features/initial_test/presentation/pages/test_graded_page.dart';
 import 'features/initial_test/domain/entities/mock_test_results.dart';
 import 'features/initial_test/presentation/pages/initial_test_page.dart';
 import 'features/initial_test/domain/entities/mock_initial_tests.dart';
-import 'features/initial_test/presentation/pages/readiness_center_page.dart';
+import 'features/initial_test/domain/entities/initial_test_data.dart';
+import 'features/initial_test/domain/entities/test_result_data.dart';
+import 'features/readiness/presentation/pages/readiness_center_page.dart';
+import 'features/assessment/presentation/pages/assessment_page.dart';
+import 'features/assessment/presentation/pages/connect_github_page.dart';
+
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  runApp(const DevApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  runApp(
+    const ProviderScope(
+      child: DevApp(),
+    ),
+  );
 }
 
 class DevApp extends StatelessWidget {
@@ -50,7 +63,7 @@ class DevApp extends StatelessWidget {
 // GANTI ROUTE DI SINI UNTUK TEST HALAMAN
 // ========================================
 final _devRouter = GoRouter(
-  initialLocation: '/readiness', // ← ganti sesuai kebutuhan
+  initialLocation: '/create-account', // ← Diubah untuk mempermudah test signup flow
   routes: [
     GoRoute(
       path: '/splash',
@@ -63,6 +76,14 @@ final _devRouter = GoRouter(
     GoRoute(
       path: '/create-account',
       builder: (context, state) => const CreateAccountPage(),
+    ),
+    GoRoute(
+      path: '/assessment',
+      builder: (context, state) => const AssessmentPage(),
+    ),
+    GoRoute(
+      path: '/connect-github',
+      builder: (context, state) => const ConnectGithubPage(),
     ),
     GoRoute(
       path: '/home',
@@ -78,35 +99,35 @@ final _devRouter = GoRouter(
     ),
     GoRoute(
       path: '/test-graded/prog',
-      builder: (context, state) => TestGradedPage(data: programmingResult),
+      builder: (context, state) => TestGradedPage(data: programmingResult.toCore()),
     ),
     GoRoute(
       path: '/test-graded/dtan',
-      builder: (context, state) => TestGradedPage(data: dataAnalysisResult),
+      builder: (context, state) => TestGradedPage(data: dataAnalysisResult.toCore()),
     ),
     GoRoute(
       path: '/test-graded/hcev',
-      builder: (context, state) => TestGradedPage(data: uxDesignResult),
+      builder: (context, state) => TestGradedPage(data: uxDesignResult.toCore()),
     ),
     GoRoute(
       path: '/test-graded/test',
-      builder: (context, state) => TestGradedPage(data: testingResult),
+      builder: (context, state) => TestGradedPage(data: testingResult.toCore()),
     ),
     GoRoute(
       path: '/initial-test/prog',
-      builder: (context, state) => InitialTestPage(data: programmingTestData),
+      builder: (context, state) => InitialTestPage(data: programmingTestData.toCore(), onSubmit: (_, __) {}),
     ),
     GoRoute(
       path: '/initial-test/dtan',
-      builder: (context, state) => InitialTestPage(data: dataAnalysisTestData),
+      builder: (context, state) => InitialTestPage(data: dataAnalysisTestData.toCore(), onSubmit: (_, __) {}),
     ),
     GoRoute(
       path: '/initial-test/hcev',
-      builder: (context, state) => InitialTestPage(data: uxDesignTestData),
+      builder: (context, state) => InitialTestPage(data: uxDesignTestData.toCore(), onSubmit: (_, __) {}),
     ),
     GoRoute(
       path: '/initial-test/test',
-      builder: (context, state) => InitialTestPage(data: testingTestData),
+      builder: (context, state) => InitialTestPage(data: testingTestData.toCore(), onSubmit: (_, __) {}),
     ),
   ],
 );
