@@ -1,63 +1,132 @@
 import 'dart:convert';
 
+class UserMiniProjectSubmission {
+  final String id;
+  final String userId;
+  final String miniProjectId;
+  final String status; // 'not_started', 'in_progress', 'submitted', 'reviewed'
+  final String? fileName;
+  final String? fileUrl;
+  final String? fileType;
+  final double? overallScore;
+  final List<String>? strengths;
+  final List<String>? improvements;
+  final List<Map<String, dynamic>>? objectivesMet;
+  final String? aiSummary;
+  final DateTime? submittedAt;
+  final DateTime? reviewedAt;
+  final DateTime createdAt;
+
+  UserMiniProjectSubmission({
+    required this.id,
+    required this.userId,
+    required this.miniProjectId,
+    required this.status,
+    this.fileName,
+    this.fileUrl,
+    this.fileType,
+    this.overallScore,
+    this.strengths,
+    this.improvements,
+    this.objectivesMet,
+    this.aiSummary,
+    this.submittedAt,
+    this.reviewedAt,
+    required this.createdAt,
+  });
+
+  factory UserMiniProjectSubmission.fromMap(Map<String, dynamic> map) {
+    return UserMiniProjectSubmission(
+      id: map['id'] ?? '',
+      userId: map['user_id'] ?? '',
+      miniProjectId: map['mini_project_id'] ?? '',
+      status: map['status'] ?? 'not_started',
+      fileName: map['file_name'],
+      fileUrl: map['file_url'],
+      fileType: map['file_type'],
+      overallScore: (map['overall_score'] as num?)?.toDouble(),
+      strengths: map['strengths'] != null ? List<String>.from(map['strengths']) : null,
+      improvements: map['improvements'] != null ? List<String>.from(map['improvements']) : null,
+      objectivesMet: map['objectives_met'] != null
+          ? List<Map<String, dynamic>>.from((map['objectives_met'] as List).map((x) => Map<String, dynamic>.from(x)))
+          : null,
+      aiSummary: map['ai_summary'],
+      submittedAt: map['submitted_at'] != null ? DateTime.parse(map['submitted_at']) : null,
+      reviewedAt: map['reviewed_at'] != null ? DateTime.parse(map['reviewed_at']) : null,
+      createdAt: map['created_at'] != null ? DateTime.parse(map['created_at']) : DateTime.now(),
+    );
+  }
+}
+
 class MiniProject {
   final String id;
   final String title;
   final String description;
-  final String gap;
-  final List<String> tags;
-  final double progress;
+  final String brief;
+  final String level; // 'Beginner', 'Intermediate', 'Advanced'
+  final String duration;
+  final String tag;
+  final List<String> relatedSkills;
+  final List<String> evaluationCriteria;
+  final int sortOrder;
+  final bool isActive;
+  final DateTime createdAt;
+  final String submissionStatus; // 'not_started', 'in_progress', 'submitted', 'reviewed'
+  final String? submissionId;
+  final double? overallScore;
+  final DateTime? submittedAt;
+  final DateTime? reviewedAt;
 
   MiniProject({
     required this.id,
     required this.title,
     required this.description,
-    required this.gap,
-    required this.tags,
-    this.progress = 0.0,
+    required this.brief,
+    required this.level,
+    required this.duration,
+    required this.tag,
+    required this.relatedSkills,
+    required this.evaluationCriteria,
+    required this.sortOrder,
+    required this.isActive,
+    required this.createdAt,
+    required this.submissionStatus,
+    this.submissionId,
+    this.overallScore,
+    this.submittedAt,
+    this.reviewedAt,
   });
 
-  MiniProject copyWith({
-    String? id,
-    String? title,
-    String? description,
-    String? gap,
-    List<String>? tags,
-    double? progress,
-  }) {
-    return MiniProject(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      description: description ?? this.description,
-      gap: gap ?? this.gap,
-      tags: tags ?? this.tags,
-      progress: progress ?? this.progress,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'title': title,
-      'description': description,
-      'gap': gap,
-      'tags': tags,
-      'progress': progress,
-    };
-  }
-
   factory MiniProject.fromMap(Map<String, dynamic> map, String id) {
+    List<String> parseList(dynamic val) {
+      if (val == null) return [];
+      if (val is List) return List<String>.from(val);
+      if (val is String) {
+        try {
+          return List<String>.from(json.decode(val));
+        } catch (_) {}
+      }
+      return [];
+    }
+
     return MiniProject(
       id: id,
       title: map['title'] ?? '',
       description: map['description'] ?? '',
-      gap: map['gap'] ?? '',
-      tags: List<String>.from(map['tags'] ?? []),
-      progress: (map['progress'] as num?)?.toDouble() ?? 0.0,
+      brief: map['brief'] ?? '',
+      level: map['level'] ?? 'Beginner',
+      duration: map['duration'] ?? '',
+      tag: map['tag'] ?? '',
+      relatedSkills: parseList(map['related_skills']),
+      evaluationCriteria: parseList(map['evaluation_criteria']),
+      sortOrder: map['sort_order'] ?? 0,
+      isActive: map['is_active'] ?? true,
+      createdAt: map['created_at'] != null ? DateTime.parse(map['created_at']) : DateTime.now(),
+      submissionStatus: map['submission_status'] ?? 'not_started',
+      submissionId: map['submission_id']?.toString(),
+      overallScore: (map['overall_score'] as num?)?.toDouble(),
+      submittedAt: map['submitted_at'] != null ? DateTime.parse(map['submitted_at']) : null,
+      reviewedAt: map['reviewed_at'] != null ? DateTime.parse(map['reviewed_at']) : null,
     );
   }
-
-  String toJson() => json.encode(toMap());
-
-  factory MiniProject.fromJson(String source) =>
-      MiniProject.fromMap(json.decode(source), '');
 }

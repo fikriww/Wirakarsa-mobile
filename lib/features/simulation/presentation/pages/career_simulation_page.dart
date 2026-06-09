@@ -151,7 +151,7 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
     });
   }
 
-  // Helper to start a new simulation session
+  // Helper to start a new simulation session via backend API
   Future<void> _startNewSession({
     required String type,
     required String companyName,
@@ -163,33 +163,50 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
     final userProfile = ref.read(userProfileProvider).value;
     final uid = userProfile?.uid ?? 'guest';
     final dbService = ref.read(dbServiceProvider);
-
-    final session = CareerSimulationSession(
-      id: '',
-      userId: uid,
-      type: type,
-      companyName: companyName,
-      role: role,
-      level: level,
-      status: 'active',
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
+    final api = ref.read(apiServiceProvider);
 
     try {
-      // 1. Create session document in Firestore
-      final sessionId = await dbService.createSimulationSession(session);
-      
-      // 2. Insert initial introductory message
-      await dbService.addChatMessage(
-        sessionId,
-        ChatMessage(
+      // 1. Try to create session via backend API for live AI
+      String sessionId;
+      String firstBotMessage = initialBotMessage;
+      try {
+        final result = await api.startSimulation(type, companyName: companyName);
+        sessionId = result['id']?.toString() ?? result['session_id']?.toString() ?? '';
+        // Use the AI opening message if returned
+        if (result['opening_message'] != null) {
+          firstBotMessage = result['opening_message'].toString();
+        } else if (result['messages'] is List && (result['messages'] as List).isNotEmpty) {
+          firstBotMessage = (result['messages'] as List).last['text']?.toString() ?? initialBotMessage;
+        }
+      } catch (apiErr) {
+        debugPrint('API startSimulation failed (using local Firestore): $apiErr');
+        // Fallback: create locally in Firestore
+        final session = CareerSimulationSession(
           id: '',
-          sender: 'ai',
-          text: initialBotMessage,
-          timestamp: DateTime.now(),
-        ),
-      );
+          userId: uid,
+          type: type,
+          companyName: companyName,
+          role: role,
+          level: level,
+          status: 'active',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+        sessionId = await dbService.createSimulationSession(session);
+      }
+
+      // 2. Mirror initial message to local Firestore for history stream
+      if (sessionId.isNotEmpty) {
+        await dbService.addChatMessage(
+          sessionId,
+          ChatMessage(
+            id: '',
+            sender: 'ai',
+            text: firstBotMessage,
+            timestamp: DateTime.now(),
+          ),
+        );
+      }
 
       setState(() {
         _currentSessionId = sessionId;
@@ -200,14 +217,15 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
     }
   }
 
-  // Handle message send
+  // Handle message send — calls backend API for real AI reply
   Future<void> _sendMessage(String text) async {
     if (text.trim().isEmpty || _currentSessionId.isEmpty || _isResponding) return;
 
     final dbService = ref.read(dbServiceProvider);
+    final api = ref.read(apiServiceProvider);
 
     try {
-      // 1. Save user message to Firestore
+      // 1. Save user message locally for instant display
       await dbService.addChatMessage(
         _currentSessionId,
         ChatMessage(
@@ -221,15 +239,25 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
       _chatController.clear();
       _scrollToBottom();
 
-      setState(() {
-        _isResponding = true;
-      });
+      setState(() => _isResponding = true);
 
-      // 2. Simulate smart bot response after 1.2s delay
-      Timer(const Duration(milliseconds: 1200), () async {
-        String botReply = "That's an interesting approach. Let's dig deeper. How would you justify this choice to the project team?";
-        
-        // Custom smart replies based on session state and query content
+      // 2. Call backend API for real AI response
+      String botReply;
+      try {
+        final result = await api.sendSimulationMessage(_currentSessionId, text);
+        // Extract AI reply from response structure
+        if (result['reply'] != null) {
+          botReply = result['reply'].toString();
+        } else if (result['message'] != null) {
+          botReply = result['message'].toString();
+        } else if (result['text'] != null) {
+          botReply = result['text'].toString();
+        } else {
+          botReply = "That's a great point! Let's explore this further.";
+        }
+      } catch (apiErr) {
+        debugPrint('API sendSimulationMessage failed (falling back to local): $apiErr');
+        // Fallback to smart local reply
         final normalizedText = text.toLowerCase();
         if (_currentState == SimulationState.careerChat) {
           if (normalizedText.contains("approach") || normalizedText.contains("right")) {
@@ -237,49 +265,44 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
           } else if (normalizedText.contains("grid")) {
             botReply = "Excellent! CSS Grid is perfect for multi-dimensional layouts. Let's write the media queries. How would you define the breakpoint boundaries for mobile (375px) vs tablet (768px)?";
           } else {
-            botReply = "Got it. Let's focus on the responsive breakpoints. Budi, what viewport units or media query strategies will keep this class page fully accessible on a 375px display?";
+            botReply = "Got it. Let's focus on the responsive breakpoints. What viewport units or media query strategies will keep this page fully accessible on a 375px display?";
           }
         } else if (_currentState == SimulationState.salaryChat) {
           if (normalizedText.contains("negotiable") || normalizedText.contains("range")) {
             botReply = "Indeed, the salary range is slightly negotiable for highly skilled candidates. What specific technical skills or portfolio items make you feel you stand out for this junior position?";
-          } else if (normalizedText.contains("12 million") || normalizedText.contains("12m") || normalizedText.contains("12jt")) {
-            botReply = "I understand. 12 million IDR is significantly higher than our initial junior range. However, we're extremely impressed by your UI design skills and Git history. Can you walk me through your key achievements that justify this premium rate?";
           } else {
-            botReply = "Thank you for sharing your expectation. We can review this rate if you are able to demonstrate competency in Jest testing and CSS Responsive layout. Are you open to a small technical case study to secure this package?";
+            botReply = "Thank you for sharing your expectation. We can review this rate if you can demonstrate competency in the required skills. Are you open to a short technical assessment?";
           }
         } else if (_currentState == SimulationState.jobdeskAnalyzerChat) {
           if (normalizedText.contains("typescript") || normalizedText.contains("improve")) {
-            botReply = "TypeScript is key! To start our technical mock interview: what is the primary difference between a 'type' alias and an 'interface' in TypeScript, and which should you prefer for defining React component props?";
-          } else if (normalizedText.contains("interface")) {
-            botReply = "Brilliant! Interfaces are ideal for declaring object shapes and support declaration merging. What about unions? Can an interface extend a union type, or is that restricted to type aliases?";
+            botReply = "TypeScript is key! To start our technical mock interview: what is the primary difference between a 'type' alias and an 'interface' in TypeScript?";
           } else {
-            botReply = "Awesome! Let's talk about Web Performance. What is your go-to optimization strategy for reducing React bundle size and improving the lighthouse score of a landing page?";
+            botReply = "Awesome! Let's talk about Web Performance. What is your go-to optimization strategy for reducing bundle size and improving the Lighthouse score?";
           }
+        } else {
+          botReply = "That's an interesting approach. Let's dig deeper. How would you justify this choice to the project team?";
         }
+      }
 
-        await dbService.addChatMessage(
-          _currentSessionId,
-          ChatMessage(
-            id: '',
-            sender: 'ai',
-            text: botReply,
-            timestamp: DateTime.now(),
-          ),
-        );
+      // 3. Mirror AI reply to Firestore for history stream
+      await dbService.addChatMessage(
+        _currentSessionId,
+        ChatMessage(
+          id: '',
+          sender: 'ai',
+          text: botReply,
+          timestamp: DateTime.now(),
+        ),
+      );
 
-        if (mounted) {
-          setState(() {
-            _isResponding = false;
-          });
-          _scrollToBottom();
-        }
-      });
+      if (mounted) {
+        setState(() => _isResponding = false);
+        _scrollToBottom();
+      }
     } catch (e) {
       debugPrint("Error sending message: $e");
       if (mounted) {
-        setState(() {
-          _isResponding = false;
-        });
+        setState(() => _isResponding = false);
       }
     }
   }

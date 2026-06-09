@@ -11,6 +11,20 @@ class ApiService {
   static String? _accessToken;
   static String? _refreshToken;
 
+  /// Helper for API requests headers
+  Map<String, String> _getHeaders() {
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
+    if (_cookieHeader != null) {
+      headers['cookie'] = _cookieHeader!;
+    }
+    if (_accessToken != null) {
+      headers['Authorization'] = 'Bearer $_accessToken';
+    }
+    return headers;
+  }
+
   /// Register a new account
   Future<Map<String, dynamic>> register({
     required String email,
@@ -121,16 +135,7 @@ class ApiService {
     final url = Uri.parse('$baseUrl/api/auth/refresh');
     debugPrint('API POST -> $url');
 
-    final Map<String, String> headers = {
-      'Content-Type': 'application/json',
-    };
-
-    if (_cookieHeader != null) {
-      headers['cookie'] = _cookieHeader!;
-    }
-    if (_accessToken != null) {
-      headers['Authorization'] = 'Bearer $_accessToken';
-    }
+    final headers = _getHeaders();
 
     try {
       final response = await http.post(
@@ -163,16 +168,7 @@ class ApiService {
     final url = Uri.parse('$baseUrl/api/auth/me');
     debugPrint('API GET -> $url');
 
-    final Map<String, String> headers = {
-      'Content-Type': 'application/json',
-    };
-
-    if (_cookieHeader != null) {
-      headers['cookie'] = _cookieHeader!;
-    }
-    if (_accessToken != null) {
-      headers['Authorization'] = 'Bearer $_accessToken';
-    }
+    final headers = _getHeaders();
 
     try {
       final response = await http.get(url, headers: headers);
@@ -201,16 +197,7 @@ class ApiService {
     final url = Uri.parse('$baseUrl/api/users/$userId/onboarding/profile');
     debugPrint('API PATCH -> $url');
 
-    final Map<String, String> headers = {
-      'Content-Type': 'application/json',
-    };
-
-    if (_cookieHeader != null) {
-      headers['cookie'] = _cookieHeader!;
-    }
-    if (_accessToken != null) {
-      headers['Authorization'] = 'Bearer $_accessToken';
-    }
+    final headers = _getHeaders();
 
     try {
       final response = await http.patch(
@@ -245,16 +232,7 @@ class ApiService {
     final url = Uri.parse('$baseUrl/api/users/$userId/onboarding/goal');
     debugPrint('API PATCH -> $url');
 
-    final Map<String, String> headers = {
-      'Content-Type': 'application/json',
-    };
-
-    if (_cookieHeader != null) {
-      headers['cookie'] = _cookieHeader!;
-    }
-    if (_accessToken != null) {
-      headers['Authorization'] = 'Bearer $_accessToken';
-    }
+    final headers = _getHeaders();
 
     try {
       final response = await http.patch(
@@ -275,21 +253,517 @@ class ApiService {
     }
   }
 
+  /// Complete onboarding role step
+  Future<Map<String, dynamic>> updateOnboardingRole({
+    required String userId,
+    required String role,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/users/$userId/onboarding/role');
+    debugPrint('API PATCH -> $url');
+
+    final headers = _getHeaders();
+
+    try {
+      final response = await http.patch(
+        url,
+        headers: headers,
+        body: jsonEncode({'target_role': role}),
+      );
+
+      final decoded = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return decoded;
+      } else {
+        throw Exception(decoded['message'] ?? 'Failed to update target role.');
+      }
+    } catch (e) {
+      debugPrint('UpdateOnboardingRole API Error: $e');
+      rethrow;
+    }
+  }
+
+  /// Helper to upload files via Multipart
+  Future<Map<String, dynamic>> _uploadMultipart({
+    required String path,
+    required String fileKey,
+    required String filePath,
+    required String fileName,
+  }) async {
+    final url = Uri.parse('$baseUrl$path');
+    debugPrint('API PATCH MULTIPART -> $url');
+
+    final request = http.MultipartRequest('PATCH', url);
+
+    if (_cookieHeader != null) {
+      request.headers['cookie'] = _cookieHeader!;
+    }
+    if (_accessToken != null) {
+      request.headers['Authorization'] = 'Bearer $_accessToken';
+    }
+
+    final file = await http.MultipartFile.fromPath(fileKey, filePath, filename: fileName);
+    request.files.add(file);
+
+    try {
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      final decoded = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return decoded;
+      } else {
+        throw Exception(decoded['message'] ?? 'Failed to upload document.');
+      }
+    } catch (e) {
+      debugPrint('Multipart Upload Error: $e');
+      rethrow;
+    }
+  }
+
+  /// Upload onboarding CV file
+  Future<Map<String, dynamic>> uploadOnboardingCv({
+    required String userId,
+    required String cvPath,
+    required String cvName,
+  }) async {
+    return _uploadMultipart(
+      path: '/api/users/$userId/onboarding/cv',
+      fileKey: 'cv',
+      filePath: cvPath,
+      fileName: cvName,
+    );
+  }
+
+  /// Upload onboarding Transcript file
+  Future<Map<String, dynamic>> uploadOnboardingTranscript({
+    required String userId,
+    required String transcriptPath,
+    required String transcriptName,
+  }) async {
+    return _uploadMultipart(
+      path: '/api/users/$userId/onboarding/transcript',
+      fileKey: 'transcript',
+      filePath: transcriptPath,
+      fileName: transcriptName,
+    );
+  }
+
+  /// Complete Onboarding Status
+  Future<Map<String, dynamic>> completeOnboarding({
+    required String userId,
+    String? githubId,
+    String? githubUsername,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/users/$userId/onboarding/complete');
+    debugPrint('API POST -> $url');
+
+    final headers = _getHeaders();
+
+    try {
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: jsonEncode({
+          if (githubId != null) 'githubId': githubId,
+          if (githubUsername != null) 'githubUsername': githubUsername,
+        }),
+      );
+
+      final decoded = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return decoded;
+      } else {
+        throw Exception(decoded['message'] ?? 'Failed to complete onboarding.');
+      }
+    } catch (e) {
+      debugPrint('CompleteOnboarding API Error: $e');
+      rethrow;
+    }
+  }
+
+  /// Update Account Settings
+  Future<Map<String, dynamic>> updateProfileSettings({
+    required String userId,
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String university,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/users/$userId/profile');
+    debugPrint('API PATCH -> $url');
+
+    final headers = _getHeaders();
+
+    try {
+      final response = await http.patch(
+        url,
+        headers: headers,
+        body: jsonEncode({
+          'first_name': firstName,
+          'last_name': lastName,
+          'email': email,
+          'university': university,
+        }),
+      );
+
+      final decoded = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return decoded;
+      } else {
+        throw Exception(decoded['message'] ?? 'Failed to update account settings.');
+      }
+    } catch (e) {
+      debugPrint('UpdateProfileSettings API Error: $e');
+      rethrow;
+    }
+  }
+
+  /// Get a user's full profile by id.
+  /// Returns the user object including `github_username` and linked `providers`.
+  Future<Map<String, dynamic>> getUserProfile(String userId) async {
+    final url = Uri.parse('$baseUrl/api/users/$userId');
+    debugPrint('API GET -> $url');
+
+    final headers = _getHeaders();
+
+    try {
+      final response = await http.get(url, headers: headers);
+      final decoded = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return Map<String, dynamic>.from(decoded['result'] ?? decoded);
+      } else {
+        throw Exception(decoded['message'] ?? 'Failed to load user profile.');
+      }
+    } catch (e) {
+      debugPrint('GetUserProfile API Error: $e');
+      rethrow;
+    }
+  }
+
+  /// Connect / sync a GitHub account by username.
+  /// Calls POST /api/users/:id/github/sync which links the username, fetches the
+  /// account's public repositories and recomputes the readiness score.
+  Future<Map<String, dynamic>> connectGithub({
+    required String userId,
+    required String githubUsername,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/users/$userId/github/sync');
+    debugPrint('API POST -> $url');
+
+    final headers = _getHeaders();
+
+    try {
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: jsonEncode({'githubUsername': githubUsername}),
+      );
+
+      final decoded = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return Map<String, dynamic>.from(decoded['result'] ?? decoded);
+      } else {
+        throw Exception(
+            decoded['message'] ?? 'Failed to connect GitHub account.');
+      }
+    } catch (e) {
+      debugPrint('ConnectGithub API Error: $e');
+      rethrow;
+    }
+  }
+
+  /// Update Password
+  Future<Map<String, dynamic>> updatePassword({
+    required String userId,
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/users/$userId/password');
+    debugPrint('API PUT -> $url');
+
+    final headers = _getHeaders();
+
+    try {
+      final response = await http.put(
+        url,
+        headers: headers,
+        body: jsonEncode({
+          'current_password': currentPassword,
+          'new_password': newPassword,
+        }),
+      );
+
+      final decoded = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return decoded;
+      } else {
+        throw Exception(decoded['message'] ?? 'Failed to update password.');
+      }
+    } catch (e) {
+      debugPrint('UpdatePassword API Error: $e');
+      rethrow;
+    }
+  }
+
+  // ── Mini Projects APIs ───────────────────────────────────────────────────
+
+  /// Fetch mini projects matched to user's role
+  Future<List<dynamic>> fetchMiniProjects() async {
+    final url = Uri.parse('$baseUrl/api/mini-projects');
+    debugPrint('API GET -> $url');
+
+    final headers = _getHeaders();
+
+    try {
+      final response = await http.get(url, headers: headers);
+      final decoded = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return decoded['result'] ?? decoded ?? [];
+      } else {
+        throw Exception(decoded['message'] ?? 'Failed to fetch mini projects.');
+      }
+    } catch (e) {
+      debugPrint('FetchMiniProjects API Error: $e');
+      rethrow;
+    }
+  }
+
+  /// Fetch a single mini project's details and submissions
+  Future<Map<String, dynamic>> fetchMiniProjectDetail(String id) async {
+    final url = Uri.parse('$baseUrl/api/mini-projects/$id');
+    debugPrint('API GET -> $url');
+
+    final headers = _getHeaders();
+
+    try {
+      final response = await http.get(url, headers: headers);
+      final decoded = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return decoded['result'] ?? decoded;
+      } else {
+        throw Exception(decoded['message'] ?? 'Failed to fetch project detail.');
+      }
+    } catch (e) {
+      debugPrint('FetchMiniProjectDetail API Error: $e');
+      rethrow;
+    }
+  }
+
+  /// Start a mini project
+  Future<Map<String, dynamic>> startMiniProject(String id) async {
+    final url = Uri.parse('$baseUrl/api/mini-projects/$id/start');
+    debugPrint('API POST -> $url');
+
+    final headers = _getHeaders();
+
+    try {
+      final response = await http.post(url, headers: headers);
+      final decoded = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return decoded['result'] ?? decoded;
+      } else {
+        throw Exception(decoded['message'] ?? 'Failed to start project.');
+      }
+    } catch (e) {
+      debugPrint('StartMiniProject API Error: $e');
+      rethrow;
+    }
+  }
+
+  /// Submit a mini project file archive (ZIP/RAR)
+  Future<Map<String, dynamic>> submitMiniProjectFile(String id, String filePath, String fileName) async {
+    final url = Uri.parse('$baseUrl/api/mini-projects/$id/submit');
+    debugPrint('API POST MULTIPART -> $url');
+
+    final request = http.MultipartRequest('POST', url);
+
+    if (_cookieHeader != null) {
+      request.headers['cookie'] = _cookieHeader!;
+    }
+    if (_accessToken != null) {
+      request.headers['Authorization'] = 'Bearer $_accessToken';
+    }
+
+    final file = await http.MultipartFile.fromPath('file', filePath, filename: fileName);
+    request.files.add(file);
+
+    try {
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      final decoded = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return decoded['result'] ?? decoded;
+      } else {
+        throw Exception(decoded['message'] ?? 'Failed to submit project file.');
+      }
+    } catch (e) {
+      debugPrint('SubmitMiniProjectFile Error: $e');
+      rethrow;
+    }
+  }
+
+  /// Submit a mini project via GitHub repository URL
+  Future<Map<String, dynamic>> submitMiniProjectGitHub(String id, String githubUrl) async {
+    final url = Uri.parse('$baseUrl/api/mini-projects/$id/submit');
+    debugPrint('API POST -> $url');
+
+    final headers = _getHeaders();
+
+    try {
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: jsonEncode({'github_url': githubUrl}),
+      );
+
+      final decoded = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return decoded['result'] ?? decoded;
+      } else {
+        throw Exception(decoded['message'] ?? 'Failed to submit project via GitHub.');
+      }
+    } catch (e) {
+      debugPrint('SubmitMiniProjectGitHub API Error: $e');
+      rethrow;
+    }
+  }
+
+  // ── Simulations APIs ─────────────────────────────────────────────────────
+
+  /// Start a new AI simulation session (recruiter or salary)
+  Future<Map<String, dynamic>> startSimulation(String type, {String? companyName}) async {
+    final url = Uri.parse('$baseUrl/api/simulations/start');
+    debugPrint('API POST -> $url');
+
+    final headers = _getHeaders();
+
+    try {
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: jsonEncode({
+          'type': type,
+          if (companyName != null) 'company_name': companyName,
+        }),
+      );
+
+      final decoded = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return decoded['result'] ?? decoded;
+      } else {
+        throw Exception(decoded['message'] ?? 'Failed to start simulation.');
+      }
+    } catch (e) {
+      debugPrint('StartSimulation API Error: $e');
+      rethrow;
+    }
+  }
+
+  /// Send message to AI simulation session
+  Future<Map<String, dynamic>> sendSimulationMessage(String simulationId, String text) async {
+    final url = Uri.parse('$baseUrl/api/simulations/$simulationId/message');
+    debugPrint('API POST -> $url');
+
+    final headers = _getHeaders();
+
+    try {
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: jsonEncode({'text': text}),
+      );
+
+      final decoded = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return decoded['result'] ?? decoded;
+      } else {
+        throw Exception(decoded['message'] ?? 'Failed to send simulation message.');
+      }
+    } catch (e) {
+      debugPrint('SendSimulationMessage API Error: $e');
+      rethrow;
+    }
+  }
+
+  /// Fetch simulation details and messages
+  Future<Map<String, dynamic>> getSimulationDetails(String simulationId) async {
+    final url = Uri.parse('$baseUrl/api/simulations/$simulationId');
+    debugPrint('API GET -> $url');
+
+    final headers = _getHeaders();
+
+    try {
+      final response = await http.get(url, headers: headers);
+      final decoded = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return decoded['result'] ?? decoded;
+      } else {
+        throw Exception(decoded['message'] ?? 'Failed to get simulation details.');
+      }
+    } catch (e) {
+      debugPrint('GetSimulationDetails API Error: $e');
+      rethrow;
+    }
+  }
+
+  // ── Dashboard / Analytics APIs ───────────────────────────────────────────
+
+  /// Fetch dashboard summary (readiness score, streak, trend)
+  Future<Map<String, dynamic>> getDashboardSummary() async {
+    final url = Uri.parse('$baseUrl/api/dashboard/summary');
+    debugPrint('API GET -> $url');
+
+    final headers = _getHeaders();
+
+    try {
+      final response = await http.get(url, headers: headers);
+      final decoded = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return decoded['result'] ?? decoded;
+      } else {
+        throw Exception(decoded['message'] ?? 'Failed to get dashboard summary.');
+      }
+    } catch (e) {
+      debugPrint('GetDashboardSummary API Error: $e');
+      rethrow;
+    }
+  }
+
+  /// Fetch skill gap analytics
+  Future<List<dynamic>> getSkillGap() async {
+    final url = Uri.parse('$baseUrl/api/readiness/skill-gap');
+    debugPrint('API GET -> $url');
+
+    final headers = _getHeaders();
+
+    try {
+      final response = await http.get(url, headers: headers);
+      final decoded = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return decoded['result'] ?? decoded ?? [];
+      } else {
+        throw Exception(decoded['message'] ?? 'Failed to get skill gaps.');
+      }
+    } catch (e) {
+      debugPrint('GetSkillGap API Error: $e');
+      rethrow;
+    }
+  }
+
   /// Logout and clear cookies
   Future<void> logout() async {
     final url = Uri.parse('$baseUrl/api/auth/logout');
     debugPrint('API POST -> $url');
 
-    final Map<String, String> headers = {
-      'Content-Type': 'application/json',
-    };
-
-    if (_cookieHeader != null) {
-      headers['cookie'] = _cookieHeader!;
-    }
-    if (_accessToken != null) {
-      headers['Authorization'] = 'Bearer $_accessToken';
-    }
+    final headers = _getHeaders();
 
     try {
       await http.post(url, headers: headers);
@@ -316,7 +790,6 @@ class ApiService {
     if (rawCookie != null) {
       final List<String> validCookies = [];
       
-      // Sometimes multiple cookies are combined using commas (e.g. "access_token=foo; ..., refresh_token=bar; ...")
       final parts = rawCookie.split(',');
       for (var part in parts) {
         final trimmed = part.trim();

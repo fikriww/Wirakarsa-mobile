@@ -5,7 +5,11 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class SocialLoginRow extends StatelessWidget {
-  const SocialLoginRow({super.key});
+  /// Whether this row is shown on the sign-up screen. Controls whether a
+  /// first-time GitHub login is allowed to create a new account.
+  final bool isSignUp;
+
+  const SocialLoginRow({super.key, this.isSignUp = false});
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +59,33 @@ class SocialLoginRow extends StatelessWidget {
                   );
                 } catch (e) {
                   debugPrint('Failed to launch Google OAuth: $e');
+                }
+              },
+              iconSize: 24,
+            ),
+            const SizedBox(width: 20),
+            _SocialButton(
+              svgAsset: 'assets/icons/github.svg',
+              onTap: () async {
+                // Open the web GitHub-login entry point in the system browser.
+                // After authenticating, /oauth-callback hands the session tokens
+                // back to the app via the wirapath:// deep link (native) or the
+                // hash-route callback (web).
+                final String redirectUri = kIsWeb
+                    ? '${Uri.base.origin}/#/oauth-callback'
+                    : 'wirapath://oauth-callback';
+                final url = Uri.parse(
+                  'http://localhost:3000/github-login'
+                  '?is_signup=$isSignUp'
+                  '&redirect_uri=${Uri.encodeComponent(redirectUri)}',
+                );
+                try {
+                  await launchUrl(
+                    url,
+                    mode: kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication,
+                  );
+                } catch (e) {
+                  debugPrint('Failed to launch GitHub OAuth: $e');
                 }
               },
               iconSize: 24,

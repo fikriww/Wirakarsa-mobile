@@ -17,6 +17,7 @@ class _PersonalInformationPageState extends ConsumerState<PersonalInformationPag
   late TextEditingController _universityController;
   late TextEditingController _majorController;
   bool _isInitialized = false;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -50,6 +51,7 @@ class _PersonalInformationPageState extends ConsumerState<PersonalInformationPag
     final user = ref.read(userProfileProvider).value;
     if (user == null) return;
 
+    setState(() => _isSaving = true);
     try {
       await ref.read(apiServiceProvider).updateOnboardingProfile(
         userId: user.uid,
@@ -79,6 +81,8 @@ class _PersonalInformationPageState extends ConsumerState<PersonalInformationPag
           ),
         );
       }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
@@ -200,7 +204,7 @@ class _PersonalInformationPageState extends ConsumerState<PersonalInformationPag
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _handleSave,
+                onPressed: _isSaving ? null : _handleSave,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryBlue,
                   foregroundColor: Colors.white,
@@ -210,13 +214,22 @@ class _PersonalInformationPageState extends ConsumerState<PersonalInformationPag
                   ),
                   elevation: 0,
                 ),
-                child: const Text(
-                  'Save Changes',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                child: _isSaving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        'Save Changes',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
               ),
             ),
           ),

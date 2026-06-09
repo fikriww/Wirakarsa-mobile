@@ -17,14 +17,8 @@ import '../../features/readiness/presentation/pages/testing_review_page.dart';
 import '../../features/readiness/presentation/pages/review_test_page.dart';
 import '../../features/readiness/presentation/pages/cv_screening_result_page.dart';
 import '../../features/devhub/presentation/pages/submit_code_page.dart';
-import '../../features/devhub/presentation/pages/react_testing_fundamentals_page.dart';
-import '../../features/devhub/presentation/pages/css_responsive_mastery_page.dart';
-import '../../features/devhub/presentation/pages/react_component_basic_page.dart';
-import '../../features/devhub/presentation/pages/async_javascript_mastery_page.dart';
-import '../../features/devhub/presentation/pages/submit_react_testing_fundamentals_page.dart';
-import '../../features/devhub/presentation/pages/submit_css_responsive_mastery_page.dart';
-import '../../features/devhub/presentation/pages/submit_react_component_basic_page.dart';
-import '../../features/devhub/presentation/pages/submit_async_javascript_mastery_page.dart';
+import '../../features/devhub/presentation/pages/project_detail_page.dart';
+import '../../features/devhub/presentation/pages/project_workspace_page.dart';
 import '../../features/main/main_shell.dart';
 import '../../features/profile/presentation/pages/personal_information_page.dart';
 import '../../features/profile/presentation/pages/password_security_page.dart';
@@ -32,6 +26,7 @@ import '../../features/profile/presentation/pages/notifications_page.dart';
 import '../../features/profile/presentation/pages/language_appearance_page.dart';
 import '../../features/profile/presentation/pages/integrations_page.dart';
 import '../../features/profile/presentation/pages/help_support_page.dart';
+import '../../core/models/mini_project_model.dart';
 
 class AppRouter {
   AppRouter._();
@@ -182,42 +177,33 @@ class AppRouter {
         builder: (context, state) => const SubmitCodePage(),
       ),
 
-      // Project detail pages
+      // Dynamic project detail (universal for all projects)
       GoRoute(
-        path: '/devhub/react-testing-fundamentals',
-        builder: (context, state) => const ReactTestingFundamentalsPage(),
-      ),
-      GoRoute(
-        path: '/devhub/css-responsive-mastery',
-        builder: (context, state) => const CssResponsiveMasteryPage(),
-      ),
-      GoRoute(
-        path: '/devhub/react-component-basic',
-        builder: (context, state) => const ReactComponentBasicPage(),
-      ),
-      GoRoute(
-        path: '/devhub/async-javascript-mastery',
-        builder: (context, state) => const AsyncJavascriptMasteryPage(),
+        path: '/devhub/project/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          final extra = state.extra as MiniProject?;
+          return ProjectDetailPage(
+            projectId: id,
+            projectFromExtra: extra,
+          );
+        },
       ),
 
-      // Project submit/result pages
+      // Dynamic project workspace/submit (universal)
       GoRoute(
-        path: '/devhub/react-testing-fundamentals/submit',
-        builder: (context, state) => const SubmitReactTestingFundamentalsPage(),
-      ),
-      GoRoute(
-        path: '/devhub/css-responsive-mastery/submit',
-        builder: (context, state) => const SubmitCssResponsiveMasteryPage(),
-      ),
-      GoRoute(
-        path: '/devhub/react-component-basic/submit',
-        builder: (context, state) => const SubmitReactComponentBasicPage(),
-      ),
-      GoRoute(
-        path: '/devhub/async-javascript-mastery/submit',
-        builder: (context, state) => const SubmitAsyncJavascriptMasteryPage(),
+        path: '/devhub/project/:id/workspace',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          final extra = state.extra as MiniProject?;
+          return ProjectWorkspacePage(
+            projectId: id,
+            projectFromExtra: extra,
+          );
+        },
       ),
 
+      // --- Profile ---
       GoRoute(
         path: '/profile',
         builder: (context, state) => const MainShell(currentIndex: 4),

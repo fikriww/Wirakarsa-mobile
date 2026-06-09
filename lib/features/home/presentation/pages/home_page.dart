@@ -11,54 +11,149 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userProfileAsync = ref.watch(userProfileProvider);
+    final summaryAsync = ref.watch(dashboardSummaryProvider);
+    final skillGapsAsync = ref.watch(skillGapProvider);
 
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 24, right: 24, top: 16, bottom: 100),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                userProfileAsync.when(
-                  data: (user) => _buildHeader(user?.displayName ?? "User"),
-                  loading: () => _buildHeader("Loading..."),
-                  error: (_, __) => _buildHeader("User"),
-                ),
-                const SizedBox(height: 24),
-                _buildSearchBar(),
-                const SizedBox(height: 32),
-                _buildReadinessCard(),
-                const SizedBox(height: 16),
-                _buildStatsRow(),
-                const SizedBox(height: 32),
-                _buildSectionHeader(
-                  "Skills That Need Attention",
-                  onViewAll: () => context.go('/readiness-center', extra: {'initialTabIndex': 3}),
-                ),
-                const SizedBox(height: 16),
-                _buildSkillAttentionCard("Web Performance", "Weak", "15%", const Color(0xFFF9C8C8), const Color(0xFFD32F2F), Icons.warning_amber_rounded),
-                const SizedBox(height: 12),
-                _buildSkillAttentionCard("Testing (Jest)", "Weak", "30%", const Color(0xFFF9C8C8), const Color(0xFFD32F2F), Icons.warning_amber_rounded),
-                const SizedBox(height: 12),
-                _buildSkillAttentionCard("Accessibility", "Enough", "50%", const Color(0xFFFFE0A0), const Color(0xFFF57F17), Icons.remove_circle_outline),
-                const SizedBox(height: 32),
-                _buildSectionHeader(
-                  "Your Achievement Progress",
-                  onViewAll: () => context.go('/profile'),
-                ),
-                const SizedBox(height: 16),
-                _buildAchievementList(),
-                const SizedBox(height: 32),
-                Center(
-                  child: Text(
-                    "Data from 2,847+ active job listings • Updated every 6 hours",
-                    style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary, fontStyle: FontStyle.italic),
+        child: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(dashboardSummaryProvider);
+            ref.invalidate(skillGapProvider);
+            await ref.read(userProfileProvider.notifier).refreshProfile();
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 24, right: 24, top: 16, bottom: 100),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  userProfileAsync.when(
+                    data: (user) => _buildHeader(user?.displayName ?? "User"),
+                    loading: () => _buildHeader("Loading..."),
+                    error: (_, __) => _buildHeader("User"),
                   ),
-                ),
-                const SizedBox(height: 40),
-              ],
+                  const SizedBox(height: 24),
+                  _buildSearchBar(),
+                  const SizedBox(height: 32),
+                  
+                  summaryAsync.when(
+                    data: (summary) => _buildReadinessCard(
+                      score: summary['readinessScore']?.toString() ?? "0",
+                      role: summary['role'] ?? "Career Seeker",
+                    ),
+                    loading: () => _buildReadinessCard(score: "...", role: "Loading...", isLoading: true),
+                    error: (e, __) => _buildReadinessCard(score: "0", role: "Error loading profile"),
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  summaryAsync.when(
+                    data: (summary) => _buildStatsRow(
+                      trend: summary['readinessTrend']?.toString() ?? "0%",
+                      streak: summary['streak']?.toString() ?? "0",
+                    ),
+                    loading: () => _buildStatsRow(trend: "...", streak: "..."),
+                    error: (e, __) => _buildStatsRow(trend: "0%", streak: "0"),
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  _buildSectionHeader(
+                    "Skills That Need Attention",
+                    onViewAll: () => context.go('/readiness-center', extra: {'initialTabIndex': 3}),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  skillGapsAsync.when(
+                    data: (gaps) {
+                      // Filter for skills with current < 70 (Weak or Enough)
+                      final attentionSkills = gaps.where((item) {
+                        final current = (item['current'] as num?)?.toDouble() ?? 0.0;
+                        return current < 70;
+                      }).toList();
+
+                      if (attentionSkills.isEmpty) {
+                        return Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE8F5E9),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.check_circle_outline, color: Color(0xFF388E3C), size: 28),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text("Great job!", style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold, color: const Color(0xFF2E7D32))),
+                                    Text("All your skills are strong and meet the required role threshold.", style: AppTextStyles.bodySmall.copyWith(color: const Color(0xFF388E3C))),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      return ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: attentionSkills.length.clamp(0, 3), // show top 3 maximum
+                        separatorBuilder: (context, index) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final item = attentionSkills[index];
+                          final skillName = item['skill'] ?? "Unknown Skill";
+                          final currentScore = (item['current'] as num?)?.toDouble() ?? 0.0;
+                          
+                          String statusStr = "Weak";
+                          Color cardBg = const Color(0xFFFFF1F1);
+                          Color textIconColor = const Color(0xFFD32F2F);
+                          IconData attentionIcon = Icons.warning_amber_rounded;
+
+                          if (currentScore >= 40) {
+                            statusStr = "Enough";
+                            cardBg = const Color(0xFFFFF9E6);
+                            textIconColor = const Color(0xFFF57F17);
+                            attentionIcon = Icons.remove_circle_outline;
+                          }
+
+                          return _buildSkillAttentionCard(
+                            skillName,
+                            statusStr,
+                            "${currentScore.toStringAsFixed(0)}%",
+                            cardBg,
+                            textIconColor,
+                            attentionIcon,
+                          );
+                        },
+                      );
+                    },
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (e, __) => Text("Failed to load skills: $e", style: const TextStyle(color: AppColors.error)),
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  _buildSectionHeader(
+                    "Your Achievement Progress",
+                    onViewAll: () => context.go('/profile'),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildAchievementList(),
+                  const SizedBox(height: 32),
+                  Center(
+                    child: Text(
+                      "Data from 2,847+ active job listings • Updated every 6 hours",
+                      style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary, fontStyle: FontStyle.italic),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              ),
             ),
           ),
         ),
@@ -70,22 +165,26 @@ class HomePage extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            const CircleAvatar(
-              radius: 24,
-              backgroundColor: Color(0xFFE5E7EB),
-              child: Icon(Icons.person, color: Colors.grey, size: 32),
-            ),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Welcome back!", style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary)),
-                Text(displayName, style: AppTextStyles.heading1.copyWith(fontSize: 24)),
-              ],
-            ),
-          ],
+        Expanded(
+          child: Row(
+            children: [
+              const CircleAvatar(
+                radius: 24,
+                backgroundColor: Color(0xFFE5E7EB),
+                child: Icon(Icons.person, color: Colors.grey, size: 32),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Welcome back!", style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary)),
+                    Text(displayName, style: AppTextStyles.heading1.copyWith(fontSize: 22), overflow: TextOverflow.ellipsis),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
         Row(
           children: [
@@ -121,7 +220,11 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildReadinessCard() {
+  Widget _buildReadinessCard({
+    required String score,
+    required String role,
+    bool isLoading = false,
+  }) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -137,9 +240,9 @@ class HomePage extends ConsumerWidget {
             children: [
               Text("Your Readiness Index today", style: AppTextStyles.bodyMedium.copyWith(color: Colors.white)),
               const SizedBox(height: 8),
-              Text("63%", style: AppTextStyles.heading1.copyWith(color: Colors.white, fontSize: 48)),
+              Text(isLoading ? score : "$score%", style: AppTextStyles.heading1.copyWith(color: Colors.white, fontSize: 48)),
               const SizedBox(height: 4),
-              Text("Growing", style: AppTextStyles.heading1.copyWith(color: Colors.white, fontSize: 20)),
+              Text(isLoading ? "Analyzing..." : "Growing", style: AppTextStyles.heading1.copyWith(color: Colors.white, fontSize: 20)),
               const SizedBox(height: 24),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -148,7 +251,7 @@ class HomePage extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  "Predicted role: Frontend Developer",
+                  "Predicted role: $role",
                   style: AppTextStyles.bodySmall.copyWith(color: const Color(0xFF1046A0), fontWeight: FontWeight.bold),
                 ),
               ),
@@ -164,7 +267,7 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatsRow() {
+  Widget _buildStatsRow({required String trend, required String streak}) {
     return Row(
       children: [
         Expanded(
@@ -176,9 +279,9 @@ class HomePage extends ConsumerWidget {
             ),
             child: Column(
               children: [
-                Text("4%", style: AppTextStyles.heading1.copyWith(color: const Color(0xFF1046A0), fontSize: 24)),
+                Text(trend, style: AppTextStyles.heading1.copyWith(color: const Color(0xFF1046A0), fontSize: 24)),
                 const SizedBox(height: 4),
-                Text("↑ Up form last week", style: AppTextStyles.bodySmall.copyWith(color: const Color(0xFF1046A0))),
+                Text("↑ Up from last week", style: AppTextStyles.bodySmall.copyWith(color: const Color(0xFF1046A0))),
               ],
             ),
           ),
@@ -193,9 +296,9 @@ class HomePage extends ConsumerWidget {
             ),
             child: Column(
               children: [
-                Text("+7", style: AppTextStyles.heading1.copyWith(color: const Color(0xFF1046A0), fontSize: 24)),
+                Text(streak, style: AppTextStyles.heading1.copyWith(color: const Color(0xFF1046A0), fontSize: 24)),
                 const SizedBox(height: 4),
-                Text("↑ Poins today", style: AppTextStyles.bodySmall.copyWith(color: const Color(0xFF1046A0))),
+                Text("Day streak today", style: AppTextStyles.bodySmall.copyWith(color: const Color(0xFF1046A0))),
               ],
             ),
           ),

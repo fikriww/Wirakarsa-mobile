@@ -243,7 +243,7 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
               const SizedBox(height: 28),
 
               // Social Login
-              const SocialLoginRow(),
+              const SocialLoginRow(isSignUp: true),
 
               const SizedBox(height: 32),
 

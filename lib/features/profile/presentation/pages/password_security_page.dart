@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/providers/user_provider.dart';
 
-class PasswordSecurityPage extends StatefulWidget {
+class PasswordSecurityPage extends ConsumerStatefulWidget {
   const PasswordSecurityPage({super.key});
 
   @override
-  State<PasswordSecurityPage> createState() => _PasswordSecurityPageState();
+  ConsumerState<PasswordSecurityPage> createState() => _PasswordSecurityPageState();
 }
 
-class _PasswordSecurityPageState extends State<PasswordSecurityPage> {
+class _PasswordSecurityPageState extends ConsumerState<PasswordSecurityPage> {
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -17,6 +19,7 @@ class _PasswordSecurityPageState extends State<PasswordSecurityPage> {
   bool _obscureCurrent = true;
   bool _obscureNew = true;
   bool _obscureConfirm = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -114,26 +117,69 @@ class _PasswordSecurityPageState extends State<PasswordSecurityPage> {
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  // Validate passwords
-                  if (_newPasswordController.text !=
-                      _confirmPasswordController.text) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('New passwords do not match'),
-                        behavior: SnackBarBehavior.floating,
-                        backgroundColor: AppColors.error,
-                      ),
-                    );
-                    return;
-                  }
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Password updated successfully'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
+                onPressed: _isLoading
+                    ? null
+                    : () async {
+                        if (_newPasswordController.text !=
+                            _confirmPasswordController.text) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('New passwords do not match'),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: AppColors.error,
+                            ),
+                          );
+                          return;
+                        }
+                        if (_currentPasswordController.text.isEmpty ||
+                            _newPasswordController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please fill in all fields'),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: AppColors.error,
+                            ),
+                          );
+                          return;
+                        }
+                        setState(() => _isLoading = true);
+                        try {
+                          final api = ref.read(apiServiceProvider);
+                          final userProfile =
+                              ref.read(userProfileProvider).value;
+                          final userId = userProfile?.uid ?? '';
+                          await api.updatePassword(
+                            userId: userId,
+                            currentPassword: _currentPasswordController.text,
+                            newPassword: _newPasswordController.text,
+                          );
+                          if (mounted) {
+                            _currentPasswordController.clear();
+                            _newPasswordController.clear();
+                            _confirmPasswordController.clear();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Password updated successfully'),
+                                behavior: SnackBarBehavior.floating,
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    e.toString().replaceAll('Exception: ', '')),
+                                behavior: SnackBarBehavior.floating,
+                                backgroundColor: AppColors.error,
+                              ),
+                            );
+                          }
+                        } finally {
+                          if (mounted) setState(() => _isLoading = false);
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryBlue,
                   foregroundColor: Colors.white,
@@ -143,13 +189,20 @@ class _PasswordSecurityPageState extends State<PasswordSecurityPage> {
                   ),
                   elevation: 0,
                 ),
-                child: const Text(
-                  'Update Password',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2),
+                      )
+                    : const Text(
+                        'Update Password',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
               ),
             ),
           ),

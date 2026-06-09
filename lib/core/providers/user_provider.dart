@@ -42,15 +42,24 @@ class AuthNotifier extends Notifier<AsyncValue<UserModel?>> {
 
   void setUser(UserModel user) {
     state = AsyncValue.data(user);
+    _invalidateDashboard();
   }
 
   Future<void> refreshProfile() async {
     state = const AsyncValue.loading();
     await _init();
+    _invalidateDashboard();
   }
 
   void logout() {
     state = const AsyncValue.data(null);
+    _invalidateDashboard();
+  }
+
+  void _invalidateDashboard() {
+    ref.invalidate(dashboardSummaryProvider);
+    ref.invalidate(skillGapProvider);
+    ref.invalidate(miniProjectsProvider);
   }
 }
 
@@ -81,8 +90,38 @@ final userSimulationSessionsProvider = StreamProvider<List<CareerSimulationSessi
   return ref.watch(dbServiceProvider).getSimulationSessionsForUser(userProfile.uid);
 });
 
-final miniProjectsProvider = StreamProvider<List<MiniProject>>((ref) {
-  return ref.watch(dbServiceProvider).getMiniProjects();
+// Dynamic dashboard summary from API
+final dashboardSummaryProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  final user = ref.watch(userProfileProvider).value;
+  if (user == null) return {};
+  final api = ref.read(apiServiceProvider);
+  return api.getDashboardSummary();
+});
+
+// Dynamic skill gap analysis from API
+final skillGapProvider = FutureProvider<List<dynamic>>((ref) async {
+  final user = ref.watch(userProfileProvider).value;
+  if (user == null) return [];
+  final api = ref.read(apiServiceProvider);
+  return api.getSkillGap();
+});
+
+// Dynamic mini projects matched to target role from API
+final miniProjectsProvider = FutureProvider<List<MiniProject>>((ref) async {
+  final user = ref.watch(userProfileProvider).value;
+  if (user == null) return [];
+  final api = ref.read(apiServiceProvider);
+  final list = await api.fetchMiniProjects();
+  return list.map((x) => MiniProject.fromMap(Map<String, dynamic>.from(x), x['id'].toString())).toList();
+});
+
+// Full user profile from backend (includes github_username + linked providers).
+// Used by the Integrations page to show real GitHub connection status.
+final githubProfileProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  final user = ref.watch(userProfileProvider).value;
+  if (user == null) return {};
+  final api = ref.read(apiServiceProvider);
+  return api.getUserProfile(user.uid);
 });
 
 final userCodeReviewsProvider = StreamProvider<List<CodeReview>>((ref) {

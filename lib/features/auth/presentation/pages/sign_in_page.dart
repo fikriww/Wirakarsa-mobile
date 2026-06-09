@@ -78,7 +78,12 @@ class _SignInPageState extends ConsumerState<SignInPage> {
             backgroundColor: AppColors.success,
           ),
         );
-        context.go('/home');
+        final user = ref.read(userProfileProvider).value;
+        if (user != null && !user.hasCompletedAssessment) {
+          context.go('/assessment');
+        } else {
+          context.go('/home');
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -207,7 +212,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               const SizedBox(height: 28),
 
               // Social Login
-              const SocialLoginRow(),
+              const SocialLoginRow(isSignUp: false),
 
               const SizedBox(height: 32),
 

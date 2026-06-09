@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/services/api_service.dart';
 import '../../../../core/providers/user_provider.dart';
+import '../../../../core/models/user_model.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
@@ -55,8 +56,13 @@ class _OAuthCallbackPageState extends ConsumerState<OAuthCallbackPage> {
           _statusMessage = 'Authentication successful! Loading...';
         });
 
-        // 3. Navigate to home screen
-        context.go('/home');
+        // 3. Navigate to home screen or onboarding
+        final user = ref.read(userProfileProvider).value;
+        if (user != null && !user.hasCompletedAssessment) {
+          context.go('/assessment');
+        } else {
+          context.go('/home');
+        }
       }
     } catch (e) {
       if (mounted) {

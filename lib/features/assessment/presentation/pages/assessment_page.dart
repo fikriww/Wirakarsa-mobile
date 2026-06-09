@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:file_picker/file_picker.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/services/api_service.dart';
@@ -18,6 +19,11 @@ class _AssessmentPageState extends State<AssessmentPage> {
   int _currentStep = 0;
   final int _totalSteps = 5;
   bool _isSaving = false;
+  bool _isUploading = false;
+
+  // CV/Transcript file state
+  PlatformFile? _cvFile;
+  PlatformFile? _transcriptFile;
 
   // Form states
   final TextEditingController _firstNameController = TextEditingController();
@@ -83,6 +89,73 @@ class _AssessmentPageState extends State<AssessmentPage> {
     _universityController.dispose();
     _gradYearController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickCv() async {
+    try {
+      final result = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'docx', 'doc'],
+        allowMultiple: false,
+      );
+      if (result != null && result.files.isNotEmpty) {
+        setState(() => _cvFile = result.files.first);
+      }
+    } catch (e) {
+      debugPrint('CV file picker error: $e');
+    }
+  }
+
+  Future<void> _pickTranscript() async {
+    try {
+      final result = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'docx', 'doc'],
+        allowMultiple: false,
+      );
+      if (result != null && result.files.isNotEmpty) {
+        setState(() => _transcriptFile = result.files.first);
+      }
+    } catch (e) {
+      debugPrint('Transcript file picker error: $e');
+    }
+  }
+
+  Future<void> _uploadDocumentsAndNext() async {
+    if (_isUploading) return;
+
+    try {
+      final session = await _apiService.getCurrentUser();
+      final userId = session['result']['user']['id'];
+
+      setState(() => _isUploading = true);
+
+      // Upload CV if selected
+      if (_cvFile != null && _cvFile!.path != null) {
+        await _apiService.uploadOnboardingCv(
+          userId: userId,
+          cvPath: _cvFile!.path!,
+          cvName: _cvFile!.name,
+        );
+        debugPrint('CV uploaded successfully.');
+      }
+
+      // Upload Transcript if selected
+      if (_transcriptFile != null && _transcriptFile!.path != null) {
+        await _apiService.uploadOnboardingTranscript(
+          userId: userId,
+          transcriptPath: _transcriptFile!.path!,
+          transcriptName: _transcriptFile!.name,
+        );
+        debugPrint('Transcript uploaded successfully.');
+      }
+    } catch (e) {
+      debugPrint('Error uploading documents: $e');
+    } finally {
+      if (mounted) setState(() => _isUploading = false);
+    }
+    // Proceed regardless of upload success (documents are optional)
+    _nextStep();
   }
 
   Future<void> _saveAssessmentData() async {
@@ -506,20 +579,37 @@ class _AssessmentPageState extends State<AssessmentPage> {
             style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 60),
-          _buildUploadField("Upload CV"),
+          const SizedBox(height: 40),
+          _buildUploadField(
+            label: "Upload CV",
+            pickedFile: _cvFile,
+            onPick: _pickCv,
+            onRemove: () => setState(() => _cvFile = null),
+          ),
           const SizedBox(height: 24),
-          _buildUploadField("Upload Transcript"),
+          _buildUploadField(
+            label: "Upload Transcript",
+            pickedFile: _transcriptFile,
+            onPick: _pickTranscript,
+            onRemove: () => setState(() => _transcriptFile = null),
+          ),
           const Spacer(),
           ElevatedButton(
-            onPressed: _nextStep,
+            onPressed: _isUploading ? null : _uploadDocumentsAndNext,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryBlue,
               foregroundColor: AppColors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
-            child: const Text('Next'),
+            child: _isUploading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2),
+                  )
+                : const Text('Next'),
           ),
           const SizedBox(height: 16),
           Center(
@@ -532,7 +622,9 @@ class _AssessmentPageState extends State<AssessmentPage> {
                   children: [
                     TextSpan(
                       text: "Skip for now",
-                      style: AppTextStyles.bodySmall.copyWith(color: AppColors.primaryBlue, fontWeight: FontWeight.bold),
+                      style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.primaryBlue,
+                          fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -544,7 +636,10 @@ class _AssessmentPageState extends State<AssessmentPage> {
             alignment: Alignment.centerLeft,
             child: TextButton(
               onPressed: _previousStep,
-              child: Text('Back', style: TextStyle(color: AppColors.primaryBlue, fontWeight: FontWeight.bold)),
+              child: Text('Back',
+                  style: TextStyle(
+                      color: AppColors.primaryBlue,
+                      fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -552,33 +647,81 @@ class _AssessmentPageState extends State<AssessmentPage> {
     );
   }
 
-  Widget _buildUploadField(String label) {
+  Widget _buildUploadField({
+    required String label,
+    required PlatformFile? pickedFile,
+    required VoidCallback onPick,
+    required VoidCallback onRemove,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+        Text(label,
+            style: AppTextStyles.bodyMedium
+                .copyWith(fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  color: AppColors.inputBackground,
-                  borderRadius: const BorderRadius.horizontal(left: Radius.circular(8)),
-                ),
-                child: Text(".pdf or .docx", style: TextStyle(color: AppColors.textHint)),
+        GestureDetector(
+          onTap: onPick,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: pickedFile != null
+                  ? AppColors.primaryBlue.withValues(alpha: 0.06)
+                  : AppColors.inputBackground,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: pickedFile != null
+                    ? AppColors.primaryBlue
+                    : Colors.transparent,
+                width: 1.2,
               ),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              decoration: BoxDecoration(
-                color: AppColors.primaryBlue,
-                borderRadius: const BorderRadius.horizontal(right: Radius.circular(8)),
-              ),
-              child: Text("Browse", style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold)),
-            ),
-          ],
+            child: pickedFile == null
+                ? Row(
+                    children: [
+                      Icon(Icons.upload_file_outlined,
+                          color: AppColors.textHint, size: 20),
+                      const SizedBox(width: 10),
+                      Text(".pdf or .docx",
+                          style: TextStyle(color: AppColors.textHint)),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryBlue,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text("Browse",
+                            style: TextStyle(
+                                color: AppColors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13)),
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      const Icon(Icons.check_circle,
+                          color: AppColors.primaryBlue, size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          pickedFile.name,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w500, fontSize: 13),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: onRemove,
+                        child: const Icon(Icons.close,
+                            color: Colors.grey, size: 18),
+                      ),
+                    ],
+                  ),
+          ),
         ),
       ],
     );
