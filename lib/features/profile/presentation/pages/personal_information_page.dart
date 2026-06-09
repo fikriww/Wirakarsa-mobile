@@ -14,6 +14,8 @@ class PersonalInformationPage extends ConsumerStatefulWidget {
 
 class _PersonalInformationPageState extends ConsumerState<PersonalInformationPage> {
   late TextEditingController _firstNameController;
+  late TextEditingController _lastNameController;
+  late TextEditingController _emailController;
   late TextEditingController _universityController;
   late TextEditingController _majorController;
   bool _isInitialized = false;
@@ -23,6 +25,8 @@ class _PersonalInformationPageState extends ConsumerState<PersonalInformationPag
   void initState() {
     super.initState();
     _firstNameController = TextEditingController();
+    _lastNameController = TextEditingController();
+    _emailController = TextEditingController();
     _universityController = TextEditingController();
     _majorController = TextEditingController();
   }
@@ -30,6 +34,8 @@ class _PersonalInformationPageState extends ConsumerState<PersonalInformationPag
   @override
   void dispose() {
     _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
     _universityController.dispose();
     _majorController.dispose();
     super.dispose();
@@ -40,7 +46,12 @@ class _PersonalInformationPageState extends ConsumerState<PersonalInformationPag
     // profile finishes loading from the backend, instead of staying empty.
     final userProfile = ref.watch(userProfileProvider).value;
     if (userProfile != null && !_isInitialized) {
-      _firstNameController.text = userProfile.displayName;
+      // The model exposes a combined displayName; split it into first/last to
+      // mirror the web Account Settings (first_name / last_name in the DB).
+      final parts = userProfile.displayName.trim().split(RegExp(r'\s+'));
+      _firstNameController.text = parts.isNotEmpty ? parts.first : '';
+      _lastNameController.text = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+      _emailController.text = userProfile.email;
       _universityController.text = userProfile.preferences['university'] ?? '';
       _majorController.text = userProfile.preferences['major'] ?? '';
       _isInitialized = true;
@@ -53,15 +64,15 @@ class _PersonalInformationPageState extends ConsumerState<PersonalInformationPag
 
     setState(() => _isSaving = true);
     try {
-      await ref.read(apiServiceProvider).updateOnboardingProfile(
+      await ref.read(apiServiceProvider).updateProfileSettings(
         userId: user.uid,
-        firstName: _firstNameController.text.split(' ').first,
-        lastName: _firstNameController.text.split(' ').length > 1 ? _firstNameController.text.split(' ').sublist(1).join(' ') : '',
-        university: _universityController.text,
-        fieldOfStudy: _majorController.text,
-        graduationYear: '2026', // default since we don't have this field
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        email: _emailController.text.trim(),
+        university: _universityController.text.trim(),
+        fieldOfStudy: _majorController.text.trim(),
       );
-      
+
       // Refresh profile data
       await ref.read(userProfileProvider.notifier).refreshProfile();
       if (mounted) {
@@ -174,10 +185,24 @@ class _PersonalInformationPageState extends ConsumerState<PersonalInformationPag
                   ),
                   const SizedBox(height: 32),
 
-                  // Full Name
+                  // First Name
                   _buildLabeledField(
-                    label: 'Full Name',
+                    label: 'First Name',
                     controller: _firstNameController,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Last Name
+                  _buildLabeledField(
+                    label: 'Last Name',
+                    controller: _lastNameController,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Email
+                  _buildLabeledField(
+                    label: 'Email Address',
+                    controller: _emailController,
                   ),
                   const SizedBox(height: 20),
 

@@ -10,10 +10,16 @@ class LanguageAppearancePage extends StatefulWidget {
 }
 
 class _LanguageAppearancePageState extends State<LanguageAppearancePage> {
-  String _selectedLanguage = 'English (EN)';
+  String _selectedLanguage = 'English (US)';
   int _selectedTheme = 0; // 0 = Light, 1 = Dark, 2 = System
 
-  final List<String> _languages = ['English (EN)', 'Bahasa Indonesia (ID)'];
+  // Matches the web reference (AppearanceSettings.tsx) language list.
+  final List<String> _languages = [
+    'English (US)',
+    'Bahasa Indonesia',
+    'English (UK)',
+    'Japanese',
+  ];
 
   @override
   Widget build(BuildContext context) {

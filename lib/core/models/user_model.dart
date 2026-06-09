@@ -67,6 +67,8 @@ class UserModel {
     final university = map['university'] ?? map['preferences']?['university'] ?? '';
     final major = map['field_of_study'] ?? map['preferences']?['major'] ?? '';
     final graduationYear = map['graduation_year']?.toString() ?? map['preferences']?['graduationYear'] ?? '';
+    final cvUrl = map['cv_url'] ?? map['preferences']?['cvUrl'] ?? '';
+    final transcriptUrl = map['transcript_url'] ?? map['preferences']?['transcriptUrl'] ?? '';
 
     return UserModel(
       uid: id,
@@ -88,6 +90,8 @@ class UserModel {
         'university': university,
         'major': major,
         'graduationYear': graduationYear,
+        'cvUrl': cvUrl,
+        'transcriptUrl': transcriptUrl,
       },
     );
   }

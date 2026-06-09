@@ -388,6 +388,7 @@ class ApiService {
     required String lastName,
     required String email,
     required String university,
+    String? fieldOfStudy,
   }) async {
     final url = Uri.parse('$baseUrl/api/users/$userId/profile');
     debugPrint('API PATCH -> $url');
@@ -403,6 +404,7 @@ class ApiService {
           'last_name': lastName,
           'email': email,
           'university': university,
+          if (fieldOfStudy != null) 'field_of_study': fieldOfStudy,
         }),
       );
 

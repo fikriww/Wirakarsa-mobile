@@ -178,6 +178,15 @@ class _IntegrationsPageState extends ConsumerState<IntegrationsPage> {
           comingSoon: true,
           onTap: () => _showSnack('LinkedIn integration is coming soon'),
         ),
+        const SizedBox(height: 12),
+        _buildServiceCard(
+          name: 'Notion',
+          svgAsset: 'assets/icons/notion.svg',
+          subtitle: 'Notes & knowledge base',
+          isConnected: false,
+          comingSoon: true,
+          onTap: () => _showSnack('Notion integration is coming soon'),
+        ),
       ],
     );
   }
