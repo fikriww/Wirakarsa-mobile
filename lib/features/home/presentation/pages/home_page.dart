@@ -148,6 +148,14 @@ class HomePage extends ConsumerWidget {
 
                   // Quick Actions — mirrors web QuickActionsCard
                   _buildQuickActions(context),
+                  const SizedBox(height: 24),
+
+                  // Growth Progress — mirrors web GrowthProgressCard
+                  _buildGrowthProgress(),
+                  const SizedBox(height: 24),
+
+                  // Continue Working — mirrors web ContinueWorkingCard
+                  _buildContinueWorking(context),
                   const SizedBox(height: 32),
 
                   // Upcoming Tasks — mirrors web UpcomingTasks
@@ -424,6 +432,242 @@ class HomePage extends ConsumerWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildGrowthProgress() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Growth Progress",
+                style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
+              ),
+              Row(
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF10B981),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    "THIS MONTH",
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _growthRing(12, 20, const Color(0xFF3B82F6), Icons.track_changes_rounded, "Skills Mapped"),
+              _growthRing(3, 8, const Color(0xFF10B981), Icons.code_rounded, "Projects Done"),
+              _growthRing(2, 5, const Color(0xFFF59E0B), Icons.work_outline_rounded, "Simulations"),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _growthRing(int value, int total, Color color, IconData icon, String label) {
+    final pct = total > 0 ? value / total : 0.0;
+    return Expanded(
+      child: Column(
+        children: [
+          SizedBox(
+            width: 64,
+            height: 64,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: 64,
+                  height: 64,
+                  child: CircularProgressIndicator(
+                    value: pct,
+                    strokeWidth: 7,
+                    backgroundColor: const Color(0xFFF1F5F9),
+                    valueColor: AlwaysStoppedAnimation(color),
+                    strokeCap: StrokeCap.round,
+                  ),
+                ),
+                Icon(icon, color: color, size: 22),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: "$value",
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                TextSpan(
+                  text: "/$total",
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContinueWorking(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFECFDF5),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.play_arrow_rounded, color: Color(0xFF10B981), size: 18),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                "Continue Working",
+                style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _continueItem(context, Icons.code_rounded, const Color(0xFF10B981), const Color(0xFFECFDF5), "REST API with Express", "In Progress — Step 3 of 4", 0.75),
+          const SizedBox(height: 12),
+          _continueItem(context, Icons.work_outline_rounded, const Color(0xFFF59E0B), const Color(0xFFFFFBEB), "Interview at Gojek", "Recruiter Simulation", null),
+          const SizedBox(height: 12),
+          _continueItem(context, Icons.description_outlined, const Color(0xFF066EFF), const Color(0xFFEFF6FF), "AI Code Review", "Last review: 57/100", null),
+        ],
+      ),
+    );
+  }
+
+  Widget _continueItem(BuildContext context, IconData icon, Color iconColor, Color iconBg, String title, String status, double? progress) {
+    return InkWell(
+      onTap: () => context.go('/devhub'),
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFF1F5F9)),
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: iconBg,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: iconColor, size: 18),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        status,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary, size: 16),
+              ],
+            ),
+            if (progress != null) ...[
+              const SizedBox(height: 10),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 6,
+                  backgroundColor: const Color(0xFFE2E8F0),
+                  valueColor: const AlwaysStoppedAnimation(Color(0xFF10B981)),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
