@@ -26,6 +26,7 @@ import '../../features/profile/presentation/pages/notifications_page.dart';
 import '../../features/profile/presentation/pages/language_appearance_page.dart';
 import '../../features/profile/presentation/pages/integrations_page.dart';
 import '../../features/profile/presentation/pages/help_support_page.dart';
+import '../../features/simulation/presentation/pages/jobdesk_analyzer_page.dart';
 import '../../core/models/mini_project_model.dart';
 
 class AppRouter {
@@ -76,6 +77,10 @@ class AppRouter {
       GoRoute(
         path: '/simulation',
         builder: (context, state) => const MainShell(currentIndex: 3),
+      ),
+      GoRoute(
+        path: '/jobdesk-analyzer',
+        builder: (context, state) => const JobdeskAnalyzerPage(),
       ),
       GoRoute(
         path: '/readiness-center',

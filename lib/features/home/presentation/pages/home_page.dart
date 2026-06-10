@@ -229,6 +229,15 @@ class HomePage extends ConsumerWidget {
             const Color(0xFFF59E0B),
             const Color(0xFFFFF7ED),
           ),
+          const SizedBox(height: 8),
+          _quickActionTile(
+            context,
+            Icons.search_rounded,
+            "Jobdesk Analyzer",
+            "/jobdesk-analyzer",
+            const Color(0xFF8B5CF6),
+            const Color(0xFFF5F3FF),
+          ),
         ],
       ),
     );
