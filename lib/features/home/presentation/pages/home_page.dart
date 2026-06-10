@@ -145,6 +145,11 @@ class HomePage extends ConsumerWidget {
                   const SizedBox(height: 16),
                   _buildAchievementList(),
                   const SizedBox(height: 32),
+
+                  // Quick Actions — mirrors web QuickActionsCard
+                  _buildQuickActions(context),
+                  const SizedBox(height: 32),
+
                   Center(
                     child: Text(
                       "Data from 2,847+ active job listings • Updated every 6 hours",
@@ -156,6 +161,99 @@ class HomePage extends ConsumerWidget {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickActions(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Quick Actions",
+            style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 12),
+          _quickActionTile(
+            context,
+            Icons.shield_outlined,
+            "Readiness Center",
+            "/readiness-center",
+            const Color(0xFF066EFF),
+            const Color(0xFFEFF6FF),
+          ),
+          const SizedBox(height: 8),
+          _quickActionTile(
+            context,
+            Icons.code_rounded,
+            "Development Hub",
+            "/devhub",
+            const Color(0xFF10B981),
+            const Color(0xFFECFDF5),
+          ),
+          const SizedBox(height: 8),
+          _quickActionTile(
+            context,
+            Icons.work_outline_rounded,
+            "Career Simulation",
+            "/simulation",
+            const Color(0xFFF59E0B),
+            const Color(0xFFFFF7ED),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _quickActionTile(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String route,
+    Color color,
+    Color bg,
+  ) {
+    return InkWell(
+      onTap: () => context.go(route),
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: bg,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: color, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                label,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textSecondary,
+              size: 20,
+            ),
+          ],
         ),
       ),
     );
