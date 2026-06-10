@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import '../../features/simulation/data/models/jobdesk_analysis_result.dart';
 
 class ApiService {
   // Use localhost for Web/iOS, and 10.0.2.2 for Android Emulator.
@@ -23,6 +24,35 @@ class ApiService {
       headers['Authorization'] = 'Bearer $_accessToken';
     }
     return headers;
+  }
+
+  /// Analyze a job description against the user's profile via the backend
+  /// (`POST /api/jobdesk/analyze`). Mirrors the web `analyzeJobDescription`,
+  /// so mobile and web share the same backend/LLM pipeline.
+  Future<JobdeskAnalysisResult> analyzeJobDescription(String jobDescription) async {
+    final url = Uri.parse('$baseUrl/api/jobdesk/analyze');
+    debugPrint('API POST -> $url');
+    try {
+      final response = await http.post(
+        url,
+        headers: _getHeaders(),
+        body: jsonEncode({'job_description': jobDescription}),
+      );
+      final decoded = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final result = decoded['result'] ?? decoded;
+        return JobdeskAnalysisResult.fromJson(
+          Map<String, dynamic>.from(result as Map),
+        );
+      } else {
+        throw Exception(
+          decoded['message'] ?? 'Failed to analyze job description.',
+        );
+      }
+    } catch (e) {
+      debugPrint('AnalyzeJobDescription API Error: $e');
+      rethrow;
+    }
   }
 
   /// Register a new account
