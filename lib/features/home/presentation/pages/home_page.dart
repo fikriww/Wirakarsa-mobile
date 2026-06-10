@@ -150,6 +150,18 @@ class HomePage extends ConsumerWidget {
                   _buildQuickActions(context),
                   const SizedBox(height: 32),
 
+                  // Upcoming Tasks — mirrors web UpcomingTasks
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Upcoming Tasks",
+                      style: AppTextStyles.heading1.copyWith(fontSize: 18),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildUpcomingTasks(context),
+                  const SizedBox(height: 32),
+
                   Center(
                     child: Text(
                       "Data from 2,847+ active job listings • Updated every 6 hours",
@@ -255,6 +267,163 @@ class HomePage extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildUpcomingTasks(BuildContext context) {
+    return Column(
+      children: [
+        _taskTile(
+          icon: Icons.code_rounded,
+          iconColor: const Color(0xFF10B981),
+          iconBg: const Color(0xFFECFDF5),
+          title: "REST API with Express",
+          status: "In Progress — 65%",
+          statusColor: const Color(0xFFF59E0B),
+          progress: 0.65,
+        ),
+        const SizedBox(height: 12),
+        _taskTile(
+          icon: Icons.work_outline_rounded,
+          iconColor: const Color(0xFFF97316),
+          iconBg: const Color(0xFFFFF7ED),
+          title: "Practice Interview",
+          status: "Gojek · Software Engineer",
+          statusColor: AppColors.textSecondary,
+        ),
+        const SizedBox(height: 12),
+        InkWell(
+          onTap: () => context.go('/readiness-center/initial-test'),
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF5D6AF2), Color(0xFF066EFF)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(Icons.star_rounded, color: Colors.white, size: 22),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Take Initial Assessment",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        "Boost your readiness accuracy",
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded, color: Colors.white70, size: 20),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _taskTile({
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBg,
+    required String title,
+    required String status,
+    required Color statusColor,
+    double? progress,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: iconBg,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, color: iconColor, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      status,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: statusColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary, size: 18),
+            ],
+          ),
+          if (progress != null) ...[
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 6,
+                backgroundColor: const Color(0xFFF1F5F9),
+                valueColor: const AlwaysStoppedAnimation(Color(0xFF10B981)),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
