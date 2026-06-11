@@ -161,8 +161,19 @@ class HomePage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // Continue Working — mirrors web ContinueWorkingCard
-                  _buildContinueWorking(context),
+                  // Continue Working — mirrors web ContinueWorkingCard,
+                  // fed by real /api/dashboard/summary activities.
+                  summaryAsync.when(
+                    data: (summary) => _buildContinueWorking(
+                      context,
+                      List<Map<String, dynamic>>.from(
+                        (summary['activities'] as List? ?? [])
+                            .map((e) => Map<String, dynamic>.from(e as Map)),
+                      ),
+                    ),
+                    loading: () => _buildContinueWorking(context, const []),
+                    error: (e, st) => _buildContinueWorking(context, const []),
+                  ),
                   const SizedBox(height: 32),
 
                   // Upcoming Tasks — mirrors web UpcomingTasks
@@ -174,7 +185,17 @@ class HomePage extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  _buildUpcomingTasks(context),
+                  summaryAsync.when(
+                    data: (summary) => _buildUpcomingTasks(
+                      context,
+                      List<Map<String, dynamic>>.from(
+                        (summary['activities'] as List? ?? [])
+                            .map((e) => Map<String, dynamic>.from(e as Map)),
+                      ),
+                    ),
+                    loading: () => _buildUpcomingTasks(context, const []),
+                    error: (e, st) => _buildUpcomingTasks(context, const []),
+                  ),
                   const SizedBox(height: 32),
 
                   Center(
@@ -294,28 +315,41 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildUpcomingTasks(BuildContext context) {
+  Widget _buildUpcomingTasks(BuildContext context, List<Map<String, dynamic>> activities) {
+    final tiles = <Widget>[];
+    for (final a in activities.take(2)) {
+      final type = a['type'] as String? ?? 'project';
+      IconData icon = Icons.code_rounded;
+      Color iconColor = const Color(0xFF10B981);
+      Color iconBg = const Color(0xFFECFDF5);
+      String route = '/devhub';
+      if (type == 'simulation') {
+        icon = Icons.work_outline_rounded;
+        iconColor = const Color(0xFFF97316);
+        iconBg = const Color(0xFFFFF7ED);
+        route = '/simulation';
+      } else if (type == 'review') {
+        icon = Icons.description_outlined;
+        iconColor = const Color(0xFF066EFF);
+        iconBg = const Color(0xFFEFF6FF);
+      }
+      final progress = (a['progress'] as num?);
+      tiles.add(_taskTile(
+        icon: icon,
+        iconColor: iconColor,
+        iconBg: iconBg,
+        title: a['title'] as String? ?? '',
+        status: a['status'] as String? ?? '',
+        statusColor: progress != null ? const Color(0xFFF59E0B) : AppColors.textSecondary,
+        progress: progress != null ? progress / 100 : null,
+        onTap: () => context.go(route),
+      ));
+      tiles.add(const SizedBox(height: 12));
+    }
+
     return Column(
       children: [
-        _taskTile(
-          icon: Icons.code_rounded,
-          iconColor: const Color(0xFF10B981),
-          iconBg: const Color(0xFFECFDF5),
-          title: "REST API with Express",
-          status: "In Progress — 65%",
-          statusColor: const Color(0xFFF59E0B),
-          progress: 0.65,
-        ),
-        const SizedBox(height: 12),
-        _taskTile(
-          icon: Icons.work_outline_rounded,
-          iconColor: const Color(0xFFF97316),
-          iconBg: const Color(0xFFFFF7ED),
-          title: "Practice Interview",
-          status: "Gojek · Software Engineer",
-          statusColor: AppColors.textSecondary,
-        ),
-        const SizedBox(height: 12),
+        ...tiles,
         InkWell(
           onTap: () => context.go('/readiness-center/initial-test'),
           borderRadius: BorderRadius.circular(20),
@@ -383,8 +417,12 @@ class HomePage extends ConsumerWidget {
     required String status,
     required Color statusColor,
     double? progress,
+    VoidCallback? onTap,
   }) {
-    return Container(
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -447,6 +485,7 @@ class HomePage extends ConsumerWidget {
             ),
           ],
         ],
+      ),
       ),
     );
   }
@@ -582,7 +621,58 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildContinueWorking(BuildContext context) {
+  Widget _buildContinueWorking(BuildContext context, List<Map<String, dynamic>> activities) {
+    Widget body;
+    if (activities.isEmpty) {
+      body = Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            children: [
+              Icon(Icons.auto_awesome_outlined, size: 26, color: AppColors.textSecondary),
+              const SizedBox(height: 8),
+              Text(
+                "Nothing in progress yet.\nStart a project or simulation to see it here.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      final tiles = <Widget>[];
+      for (final a in activities) {
+        final type = a['type'] as String? ?? 'project';
+        IconData icon = Icons.code_rounded;
+        Color iconColor = const Color(0xFF10B981);
+        Color iconBg = const Color(0xFFECFDF5);
+        String route = '/devhub';
+        if (type == 'simulation') {
+          icon = Icons.work_outline_rounded;
+          iconColor = const Color(0xFFF59E0B);
+          iconBg = const Color(0xFFFFFBEB);
+          route = '/simulation';
+        } else if (type == 'review') {
+          icon = Icons.description_outlined;
+          iconColor = const Color(0xFF066EFF);
+          iconBg = const Color(0xFFEFF6FF);
+        }
+        if (tiles.isNotEmpty) tiles.add(const SizedBox(height: 12));
+        tiles.add(_continueItem(
+          context,
+          icon,
+          iconColor,
+          iconBg,
+          a['title'] as String? ?? '',
+          a['status'] as String? ?? '',
+          (a['progress'] as num?) != null ? (a['progress'] as num) / 100 : null,
+          route: route,
+        ));
+      }
+      body = Column(children: tiles);
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -613,19 +703,15 @@ class HomePage extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
-          _continueItem(context, Icons.code_rounded, const Color(0xFF10B981), const Color(0xFFECFDF5), "REST API with Express", "In Progress — Step 3 of 4", 0.75),
-          const SizedBox(height: 12),
-          _continueItem(context, Icons.work_outline_rounded, const Color(0xFFF59E0B), const Color(0xFFFFFBEB), "Interview at Gojek", "Recruiter Simulation", null),
-          const SizedBox(height: 12),
-          _continueItem(context, Icons.description_outlined, const Color(0xFF066EFF), const Color(0xFFEFF6FF), "AI Code Review", "Last review: 57/100", null),
+          body,
         ],
       ),
     );
   }
 
-  Widget _continueItem(BuildContext context, IconData icon, Color iconColor, Color iconBg, String title, String status, double? progress) {
+  Widget _continueItem(BuildContext context, IconData icon, Color iconColor, Color iconBg, String title, String status, double? progress, {String route = '/devhub'}) {
     return InkWell(
-      onTap: () => context.go('/devhub'),
+      onTap: () => context.go(route),
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(12),
