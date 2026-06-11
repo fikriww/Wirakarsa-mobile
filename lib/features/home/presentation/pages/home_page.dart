@@ -26,7 +26,7 @@ class HomePage extends ConsumerWidget {
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: Padding(
-              padding: const EdgeInsets.only(left: 24, right: 24, top: 16, bottom: 100),
+              padding: const EdgeInsets.only(left: 24, right: 24, top: 16, bottom: 80),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -176,7 +176,6 @@ class HomePage extends ConsumerWidget {
                       style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary, fontStyle: FontStyle.italic),
                     ),
                   ),
-                  const SizedBox(height: 40),
                 ],
               ),
             ),
