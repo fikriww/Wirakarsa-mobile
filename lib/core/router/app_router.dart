@@ -86,7 +86,9 @@ class AppRouter {
         path: '/readiness-center',
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
-          final initialTabIndex = extra?['initialTabIndex'] as int? ?? 0;
+          // Tab can come from navigation extra or a ?tab= query param (deep link).
+          final tabParam = int.tryParse(state.uri.queryParameters['tab'] ?? '');
+          final initialTabIndex = extra?['initialTabIndex'] as int? ?? tabParam ?? 0;
           return MainShell(
             currentIndex: 1,
             initialReadinessTabIndex: initialTabIndex,

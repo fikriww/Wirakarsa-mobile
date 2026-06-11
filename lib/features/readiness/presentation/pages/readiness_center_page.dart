@@ -442,10 +442,13 @@ class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryBlue,
                           foregroundColor: AppColors.white,
+                          // Global theme sets minimumSize width to infinity, which
+                          // breaks layout inside a Row — override it here.
+                          minimumSize: const Size(0, 36),
                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
-                        child: Text(buttonText),
+                        child: Text(buttonText, style: const TextStyle(fontSize: 12)),
                       ),
                     ],
                   ),
