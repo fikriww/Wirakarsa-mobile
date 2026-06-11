@@ -26,7 +26,7 @@ class HomePage extends ConsumerWidget {
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: Padding(
-              padding: const EdgeInsets.only(left: 24, right: 24, top: 16, bottom: 80),
+              padding: const EdgeInsets.only(left: 24, right: 24, top: 16, bottom: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -150,8 +150,15 @@ class HomePage extends ConsumerWidget {
                   _buildQuickActions(context),
                   const SizedBox(height: 24),
 
-                  // Growth Progress — mirrors web GrowthProgressCard
-                  _buildGrowthProgress(),
+                  // Growth Progress — mirrors web GrowthProgressCard,
+                  // fed by the same /api/dashboard/summary growthProgress data.
+                  summaryAsync.when(
+                    data: (summary) => _buildGrowthProgress(
+                      Map<String, dynamic>.from(summary['growthProgress'] ?? {}),
+                    ),
+                    loading: () => _buildGrowthProgress(const {}),
+                    error: (e, st) => _buildGrowthProgress(const {}),
+                  ),
                   const SizedBox(height: 24),
 
                   // Continue Working — mirrors web ContinueWorkingCard
@@ -444,7 +451,15 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildGrowthProgress() {
+  Widget _buildGrowthProgress(Map<String, dynamic> gp) {
+    int asInt(dynamic v, int fallback) => (v as num?)?.toInt() ?? fallback;
+    final skillsMapped = asInt(gp['skillsMapped'], 0);
+    final totalSkills = asInt(gp['totalSkills'], 10);
+    final projectsDone = asInt(gp['projectsDone'], 0);
+    final totalProjects = asInt(gp['totalProjects'], 8);
+    final simulationsDone = asInt(gp['simulationsDone'], 0);
+    final totalSimulations = asInt(gp['totalSimulations'], 5);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -491,9 +506,9 @@ class HomePage extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _growthRing(12, 20, const Color(0xFF3B82F6), Icons.track_changes_rounded, "Skills Mapped"),
-              _growthRing(3, 8, const Color(0xFF10B981), Icons.code_rounded, "Projects Done"),
-              _growthRing(2, 5, const Color(0xFFF59E0B), Icons.work_outline_rounded, "Simulations"),
+              _growthRing(skillsMapped, totalSkills, const Color(0xFF3B82F6), Icons.track_changes_rounded, "Skills Mapped"),
+              _growthRing(projectsDone, totalProjects, const Color(0xFF10B981), Icons.code_rounded, "Projects Done"),
+              _growthRing(simulationsDone, totalSimulations, const Color(0xFFF59E0B), Icons.work_outline_rounded, "Simulations"),
             ],
           ),
         ],
