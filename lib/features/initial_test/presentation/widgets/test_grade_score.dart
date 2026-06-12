@@ -44,8 +44,14 @@ class TestGradeScore extends StatelessWidget {
             shape: BoxShape.circle,
           ),
           alignment: Alignment.center,
-          child: RichText(
-            text: TextSpan(
+          padding: const EdgeInsets.all(10),
+          // FittedBox keeps 3-digit scores (e.g. 100/100) on one line by
+          // scaling the text down instead of wrapping inside the circle.
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: RichText(
+              maxLines: 1,
+              text: TextSpan(
               children: [
                 TextSpan(
                   text: scoreValue.contains('/') ? scoreValue.split('/')[0] : scoreValue,
@@ -66,7 +72,7 @@ class TestGradeScore extends StatelessWidget {
                   )
                 else
                   TextSpan(
-                    text: '/$maxScore',
+                    text: '/${maxScore % 1 == 0 ? maxScore.toInt() : maxScore}',
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -74,6 +80,7 @@ class TestGradeScore extends StatelessWidget {
                     ),
                   ),
               ],
+              ),
             ),
           ),
         ),

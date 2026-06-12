@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/providers/recent_activity_provider.dart';
 import '../../../../core/providers/user_provider.dart';
 
 class HomePage extends ConsumerWidget {
@@ -161,19 +162,33 @@ class HomePage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // Continue Working — mirrors web ContinueWorkingCard,
-                  // fed by real /api/dashboard/summary activities.
-                  summaryAsync.when(
-                    data: (summary) => _buildContinueWorking(
-                      context,
-                      List<Map<String, dynamic>>.from(
+                  // Continue Working — recently visited pages first, then real
+                  // /api/dashboard/summary activities (deduped).
+                  Builder(builder: (context) {
+                    final recent = ref
+                        .watch(recentActivityProvider)
+                        .map((p) => <String, dynamic>{
+                              'type': p.type,
+                              'title': p.title,
+                              'status': 'Recently visited',
+                              'progress': null,
+                              'route': p.route,
+                            })
+                        .toList();
+                    final db = summaryAsync.maybeWhen(
+                      data: (summary) => List<Map<String, dynamic>>.from(
                         (summary['activities'] as List? ?? [])
                             .map((e) => Map<String, dynamic>.from(e as Map)),
                       ),
-                    ),
-                    loading: () => _buildContinueWorking(context, const []),
-                    error: (e, st) => _buildContinueWorking(context, const []),
-                  ),
+                      orElse: () => <Map<String, dynamic>>[],
+                    );
+                    final titles = recent.map((e) => e['title']).toSet();
+                    final merged = [
+                      ...recent,
+                      ...db.where((a) => !titles.contains(a['title'])),
+                    ].take(4).toList();
+                    return _buildContinueWorking(context, merged);
+                  }),
                   const SizedBox(height: 32),
 
                   // Upcoming Tasks — mirrors web UpcomingTasks
@@ -657,7 +672,19 @@ class HomePage extends ConsumerWidget {
           icon = Icons.description_outlined;
           iconColor = const Color(0xFF066EFF);
           iconBg = const Color(0xFFEFF6FF);
+        } else if (type == 'readiness') {
+          icon = Icons.shield_outlined;
+          iconColor = const Color(0xFF066EFF);
+          iconBg = const Color(0xFFEFF6FF);
+          route = '/readiness-center';
+        } else if (type == 'jobdesk') {
+          icon = Icons.search_rounded;
+          iconColor = const Color(0xFF8B5CF6);
+          iconBg = const Color(0xFFF5F3FF);
+          route = '/jobdesk-analyzer';
         }
+        // Visited pages carry their own route.
+        route = (a['route'] as String?) ?? route;
         if (tiles.isNotEmpty) tiles.add(const SizedBox(height: 12));
         tiles.add(_continueItem(
           context,

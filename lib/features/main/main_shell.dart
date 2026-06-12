@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/providers/recent_activity_provider.dart';
 import '../../core/widgets/app_bottom_nav_bar.dart';
 import '../simulation/presentation/pages/career_simulation_page.dart';
 import '../home/presentation/pages/home_page.dart';
@@ -8,7 +10,7 @@ import '../readiness/presentation/pages/readiness_center_page.dart';
 import '../devhub/presentation/pages/devhub_page.dart';
 import '../profile/presentation/pages/profile_page.dart';
 
-class MainShell extends StatefulWidget {
+class MainShell extends ConsumerStatefulWidget {
   final int currentIndex;
   final int? initialReadinessTabIndex;
   final bool? initialDevhubCodeReviewActive;
@@ -23,16 +25,17 @@ class MainShell extends StatefulWidget {
   });
 
   @override
-  State<MainShell> createState() => _MainShellState();
+  ConsumerState<MainShell> createState() => _MainShellState();
 }
 
-class _MainShellState extends State<MainShell> {
+class _MainShellState extends ConsumerState<MainShell> {
   late int _currentIndex;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.currentIndex;
+    _recordVisit(_currentIndex);
   }
 
   @override
@@ -42,7 +45,26 @@ class _MainShellState extends State<MainShell> {
       setState(() {
         _currentIndex = widget.currentIndex;
       });
+      _recordVisit(widget.currentIndex);
     }
+  }
+
+  /// Logs feature-tab visits so they show up on the home Continue Working card.
+  void _recordVisit(int index) {
+    const visits = {
+      1: ('/readiness-center', 'Readiness Center', 'readiness'),
+      2: ('/devhub', 'Development Hub', 'project'),
+      3: ('/simulation', 'Career Simulation', 'simulation'),
+    };
+    final v = visits[index];
+    if (v == null) return;
+    // Defer so the provider mutation never happens during build.
+    Future.microtask(() {
+      if (!mounted) return;
+      ref
+          .read(recentActivityProvider.notifier)
+          .record(route: v.$1, title: v.$2, type: v.$3);
+    });
   }
 
   Widget _buildCurrentPage() {

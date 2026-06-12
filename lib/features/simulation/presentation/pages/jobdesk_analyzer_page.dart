@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/providers/recent_activity_provider.dart';
 import '../../../../core/providers/user_provider.dart';
 import '../../data/models/jobdesk_analysis_result.dart';
 
@@ -19,6 +20,19 @@ class _JobdeskAnalyzerPageState extends ConsumerState<JobdeskAnalyzerPage> {
   bool _loading = false;
   String? _error;
   JobdeskAnalysisResult? _result;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      if (!mounted) return;
+      ref.read(recentActivityProvider.notifier).record(
+            route: '/jobdesk-analyzer',
+            title: 'Jobdesk Analyzer',
+            type: 'jobdesk',
+          );
+    });
+  }
 
   @override
   void dispose() {

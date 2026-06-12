@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -23,6 +24,9 @@ class _InitialTestPageState extends State<InitialTestPage> {
 
   /// Tracks text input for essay fields
   final Map<int, TextEditingController> _essayControllers = {};
+
+  /// Tracks the picked file name per upload-field label
+  final Map<String, String> _pickedFiles = {};
 
   @override
   void initState() {
@@ -363,18 +367,11 @@ class _InitialTestPageState extends State<InitialTestPage> {
           ),
           const SizedBox(height: 10),
           InkWell(
-            onTap: () {
-              // Fake upload simulation
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Simulating file upload...',
-                    style: GoogleFonts.poppins(),
-                  ),
-                  backgroundColor: AppColors.primaryBlue,
-                  duration: const Duration(seconds: 1),
-                ),
-              );
+            onTap: () async {
+              final result = await FilePicker.pickFiles(withData: false);
+              if (result != null && result.files.isNotEmpty) {
+                setState(() => _pickedFiles[field.label] = result.files.first.name);
+              }
             },
             borderRadius: BorderRadius.circular(12),
             child: Container(
@@ -384,29 +381,41 @@ class _InitialTestPageState extends State<InitialTestPage> {
                 color: AppColors.white,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppColors.divider,
+                  color: _pickedFiles.containsKey(field.label)
+                      ? const Color(0xFF10B981)
+                      : AppColors.divider,
                   width: 1.5,
                 ),
               ),
               child: Column(
                 children: [
                   Icon(
-                    Icons.cloud_upload_outlined,
+                    _pickedFiles.containsKey(field.label)
+                        ? Icons.check_circle_outline
+                        : Icons.cloud_upload_outlined,
                     size: 40,
-                    color: AppColors.textHint,
+                    color: _pickedFiles.containsKey(field.label)
+                        ? const Color(0xFF10B981)
+                        : AppColors.textHint,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Upload File',
+                    _pickedFiles[field.label] ?? 'Upload File',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.primaryBlue,
+                      color: _pickedFiles.containsKey(field.label)
+                          ? const Color(0xFF10B981)
+                          : AppColors.primaryBlue,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    field.supportedFormats,
+                    _pickedFiles.containsKey(field.label)
+                        ? 'Tap to change file'
+                        : field.supportedFormats,
                     style: GoogleFonts.poppins(
                       fontSize: 11,
                       color: AppColors.textHint,
