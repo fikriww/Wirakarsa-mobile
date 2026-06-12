@@ -50,9 +50,12 @@ class _ProjectDetailPageState extends ConsumerState<ProjectDetailPage> {
       final data = await api.fetchMiniProjectDetail(widget.projectId);
       if (mounted) {
         setState(() {
+          final projectMap = data['project'] != null
+              ? Map<String, dynamic>.from(data['project'] as Map)
+              : Map<String, dynamic>.from(data);
           _project = MiniProject.fromMap(
-            Map<String, dynamic>.from(data),
-            data['id']?.toString() ?? widget.projectId,
+            projectMap,
+            projectMap['id']?.toString() ?? widget.projectId,
           );
           _isLoading = false;
         });

@@ -57,9 +57,11 @@ class AuthNotifier extends Notifier<AsyncValue<UserModel?>> {
   }
 
   void _invalidateDashboard() {
-    ref.invalidate(dashboardSummaryProvider);
-    ref.invalidate(skillGapProvider);
-    ref.invalidate(miniProjectsProvider);
+    Future.microtask(() {
+      ref.invalidate(dashboardSummaryProvider);
+      ref.invalidate(skillGapProvider);
+      ref.invalidate(miniProjectsProvider);
+    });
   }
 }
 

@@ -170,10 +170,13 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
       String sessionId;
       String firstBotMessage = initialBotMessage;
       try {
-        // Backend only knows 'recruiter' | 'salary'; jobdesk interview chats
-        // ride on the recruiter persona so they get live LLM replies too.
         final apiType = (type == 'recruiter' || type == 'salary') ? type : 'recruiter';
-        final result = await api.startSimulation(apiType, companyName: companyName);
+        final result = await api.startSimulation(
+          apiType,
+          companyName: companyName,
+          role: role,
+          scenario: initialBotMessage,
+        );
         // Backend shape: { simulation: {id,...}, firstMessage: {text,...} }
         sessionId = (result['simulation'] as Map?)?['id']?.toString() ??
             result['id']?.toString() ??

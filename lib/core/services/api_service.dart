@@ -23,6 +23,7 @@ class ApiService {
     if (_accessToken != null) {
       headers['Authorization'] = 'Bearer $_accessToken';
     }
+    debugPrint('ApiService Headers: $headers');
     return headers;
   }
 
@@ -682,7 +683,12 @@ class ApiService {
   // ── Simulations APIs ─────────────────────────────────────────────────────
 
   /// Start a new AI simulation session (recruiter or salary)
-  Future<Map<String, dynamic>> startSimulation(String type, {String? companyName}) async {
+  Future<Map<String, dynamic>> startSimulation(
+    String type, {
+    String? companyName,
+    String? role,
+    String? scenario,
+  }) async {
     final url = Uri.parse('$baseUrl/api/simulations/start');
     debugPrint('API POST -> $url');
 
@@ -695,11 +701,13 @@ class ApiService {
         body: jsonEncode({
           'type': type,
           if (companyName != null) 'company_name': companyName,
+          if (role != null) 'role': role,
+          if (scenario != null) 'scenario': scenario,
         }),
       );
 
       final decoded = jsonDecode(response.body);
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return decoded['result'] ?? decoded;
       } else {
         throw Exception(decoded['message'] ?? 'Failed to start simulation.');
