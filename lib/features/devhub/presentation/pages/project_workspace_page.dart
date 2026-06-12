@@ -85,6 +85,8 @@ class _ProjectWorkspacePageState
         type: FileType.custom,
         allowedExtensions: ['zip', 'rar', 'tar', 'gz', '7z'],
         allowMultiple: false,
+        // On web there is no file path — we need the bytes to upload.
+        withData: true,
       );
       if (result != null && result.files.isNotEmpty) {
         setState(() {
@@ -137,8 +139,9 @@ class _ProjectWorkspacePageState
       if (_mode == 'file' && _pickedFile != null) {
         result = await api.submitMiniProjectFile(
           _project!.id,
-          _pickedFile!.path!,
+          _pickedFile!.path,
           _pickedFile!.name,
+          bytes: _pickedFile!.bytes,
         );
       } else {
         result = await api.submitMiniProjectGitHub(

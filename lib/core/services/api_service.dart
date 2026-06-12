@@ -606,8 +606,15 @@ class ApiService {
     }
   }
 
-  /// Submit a mini project file archive (ZIP/RAR)
-  Future<Map<String, dynamic>> submitMiniProjectFile(String id, String filePath, String fileName) async {
+  /// Submit a mini project file archive (ZIP/RAR).
+  /// On web the file must be passed as [bytes] (dart:io paths are unavailable);
+  /// on mobile/desktop either works.
+  Future<Map<String, dynamic>> submitMiniProjectFile(
+    String id,
+    String? filePath,
+    String fileName, {
+    List<int>? bytes,
+  }) async {
     final url = Uri.parse('$baseUrl/api/mini-projects/$id/submit');
     debugPrint('API POST MULTIPART -> $url');
 
@@ -620,7 +627,14 @@ class ApiService {
       request.headers['Authorization'] = 'Bearer $_accessToken';
     }
 
-    final file = await http.MultipartFile.fromPath('file', filePath, filename: fileName);
+    final http.MultipartFile file;
+    if (bytes != null) {
+      file = http.MultipartFile.fromBytes('file', bytes, filename: fileName);
+    } else if (filePath != null) {
+      file = await http.MultipartFile.fromPath('file', filePath, filename: fileName);
+    } else {
+      throw Exception('No file data provided.');
+    }
     request.files.add(file);
 
     try {

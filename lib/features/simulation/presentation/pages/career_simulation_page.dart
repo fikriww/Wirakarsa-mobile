@@ -170,10 +170,23 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
       String sessionId;
       String firstBotMessage = initialBotMessage;
       try {
-        final result = await api.startSimulation(type, companyName: companyName);
-        sessionId = result['id']?.toString() ?? result['session_id']?.toString() ?? '';
+        // Backend only knows 'recruiter' | 'salary'; jobdesk interview chats
+        // ride on the recruiter persona so they get live LLM replies too.
+        final apiType = (type == 'recruiter' || type == 'salary') ? type : 'recruiter';
+        final result = await api.startSimulation(apiType, companyName: companyName);
+        // Backend shape: { simulation: {id,...}, firstMessage: {text,...} }
+        sessionId = (result['simulation'] as Map?)?['id']?.toString() ??
+            result['id']?.toString() ??
+            result['session_id']?.toString() ??
+            '';
+        if (sessionId.isEmpty) {
+          throw Exception('No simulation id in start response');
+        }
         // Use the AI opening message if returned
-        if (result['opening_message'] != null) {
+        final firstMsg = (result['firstMessage'] as Map?)?['text']?.toString();
+        if (firstMsg != null && firstMsg.isNotEmpty) {
+          firstBotMessage = firstMsg;
+        } else if (result['opening_message'] != null) {
           firstBotMessage = result['opening_message'].toString();
         } else if (result['messages'] is List && (result['messages'] as List).isNotEmpty) {
           firstBotMessage = (result['messages'] as List).last['text']?.toString() ?? initialBotMessage;
@@ -245,8 +258,11 @@ class _CareerSimulationPageState extends ConsumerState<CareerSimulationPage> {
       String botReply;
       try {
         final result = await api.sendSimulationMessage(_currentSessionId, text);
-        // Extract AI reply from response structure
-        if (result['reply'] != null) {
+        // Backend shape: { botMessage: {text,...} }
+        final botMsg = (result['botMessage'] as Map?)?['text']?.toString();
+        if (botMsg != null && botMsg.isNotEmpty) {
+          botReply = botMsg;
+        } else if (result['reply'] != null) {
           botReply = result['reply'].toString();
         } else if (result['message'] != null) {
           botReply = result['message'].toString();
