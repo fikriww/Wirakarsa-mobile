@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/services/api_service.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class SocialLoginRow extends StatelessWidget {
@@ -51,7 +52,7 @@ class SocialLoginRow extends StatelessWidget {
                 final String queryParams = redirectUri.isNotEmpty
                     ? '?redirect_uri=${Uri.encodeComponent(redirectUri)}'
                     : '';
-                final url = Uri.parse('http://localhost:3000/google-login$queryParams');
+                final url = Uri.parse('${ApiService.frontendUrl}/google-login$queryParams');
                 try {
                   await launchUrl(
                     url,
@@ -75,7 +76,7 @@ class SocialLoginRow extends StatelessWidget {
                     ? '${Uri.base.origin}/#/oauth-callback'
                     : 'wirapath://oauth-callback';
                 final url = Uri.parse(
-                  'http://localhost:3000/github-login'
+                  '${ApiService.frontendUrl}/github-login'
                   '?is_signup=$isSignUp'
                   '&redirect_uri=${Uri.encodeComponent(redirectUri)}',
                 );

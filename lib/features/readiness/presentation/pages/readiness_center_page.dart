@@ -58,12 +58,6 @@ class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
             }
           },
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.menu, color: Colors.black),
-            onPressed: () {},
-          ),
-        ],
         centerTitle: true,
         title: Column(
           children: [
@@ -116,8 +110,25 @@ class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
     }
   }
 
-  // Helper to extract user's skills or return defaults
+  // Helper to extract the user's skills. Primary source is the backend
+  // assessment analytics (same data the website uses), so the mobile Skill Map /
+  // Skill Gap / Overview always match the web. Falls back to the user profile
+  // skills, then to static defaults.
   Map<String, double> _getSkills() {
+    final analytics = ref.watch(assessmentAnalyticsProvider).value;
+    if (analytics != null && analytics['has_assessment'] == true) {
+      final cats = (analytics['categories'] as List?) ?? [];
+      if (cats.isNotEmpty) {
+        final map = <String, double>{};
+        for (final c in cats) {
+          final name = (c['name'] ?? c['slug'] ?? 'Skill').toString();
+          final scoreNum = c['score'];
+          final score = scoreNum is num ? scoreNum.toDouble() : 0.0;
+          map[name] = (score / 100.0).clamp(0.0, 1.0);
+        }
+        return map;
+      }
+    }
     final userProfile = ref.watch(userProfileProvider).value;
     if (userProfile != null && userProfile.skills.isNotEmpty) {
       return userProfile.skills;
@@ -128,56 +139,92 @@ class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
   // --- TAB 0: OVERVIEW ---
   Widget _buildOverviewTab() {
     final userProfile = ref.watch(userProfileProvider).value;
+    final analytics = ref.watch(assessmentAnalyticsProvider).value;
     final results = ref.watch(userTestResultsProvider).value ?? [];
     final skills = _getSkills();
 
-    // 1. Calculate overall readiness score based on test results
-    double readinessPercent = 63.0; // Default fallback
-    if (results.isNotEmpty) {
-      double sum = 0.0;
-      for (var r in results) {
-        if (r.maxScore > 0) {
-          sum += (r.numericScore / r.maxScore) * 100.0;
+    final hasAssessment =
+        analytics != null && analytics['has_assessment'] == true;
+
+    String readinessStr;
+    String skillsMappedStr;
+    String criticalGapsStr;
+    String strengthsStr;
+
+    if (hasAssessment) {
+      // Use the same backend analytics the website does so the numbers match.
+      final overall = analytics['overall_score'];
+      final overallVal = overall is num ? overall.toDouble() : 0.0;
+      readinessStr = "${overallVal.round()}%";
+      skillsMappedStr = "${analytics['skills_mapped'] ?? skills.length}";
+      criticalGapsStr = "${analytics['critical_gaps_count'] ?? 0}";
+      strengthsStr = "${analytics['strengths_count'] ?? 0}";
+    } else {
+      // Fallback: derive from local test results / skill map.
+      double readinessPercent = 0.0;
+      if (results.isNotEmpty) {
+        double sum = 0.0;
+        for (var r in results) {
+          if (r.maxScore > 0) {
+            sum += (r.numericScore / r.maxScore) * 100.0;
+          }
         }
+        readinessPercent = sum / results.length;
       }
-      readinessPercent = sum / results.length;
+      int criticalGaps = 0;
+      int strengths = 0;
+      skills.forEach((key, val) {
+        if (val < 0.40) {
+          criticalGaps++;
+        } else if (val >= 0.70) {
+          strengths++;
+        }
+      });
+      readinessStr = "${readinessPercent.toStringAsFixed(0)}%";
+      skillsMappedStr = "${skills.length}";
+      criticalGapsStr = "$criticalGaps";
+      strengthsStr = "$strengths";
     }
 
-    // 2. Count critical gaps (< 40%) and strengths (>= 70%)
-    int criticalGaps = 0;
-    int strengths = 0;
-    skills.forEach((key, val) {
-      if (val < 0.40) {
-        criticalGaps++;
-      } else if (val >= 0.70) {
-        strengths++;
-      }
-    });
+    // Real document state (no more hardcoded JohnDoe files).
+    final cvUrl = (userProfile?.preferences['cvUrl'] ?? '').toString();
+    final transcriptUrl =
+        (userProfile?.preferences['transcriptUrl'] ?? '').toString();
+    final cvName =
+        cvUrl.isNotEmpty ? (cvUrl.split('/').last) : null;
+    final transcriptName =
+        transcriptUrl.isNotEmpty ? (transcriptUrl.split('/').last) : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildStatsGrid(
-          readiness: "${readinessPercent.toStringAsFixed(0)}%",
-          skillsMapped: "${skills.length}",
-          criticalGaps: "$criticalGaps",
-          strengths: "$strengths",
+          readiness: readinessStr,
+          skillsMapped: skillsMappedStr,
+          criticalGaps: criticalGapsStr,
+          strengths: strengthsStr,
         ),
         const SizedBox(height: 24),
         Text("CV Analysis", style: AppTextStyles.heading1.copyWith(fontSize: 18)),
         const SizedBox(height: 16),
         _buildDocumentAnalysisCard(
-          "JohnDoeCV.pdf",
-          "12 skills extracted, 3 experience entries detected. Your CV shows strong frontend focus but lacks backend and DevOps keywords.",
-          "Re-Upload CV",
+          cvName ?? "No CV uploaded",
+          cvName != null
+              ? "Your CV has been uploaded and analyzed against your target role."
+              : "You haven't uploaded a CV yet. Upload one to get a personalized analysis of your skills and gaps.",
+          cvName != null ? "Re-Upload CV" : "Upload CV",
         ),
         const SizedBox(height: 32),
         Text("Academic Transcript Analysis", style: AppTextStyles.heading1.copyWith(fontSize: 18)),
         const SizedBox(height: 16),
         _buildDocumentAnalysisCard(
-          "JohnDoeTranscript.pdf",
-          "GPA 3.45/4.00 detected. Strong academic performance in Data Structures and Algorithms. Software Engineering coursework identified.",
-          "Re-Upload Academic Transcript",
+          transcriptName ?? "No transcript uploaded",
+          transcriptName != null
+              ? "Your academic transcript has been uploaded and analyzed."
+              : "You haven't uploaded an academic transcript yet. Upload one to include your academic performance in your readiness score.",
+          transcriptName != null
+              ? "Re-Upload Academic Transcript"
+              : "Upload Academic Transcript",
         ),
         const SizedBox(height: 32),
         GestureDetector(
@@ -706,9 +753,7 @@ class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
             children: [
               Text("Market Demand", style: AppTextStyles.heading1.copyWith(fontSize: 18)),
               const SizedBox(height: 24),
-              _buildMarketDemandRow("React.js", 0.94, "94%"),
-              const SizedBox(height: 16),
-              _buildMarketDemandRow("TypeScript", 0.82, "82%"),
+              ..._buildMarketDemandRows(),
             ],
           ),
         ),
@@ -752,6 +797,33 @@ class _ReadinessCenterPageState extends ConsumerState<ReadinessCenterPage> {
         ],
       ),
     );
+  }
+
+  // Build the market-demand rows from the backend (top in-demand skills for the
+  // user's role), so the mobile list matches the website.
+  List<Widget> _buildMarketDemandRows() {
+    final demand = ref.watch(marketDemandProvider).value ?? [];
+    if (demand.isEmpty) {
+      return [
+        _buildMarketDemandRow("React.js", 0.94, "94%"),
+        const SizedBox(height: 16),
+        _buildMarketDemandRow("TypeScript", 0.82, "82%"),
+      ];
+    }
+    final rows = <Widget>[];
+    final top = demand.take(8).toList();
+    for (var i = 0; i < top.length; i++) {
+      final item = Map<String, dynamic>.from(top[i] as Map);
+      final skill =
+          (item['skill'] ?? item['skill_name'] ?? 'Skill').toString();
+      final trendRaw =
+          item['trend_score'] ?? item['trend'] ?? item['bar_width'] ?? 0;
+      final trend = trendRaw is num ? trendRaw.toDouble() : 0.0;
+      rows.add(_buildMarketDemandRow(
+          skill, (trend / 100).clamp(0.0, 1.0), "${trend.round()}%"));
+      if (i < top.length - 1) rows.add(const SizedBox(height: 16));
+    }
+    return rows;
   }
 
   Widget _buildMarketDemandRow(String title, double progress, String percent) {

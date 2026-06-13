@@ -61,6 +61,8 @@ class AuthNotifier extends Notifier<AsyncValue<UserModel?>> {
       ref.invalidate(dashboardSummaryProvider);
       ref.invalidate(skillGapProvider);
       ref.invalidate(miniProjectsProvider);
+      ref.invalidate(assessmentAnalyticsProvider);
+      ref.invalidate(marketDemandProvider);
     });
   }
 }
@@ -106,6 +108,24 @@ final skillGapProvider = FutureProvider<List<dynamic>>((ref) async {
   if (user == null) return [];
   final api = ref.read(apiServiceProvider);
   return api.getSkillGap();
+});
+
+// Assessment analytics — single source of truth shared with the website
+// (overall readiness, skills mapped, critical gaps, strengths, per-category map).
+final assessmentAnalyticsProvider =
+    FutureProvider<Map<String, dynamic>>((ref) async {
+  final user = ref.watch(userProfileProvider).value;
+  if (user == null) return {'has_assessment': false};
+  final api = ref.read(apiServiceProvider);
+  return api.getAssessmentAnalytics();
+});
+
+// Market demand — top-10 in-demand skills for the user's chosen role.
+final marketDemandProvider = FutureProvider<List<dynamic>>((ref) async {
+  final user = ref.watch(userProfileProvider).value;
+  if (user == null) return [];
+  final api = ref.read(apiServiceProvider);
+  return api.getMarketDemand();
 });
 
 // Dynamic mini projects matched to target role from API

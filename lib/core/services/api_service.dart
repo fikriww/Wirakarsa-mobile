@@ -7,6 +7,9 @@ class ApiService {
   // Use localhost for Web/iOS, and 10.0.2.2 for Android Emulator.
   static final String baseUrl = kIsWeb ? 'http://localhost:5001' : (defaultTargetPlatform == TargetPlatform.android ? 'http://10.0.2.2:5001' : 'http://localhost:5001');
 
+  // Web frontend (OAuth entry pages). Same host rules as baseUrl.
+  static final String frontendUrl = kIsWeb ? 'http://localhost:3000' : (defaultTargetPlatform == TargetPlatform.android ? 'http://10.0.2.2:3000' : 'http://localhost:3000');
+
   // In-memory storage for JWT cookies and tokens
   static String? _cookieHeader;
   static String? _accessToken;
@@ -808,6 +811,47 @@ class ApiService {
       }
     } catch (e) {
       debugPrint('GetSkillGap API Error: $e');
+      rethrow;
+    }
+  }
+
+  /// Fetch assessment analytics (same source the web profile/readiness use).
+  /// Returns { has_assessment, overall_score, skills_mapped, critical_gaps_count,
+  /// strengths_count, categories: [{slug,name,score,required,gap,status,...}] }.
+  Future<Map<String, dynamic>> getAssessmentAnalytics() async {
+    final url = Uri.parse('$baseUrl/api/assessment/analytics');
+    debugPrint('API GET -> $url');
+    final headers = _getHeaders();
+    try {
+      final response = await http.get(url, headers: headers);
+      final decoded = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final result = decoded['result'] ?? decoded;
+        return Map<String, dynamic>.from(result as Map);
+      } else {
+        throw Exception(decoded['message'] ?? 'Failed to get analytics.');
+      }
+    } catch (e) {
+      debugPrint('GetAssessmentAnalytics API Error: $e');
+      rethrow;
+    }
+  }
+
+  /// Fetch market demand (top-10 in-demand skills for the user's target role).
+  Future<List<dynamic>> getMarketDemand() async {
+    final url = Uri.parse('$baseUrl/api/readiness/market-demand');
+    debugPrint('API GET -> $url');
+    final headers = _getHeaders();
+    try {
+      final response = await http.get(url, headers: headers);
+      final decoded = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return decoded['result'] ?? decoded ?? [];
+      } else {
+        throw Exception(decoded['message'] ?? 'Failed to get market demand.');
+      }
+    } catch (e) {
+      debugPrint('GetMarketDemand API Error: $e');
       rethrow;
     }
   }

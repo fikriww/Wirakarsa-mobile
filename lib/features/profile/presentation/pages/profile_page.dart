@@ -150,7 +150,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   Widget _buildProfileContent(AsyncValue<UserModel?> userProfileAsync) {
     final userProfile = userProfileAsync.value;
-    
+
+    // Real stats from the same backend analytics the website uses.
+    final analytics = ref.watch(assessmentAnalyticsProvider).value;
+    final hasAssessment =
+        analytics != null && analytics['has_assessment'] == true;
+    final overallRaw = analytics?['overall_score'];
+    final readinessVal = overallRaw is num ? overallRaw.round() : 0;
+    final readinessStr = hasAssessment ? '$readinessVal%' : '0%';
+    final gapsStr =
+        hasAssessment ? '${analytics['critical_gaps_count'] ?? 0}' : '0';
+
+    final miniProjects = ref.watch(miniProjectsProvider).value ?? [];
+    final testResults = ref.watch(userTestResultsProvider).value ?? [];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -160,14 +173,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         const SizedBox(height: 16),
 
-        // Stats
-        const Row(
+        // Stats (driven by real data)
+        Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            StatCard(value: '63%', label: 'Readiness\nIndex'),
-            StatCard(value: '2', label: 'Skills That Need\nImproved'),
-            StatCard(value: '4', label: 'Mini\nProject'),
-            StatCard(value: '3x', label: 'Skill Test\nAttempts'),
+            StatCard(value: readinessStr, label: 'Readiness\nIndex'),
+            StatCard(value: gapsStr, label: 'Skills That Need\nImproved'),
+            StatCard(value: '${miniProjects.length}', label: 'Mini\nProject'),
+            StatCard(
+                value: '${testResults.length}x', label: 'Skill Test\nAttempts'),
           ],
         ),
         const SizedBox(height: 24),
